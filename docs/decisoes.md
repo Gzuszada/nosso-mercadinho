@@ -11,7 +11,7 @@ Atualizado em 16/11/2026. Este registro documenta decisões aprovadas para a Eta
 - A criação da lista restante preserva a forma de compra e o snapshot de estimativa do item de origem. A inserção é feita diretamente no banco, sem depender do modo atual do cadastro do produto.
 - “Último pago” usa a linha válida mais recente da compra concluída mais recente: `total_cents` dividido pela quantidade da própria linha e convertido para a unidade padrão da forma. Linhas de etiqueta não são combinadas com outras linhas do mesmo produto na viagem de referência.
 - O rodapé do carrinho limita a área expandida e oferece rolagem; a barra compacta permanece visível. Isso preserva as ações com fonte ampliada sem reduzir a escala da interface.
-- Versão atual `1.0.0+7` (build 7). APK release assinado foi gerado e verificado; a atualização por cima da versão `+6` foi instalada no aparelho Android físico, preservando os dados locais, e o app iniciou sem crash.
+- Versão atual `1.0.1+9` (build 9). APK release assinado foi gerado e verificado, com autenticação obrigatória antes do acesso ao mercado.
 
 ## Stack e ambiente
 
@@ -96,12 +96,12 @@ Atualizado em 16/11/2026. Este registro documenta decisões aprovadas para a Eta
 - O Identity Platform está inicializado, com E-mail/Senha habilitado e a blocking function `beforeCreateUser` publicada. O provedor só foi reaberto depois de o teste real confirmar que um e-mail não autorizado é bloqueado e que o trigger `beforeCreate` está vinculado.
 - O cadastro público é restrito no servidor pela blocking function `beforeCreateUser`. A allowlist fica em Firestore privado como hashes SHA-256 dos e-mails autorizados; as regras públicas negam leitura e gravação. A ausência de configuração bloqueia o cadastro, e chamadas diretas à API de criação de conta também são recusadas.
 - O acesso ao mercado exige autenticação: sem uma sessão válida, o `AuthGate` mostra somente **Entrar** e **Criar conta autorizada**. Se o Firebase não inicializar, o app falha fechado e mantém o mercado fechado. Depois do login, o Drift local permanece disponível para operação offline e o logout retorna à tela de entrada.
-- Enquanto a lista não estiver completa, a allowlist contém somente o e-mail principal conhecido. A Iasmim deve permanecer bloqueada até a confirmação do endereço, evitando autorizar a pessoa errada por suposição.
+- A allowlist de produção contém dois hashes SHA-256 únicos: o e-mail principal e o e-mail confirmado da Iasmim. A Iasmim está autorizada para criar a conta, mas ainda não criou login no Identity Platform.
 
 ## Pendências para concluir a Etapa 4
 
 - Testes automatizados executados: persistência do carrinho ao reabrir SQLite, restauração isolada, migrações, backup, lista `open`, total de etiqueta, “último pago” por linha, fluxo pós-compra, acessibilidade com fonte ampliada, sincronização em nuvem e gate de autenticação; suíte completa passou com 79 testes e análise limpa. As Functions passaram no build TypeScript e nos 3 testes da allowlist.
 - Cadastro/registro do pacote no Android Developer Console e autorização do telefone são ações que o usuário deve executar em contas/dispositivos próprios.
 - Teste manual de migração do backup e instalação do APK release no telefone, sem desinstalar a instalação atual até validar os dados.
-- Confirmar o e-mail da Iasmim, atualizar a allowlist com os dois hashes e validar o fluxo real com duas contas.
+- Validar o fluxo real com duas contas: criação da conta da Iasmim, criação da casa, convite, sincronização, alterações nos dois dispositivos e resolução de conflito.
 - Nenhum extra (estoque, validade, código de barras ou OCR) foi aprovado ou implementado.
