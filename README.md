@@ -1,10 +1,10 @@
 # Nosso Mercadinho
 
-Aplicativo Android pessoal com dados locais, também publicado como PWA. Abra `app\` no VS Code. O identificador Android está definido como `br.com.nocorre.mercado`; a versão atual é `1.0.2+10`. A entrada no mercado exige uma conta autorizada; depois do login, o banco local continua disponível para operação offline. O app também descobre as casas vinculadas à conta, restaura o nome da casa selecionada e permite trocar a casa em **Ajustes → Conta e sincronização**.
+Aplicativo Android pessoal com dados locais, também publicado como PWA. Abra `app\` no VS Code. O identificador Android está definido como `br.com.nocorre.mercado`; a versão atual é `1.0.3+11`. A entrada no mercado exige uma conta autorizada; depois do login, o banco local continua disponível para operação offline. O app também descobre as casas vinculadas à conta, restaura o nome da casa selecionada e permite trocar a casa em **Ajustes → Conta e sincronização**.
 
 ## Download do APK
 
-A release assinada está disponível em [nosso-mercadinho-1.0.2.apk](https://github.com/Gzuszada/nosso-mercadinho/releases/download/v1.0.2/nosso-mercadinho-1.0.2.apk). SHA-256: `D8A92164E0AC9EF73060DEA9D933AA796E4F168AE5A70E0033BED59C76A45C77`.
+A release assinada está disponível em [nosso-mercadinho-1.0.3.apk](https://github.com/Gzuszada/nosso-mercadinho/releases/download/v1.0.3/nosso-mercadinho-1.0.3.apk). SHA-256: `1C59AA5CEE7222210C5C7FBEF5DB86F68EF68689A4DFF36A30A95EFC96118699`.
 
 ## O que já funciona
 
@@ -141,7 +141,7 @@ firebase emulators:exec --only firestore,auth --project demo-nosso-mercado "node
 
 Este aplicativo não será publicado na Google Play. O Android passou a exigir registro de pacotes para instalações em dispositivos certificados no Brasil a partir de 30/09/2026. A rota escolhida é a conta gratuita **Limited distribution** do Android Developer Console, fora da Play Store, para registrar o pacote e autorizar o telefone. Ela exige uma conta Google com verificação em duas etapas e perfil de pagamentos com nome/endereço; não exige documento oficial de identidade conforme a documentação atual. O usuário precisa concluir esse cadastro diretamente com Google; não compartilhe credenciais com o assistente. Consulte [Android developer verification](https://developer.android.com/developer-verification) e [Limited distribution](https://developer.android.com/developer-verification/guides/limited-distribution).
 
-O ID foi alterado de `com.example.mercado` para `br.com.nocorre.mercado`, com versão atual `1.0.1+9`. A release usa uma chave própria e pode atualizar a instalação release anterior do mesmo pacote, preservando os dados locais. Builds debug e release têm assinaturas diferentes e não podem substituir um ao outro como atualização; por isso, a primeira instalação da release deve ser feita sem desinstalar a versão anterior
+O ID foi alterado de `com.example.mercado` para `br.com.nocorre.mercado`, com versão atual `1.0.3+11`. A release usa uma chave própria e pode atualizar a instalação release anterior do mesmo pacote, preservando os dados locais. Builds debug e release têm assinaturas diferentes e não podem substituir um ao outro como atualização; por isso, a primeira instalação da release deve ser feita sem desinstalar a versão anterior.
 
 ### Política de backup Android
 

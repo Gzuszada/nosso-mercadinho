@@ -50,9 +50,16 @@ service cloud.firestore {
           request.auth.uid == userId &&
           (getAfter(/databases/$(database)/documents/households/$(householdId)).data.ownerUid == request.auth.uid ||
             existsAfter(/databases/$(database)/documents/households/$(householdId)/inviteClaims/$(request.auth.uid)));
-        allow update, delete: if isMember(householdId) &&
-          (request.auth.uid == userId ||
-            resource.data.role == 'owner');
+        // Cada pessoa pode atualizar apenas o próprio nome de usuário.
+        allow update: if isMember(householdId) &&
+          request.auth.uid == userId &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName']);
+        // O dono pode manter os demais membros e remover contas da casa.
+        allow update: if isMember(householdId) &&
+          request.auth.uid != userId &&
+          resource.data.role == 'owner';
+        allow delete: if isMember(householdId) &&
+          resource.data.role == 'owner';
       }
 
       match /inviteClaims/{userId} {

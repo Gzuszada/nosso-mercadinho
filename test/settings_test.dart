@@ -276,9 +276,7 @@ void main() {
         overrides: [
           databaseProvider.overrideWithValue(database),
           authStateProvider.overrideWith(
-            (ref) => Stream.value(
-              const AuthAccount(uid: 'test-user'),
-            ),
+            (ref) => Stream.value(const AuthAccount(uid: 'test-user')),
           ),
         ],
         child: const MercadoApp(),

@@ -47,6 +47,7 @@ final cloudHouseholdsProvider = FutureProvider<List<CloudHousehold>>((
     return const [];
   }
 
+  await ref.read(cloudAuthServiceProvider).ensureDisplayName();
   final households = await ref
       .read(cloudAuthServiceProvider)
       .discoverHouseholds();

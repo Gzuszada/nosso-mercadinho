@@ -13,6 +13,7 @@ class AuthScreen extends ConsumerStatefulWidget {
 class _AuthScreenState extends ConsumerState<AuthScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _displayNameController = TextEditingController();
   bool _busy = false;
   bool _obscurePassword = true;
 
@@ -20,6 +21,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _displayNameController.dispose();
     super.dispose();
   }
 
@@ -58,6 +60,20 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     decoration: const InputDecoration(
                       labelText: 'E-mail',
                       prefixIcon: Icon(Icons.email_outlined),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    key: const Key('auth-display-name'),
+                    controller: _displayNameController,
+                    enabled: !_busy,
+                    maxLength: 40,
+                    textCapitalization: TextCapitalization.words,
+                    decoration: const InputDecoration(
+                      labelText: 'Nome de usuário (opcional)',
+                      prefixIcon: Icon(Icons.person_outline),
+                      helperText:
+                          'Se vazio, usaremos a parte do e-mail antes do @.',
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -125,6 +141,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         .register(
           email: _emailController.text,
           password: _passwordController.text,
+          displayName: _displayNameController.text,
         ),
   );
 

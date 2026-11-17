@@ -65,9 +65,7 @@ void main() {
     expect(find.text('Entrar'), findsOneWidget);
     expect(find.text('Listas'), findsNothing);
 
-    accounts.add(
-      const AuthAccount(uid: 'test-user'),
-    );
+    accounts.add(const AuthAccount(uid: 'test-user'));
     await tester.pumpAndSettle();
 
     expect(find.text('Entrar'), findsNothing);

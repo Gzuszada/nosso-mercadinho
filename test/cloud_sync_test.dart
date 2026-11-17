@@ -2,11 +2,62 @@ import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mercado/data/app_database.dart';
+import 'package:mercado/features/cloud/data/cloud_auth_service.dart';
 import 'package:mercado/features/cloud/data/cloud_models.dart';
 import 'package:mercado/features/cloud/data/cloud_sync_service.dart';
 import 'package:mercado/features/settings/data/settings_repository.dart';
 
 void main() {
+  group('nome de usuário', () {
+    test('usa a parte do e-mail antes do arroba como nome padrão', () {
+      expect(
+        CloudAuthService.defaultDisplayName('  pessoa@exemplo.com  '),
+        'pessoa',
+      );
+    });
+
+    test('sanitiza e limita o nome padrão', () {
+      expect(
+        CloudAuthService.defaultDisplayName('${'a' * 50}@exemplo.com'),
+        'a' * 40,
+      );
+      expect(
+        CloudAuthService.defaultDisplayName(
+          '  nome  com   espacos@exemplo.com ',
+        ),
+        'nome com espacos',
+      );
+    });
+
+    test('usa fallback quando o e-mail não tem parte local utilizável', () {
+      expect(CloudAuthService.defaultDisplayName('@exemplo.com'), 'Usuário');
+      expect(CloudAuthService.defaultDisplayName('a@exemplo.com'), 'Usuário');
+      expect(CloudAuthService.defaultDisplayName(null), 'Usuário');
+    });
+
+    test('valida o tamanho do nome de usuário', () {
+      expect(
+        CloudAuthService.validateDisplayName('  Igor Munhoz  '),
+        'Igor Munhoz',
+      );
+      expect(
+        () => CloudAuthService.validateDisplayName('a'),
+        throwsArgumentError,
+      );
+      expect(
+        () => CloudAuthService.validateDisplayName('a' * 41),
+        throwsArgumentError,
+      );
+    });
+
+    test('recusa caracteres de controle no nome de usuário', () {
+      expect(
+        () => CloudAuthService.validateDisplayName('Igor\nMunhoz'),
+        throwsArgumentError,
+      );
+    });
+  });
+
   group('CloudSnapshot', () {
     test('hash independe da ordem das chaves em mapas aninhados', () {
       final first = <String, dynamic>{

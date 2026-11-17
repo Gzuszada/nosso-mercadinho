@@ -11,7 +11,8 @@ Atualizado em 16/11/2026. Este registro documenta decisões aprovadas para a Eta
 - A criação da lista restante preserva a forma de compra e o snapshot de estimativa do item de origem. A inserção é feita diretamente no banco, sem depender do modo atual do cadastro do produto.
 - “Último pago” usa a linha válida mais recente da compra concluída mais recente: `total_cents` dividido pela quantidade da própria linha e convertido para a unidade padrão da forma. Linhas de etiqueta não são combinadas com outras linhas do mesmo produto na viagem de referência.
 - O rodapé do carrinho limita a área expandida e oferece rolagem; a barra compacta permanece visível. Isso preserva as ações com fonte ampliada sem reduzir a escala da interface.
-- Versão atual `1.0.2+10` (build 10). APK release assinado gerado e verificado com assinatura v2 válida. A versão anterior `1.0.1+9` permanece disponível para atualização e consulta.
+- Versão atual `1.0.3+11` (build 11). APK release assinado gerado e verificado com assinatura v2 válida; tamanho `61.184.588` bytes e SHA-256 `1C59AA5CEE7222210C5C7FBEF5DB86F68EF68689A4DFF36A30A95EFC96118699`. A versão anterior `1.0.2+10` permanece disponível para atualização e consulta.
+- O nome de usuário é o campo nativo `displayName` do Firebase Auth; o e-mail continua sendo o identificador de login. O nome é validado, pode ser editado em **Ajustes → Conta e sincronização** e é espelhado de forma best-effort no campo `displayName` dos documentos `members`, sem alterar `uid` nem `role`.
 
 ## Stack e ambiente
 

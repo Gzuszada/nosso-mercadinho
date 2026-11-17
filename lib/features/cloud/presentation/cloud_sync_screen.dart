@@ -53,28 +53,39 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(cloudAuthServiceProvider).currentUser;
+    final account = ref.watch(authStateProvider).asData?.value;
     return Scaffold(
       appBar: AppBar(title: const Text('Conta e sincronização')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          if (user == null)
+          if (account == null)
             const _SignedOutMessage()
           else
-            ..._buildAccount(user.email),
+            ..._buildAccount(account.displayName, account.email),
         ],
       ),
     );
   }
 
-  List<Widget> _buildAccount(String? email) => [
-    ListTile(
-      leading: const Icon(Icons.person_outline),
-      title: Text(email ?? 'Conta conectada'),
-      trailing: TextButton(
+  List<Widget> _buildAccount(String? displayName, String? email) => [
+    Card(
+      child: ListTile(
+        leading: const Icon(Icons.person_outline),
+        title: Text(displayName ?? 'Usuário'),
+        subtitle: Text(email ?? 'Conta conectada'),
+        trailing: TextButton(
+          onPressed: _busy ? null : _editDisplayName,
+          child: const Text('Editar nome'),
+        ),
+      ),
+    ),
+    Align(
+      alignment: Alignment.centerLeft,
+      child: TextButton.icon(
         onPressed: _busy ? null : _signOut,
-        child: const Text('Sair'),
+        icon: const Icon(Icons.logout),
+        label: const Text('Sair'),
       ),
     ),
     const Divider(),
@@ -248,6 +259,53 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
     setState(() => _householdId = null);
     Navigator.of(context).popUntil((route) => route.isFirst);
   });
+
+  Future<void> _editDisplayName() async {
+    final service = ref.read(cloudAuthServiceProvider);
+    final current = service.currentUser?.displayName ?? '';
+    final controller = TextEditingController(text: current);
+    final value = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Editar nome de usuário'),
+        content: TextField(
+          key: const Key('display-name-input'),
+          controller: controller,
+          autofocus: true,
+          maxLength: 40,
+          textInputAction: TextInputAction.done,
+          decoration: const InputDecoration(
+            labelText: 'Nome de usuário',
+            helperText: 'Use de 2 a 40 caracteres.',
+          ),
+          onSubmitted: (value) => Navigator.of(dialogContext).pop(value),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            key: const Key('save-display-name'),
+            onPressed: () => Navigator.of(dialogContext).pop(controller.text),
+            child: const Text('Salvar'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (value == null || !mounted) {
+      return;
+    }
+    await _run(() async {
+      await service.updateDisplayName(value);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Nome de usuário atualizado.')),
+        );
+      }
+    });
+  }
 
   Future<void> _createHousehold() => _run(() async {
     final id = await ref

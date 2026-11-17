@@ -6,10 +6,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'cloud_models.dart';
 
 class AuthAccount {
-  const AuthAccount({required this.uid, this.email});
+  const AuthAccount({required this.uid, this.email, this.displayName});
 
   final String uid;
   final String? email;
+  final String? displayName;
 }
 
 class CloudAuthService {
@@ -21,9 +22,14 @@ class CloudAuthService {
   final FirebaseFirestore _firestore;
 
   User? get currentUser => _auth.currentUser;
-  Stream<AuthAccount?> get authStateChanges => _auth.authStateChanges().map(
-    (user) =>
-        user == null ? null : AuthAccount(uid: user.uid, email: user.email),
+  Stream<AuthAccount?> get authStateChanges => _auth.userChanges().map(
+    (user) => user == null
+        ? null
+        : AuthAccount(
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+          ),
   );
 
   Future<void> signIn({required String email, required String password}) async {
@@ -31,12 +37,18 @@ class CloudAuthService {
       email: email.trim(),
       password: password,
     );
+    await ensureDisplayName();
   }
 
   Future<void> register({
     required String email,
     required String password,
+    String? displayName,
   }) async {
+    final requestedName = displayName?.trim();
+    final validatedName = requestedName != null && requestedName.isNotEmpty
+        ? validateDisplayName(requestedName)
+        : null;
     try {
       await _auth.createUserWithEmailAndPassword(
         email: email.trim(),
@@ -53,9 +65,97 @@ class CloudAuthService {
       }
       rethrow;
     }
+
+    if (validatedName != null) {
+      await updateDisplayName(validatedName);
+    } else {
+      await ensureDisplayName();
+    }
   }
 
   Future<void> signOut() => _auth.signOut();
+
+  /// Garante que contas criadas antes da criação do nome de usuário tenham um
+  /// nome utilizável, sem precisar apagar ou recriar a conta.
+  Future<void> ensureDisplayName() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      return;
+    }
+    final existing = user.displayName?.trim();
+    if (existing != null && existing.isNotEmpty) {
+      try {
+        await _syncDisplayNameToMemberships(existing);
+      } on FirebaseException {
+        // O perfil já existe no Firebase Auth; o espelho é best-effort.
+      }
+      return;
+    }
+    await updateDisplayName(defaultDisplayName(user.email));
+  }
+
+  /// Atualiza o nome de usuário e o espelho nos registros de membros das casas
+  /// às quais o usuário pertence.
+  Future<void> updateDisplayName(String value) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw StateError('Entre na sua conta antes de editar o nome.');
+    }
+    final displayName = validateDisplayName(value);
+    await user.updateProfile(displayName: displayName);
+    try {
+      await _syncDisplayNameToMemberships(displayName);
+    } on FirebaseException {
+      // O perfil nativo já foi salvo. O espelho nos membros é uma melhoria
+      // best-effort e não deve impedir o usuário de editar o próprio nome.
+    }
+  }
+
+  static String defaultDisplayName(String? email) {
+    final localPart = email?.trim().split('@').first ?? '';
+    final sanitized = localPart
+        .replaceAll(RegExp(r'[\x00-\x1F\x7F]'), '')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    if (sanitized.length < 2) {
+      return 'Usuário';
+    }
+    return sanitized.length <= 40
+        ? sanitized
+        : sanitized.substring(0, 40).trim();
+  }
+
+  static String validateDisplayName(String value) {
+    final displayName = value.trim();
+    if (displayName.length < 2 || displayName.length > 40) {
+      throw ArgumentError('O nome deve ter entre 2 e 40 caracteres.');
+    }
+    if (RegExp(r'[\x00-\x1F\x7F]').hasMatch(displayName)) {
+      throw ArgumentError('O nome contém caracteres inválidos.');
+    }
+    return displayName;
+  }
+
+  Future<void> _syncDisplayNameToMemberships(String displayName) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      return;
+    }
+    final memberships = await _firestore
+        .collectionGroup('members')
+        .where('uid', isEqualTo: user.uid)
+        .get();
+    if (memberships.docs.isEmpty) {
+      return;
+    }
+    final batch = _firestore.batch();
+    for (final membership in memberships.docs) {
+      batch.set(membership.reference, {
+        'displayName': displayName,
+      }, SetOptions(merge: true));
+    }
+    await batch.commit();
+  }
 
   Future<List<CloudHousehold>> discoverHouseholds() async {
     final user = _auth.currentUser;
@@ -110,6 +210,7 @@ class CloudAuthService {
       transaction.set(memberRef, {
         'uid': user.uid,
         'email': user.email,
+        'displayName': user.displayName,
         'role': 'owner',
         'joinedAt': FieldValue.serverTimestamp(),
       });
@@ -175,6 +276,7 @@ class CloudAuthService {
     batch.set(memberRef, {
       'uid': user.uid,
       'email': user.email,
+      'displayName': user.displayName,
       'role': 'member',
       'joinedAt': FieldValue.serverTimestamp(),
     });

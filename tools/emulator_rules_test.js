@@ -134,6 +134,39 @@ async function main() {
     );
   }
 
+  const updateOwnDisplayName = await commit(member, [
+    set(`${household}/members/${member.uid}`, {
+      displayName: { stringValue: 'Membro Teste' },
+    }),
+  ]);
+  if (updateOwnDisplayName.status !== 200) {
+    throw new Error(
+      `Membro não atualizou o próprio nome: ${JSON.stringify(updateOwnDisplayName)}`,
+    );
+  }
+
+  const changeOwnUid = await commit(member, [
+    set(`${household}/members/${member.uid}`, {
+      uid: { stringValue: outsider.uid },
+    }),
+  ]);
+  if (changeOwnUid.status !== 403) {
+    throw new Error(
+      `Membro não deveria alterar o próprio UID: ${JSON.stringify(changeOwnUid)}`,
+    );
+  }
+
+  const changeOwnRole = await commit(member, [
+    set(`${household}/members/${member.uid}`, {
+      role: { stringValue: 'owner' },
+    }),
+  ]);
+  if (changeOwnRole.status !== 403) {
+    throw new Error(
+      `Membro não deveria alterar o próprio papel: ${JSON.stringify(changeOwnRole)}`,
+    );
+  }
+
   const foreignMemberships = await runQuery(outsider, {
     from: [{ collectionId: 'members', allDescendants: true }],
     where: {
