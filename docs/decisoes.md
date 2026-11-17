@@ -11,7 +11,7 @@ Atualizado em 16/11/2026. Este registro documenta decisões aprovadas para a Eta
 - A criação da lista restante preserva a forma de compra e o snapshot de estimativa do item de origem. A inserção é feita diretamente no banco, sem depender do modo atual do cadastro do produto.
 - “Último pago” usa a linha válida mais recente da compra concluída mais recente: `total_cents` dividido pela quantidade da própria linha e convertido para a unidade padrão da forma. Linhas de etiqueta não são combinadas com outras linhas do mesmo produto na viagem de referência.
 - O rodapé do carrinho limita a área expandida e oferece rolagem; a barra compacta permanece visível. Isso preserva as ações com fonte ampliada sem reduzir a escala da interface.
-- Versão atual `1.0.1+9` (build 9). APK release assinado foi gerado e verificado, com autenticação obrigatória antes do acesso ao mercado.
+- Versão atual `1.0.2+10` (build 10). APK release assinado gerado e verificado com assinatura v2 válida. A versão anterior `1.0.1+9` permanece disponível para atualização e consulta.
 
 ## Stack e ambiente
 
@@ -97,6 +97,7 @@ Atualizado em 16/11/2026. Este registro documenta decisões aprovadas para a Eta
 - O cadastro público é restrito no servidor pela blocking function `beforeCreateUser`. A allowlist fica em Firestore privado como hashes SHA-256 dos e-mails autorizados; as regras públicas negam leitura e gravação. A ausência de configuração bloqueia o cadastro, e chamadas diretas à API de criação de conta também são recusadas.
 - O acesso ao mercado exige autenticação: sem uma sessão válida, o `AuthGate` mostra somente **Entrar** e **Criar conta autorizada**. Se o Firebase não inicializar, o app falha fechado e mantém o mercado fechado. Depois do login, o Drift local permanece disponível para operação offline e o logout retorna à tela de entrada.
 - A allowlist de produção contém dois hashes SHA-256 únicos: o e-mail principal e o e-mail confirmado da Iasmim. A Iasmim está autorizada para criar a conta, mas ainda não criou login no Identity Platform.
+- Após o login, a descoberta de casas consulta os documentos `members` cujo campo `uid` é igual ao UID autenticado e lê o nome de cada `households/{id}`. A regra permite ao usuário listar apenas os próprios registros de membro. Se a conta pertence a uma única casa, ela é selecionada e persistida automaticamente; se pertence a várias, os nomes são exibidos para escolha explícita. Trocar de casa zera revisão e hash-base locais para impedir a mistura de bases de sincronização.
 
 ## Pendências para concluir a Etapa 4
 

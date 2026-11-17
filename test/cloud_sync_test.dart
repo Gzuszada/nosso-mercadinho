@@ -1,6 +1,10 @@
+import 'package:drift/drift.dart' show driftRuntimeOptions;
+import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mercado/data/app_database.dart';
 import 'package:mercado/features/cloud/data/cloud_models.dart';
 import 'package:mercado/features/cloud/data/cloud_sync_service.dart';
+import 'package:mercado/features/settings/data/settings_repository.dart';
 
 void main() {
   group('CloudSnapshot', () {
@@ -121,5 +125,61 @@ void main() {
     expect(conflict.localPayload['importEntries'], ['local']);
     expect(conflict.remotePayload['importEntries'], ['remoto']);
     expect(conflict.remoteRevision, 7);
+  });
+
+  group('seleção da casa de sincronização', () {
+    late AppDatabase database;
+    late SettingsRepository settings;
+    late bool previousMultipleDatabaseWarning;
+
+    setUpAll(() {
+      previousMultipleDatabaseWarning =
+          driftRuntimeOptions.dontWarnAboutMultipleDatabases;
+      driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+    });
+
+    tearDownAll(() {
+      driftRuntimeOptions.dontWarnAboutMultipleDatabases =
+          previousMultipleDatabaseWarning;
+    });
+
+    setUp(() {
+      database = AppDatabase(NativeDatabase.memory());
+      settings = SettingsRepository(database);
+    });
+
+    tearDown(() async {
+      await database.close();
+    });
+
+    test('trocar de casa zera o estado base da sincronização', () async {
+      await settings.saveCloudSyncSettings(
+        householdId: 'casa-antiga',
+        remoteRevision: 12,
+        lastSyncedHash: 'hash-antigo',
+      );
+
+      await settings.selectCloudHousehold('casa-nova');
+
+      final selected = await settings.getCloudSyncSettings();
+      expect(selected?.householdId, 'casa-nova');
+      expect(selected?.remoteRevision, 0);
+      expect(selected?.lastSyncedHash, isNull);
+    });
+
+    test('manter a mesma casa preserva o estado base', () async {
+      await settings.saveCloudSyncSettings(
+        householdId: 'casa-atual',
+        remoteRevision: 8,
+        lastSyncedHash: 'hash-atual',
+      );
+
+      await settings.selectCloudHousehold('casa-atual');
+
+      final selected = await settings.getCloudSyncSettings();
+      expect(selected?.householdId, 'casa-atual');
+      expect(selected?.remoteRevision, 8);
+      expect(selected?.lastSyncedHash, 'hash-atual');
+    });
   });
 }

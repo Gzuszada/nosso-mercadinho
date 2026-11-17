@@ -47,6 +47,14 @@ async function commit(user, writes) {
   });
 }
 
+async function runQuery(user, structuredQuery) {
+  return request(`${firestoreBase}:runQuery`, {
+    method: 'POST',
+    headers: auth(user),
+    body: JSON.stringify({ structuredQuery }),
+  });
+}
+
 function set(document, fields) {
   const name = document.startsWith('projects/')
     ? document
@@ -94,8 +102,66 @@ async function main() {
   const read = await request(`${firestoreBase}/${household}/metadata/sync`, { headers: auth(member) });
   if (read.status !== 200) throw new Error(`Membro não leu metadata: ${JSON.stringify(read)}`);
 
+  const secondHousehold = `households/house-second-${Date.now()}`;
+  const createSecondHousehold = await commit(owner, [
+    set(secondHousehold, { name: { stringValue: 'Segunda casa' }, ownerUid: { stringValue: owner.uid } }),
+    set(`${secondHousehold}/members/${owner.uid}`, { uid: { stringValue: owner.uid }, role: { stringValue: 'owner' } }),
+  ]);
+  if (createSecondHousehold.status !== 200) {
+    throw new Error(`Dono não criou a segunda casa: ${JSON.stringify(createSecondHousehold)}`);
+  }
+
+  const memberships = await runQuery(owner, {
+    from: [{ collectionId: 'members', allDescendants: true }],
+    where: {
+      fieldFilter: {
+        field: { fieldPath: 'uid' },
+        op: 'EQUAL',
+        value: { stringValue: owner.uid },
+      },
+    },
+  });
+  if (memberships.status !== 200) {
+    throw new Error(`Consulta de members falhou: ${JSON.stringify(memberships)}`);
+  }
+  const membershipRows = Array.isArray(memberships.body) ? memberships.body : [];
+  const membershipDocuments = membershipRows
+    .map((row) => row.document)
+    .filter(Boolean);
+  if (membershipDocuments.length !== 2) {
+    throw new Error(
+      `Duas casas do mesmo proprietário deveriam ser descobertas: ${JSON.stringify(membershipDocuments)}`,
+    );
+  }
+
+  const foreignMemberships = await runQuery(outsider, {
+    from: [{ collectionId: 'members', allDescendants: true }],
+    where: {
+      fieldFilter: {
+        field: { fieldPath: 'uid' },
+        op: 'EQUAL',
+        value: { stringValue: owner.uid },
+      },
+    },
+  });
+  if (foreignMemberships.status !== 403) {
+    throw new Error(
+      `Não-membro não deveria consultar membros de outro UID: ${JSON.stringify(foreignMemberships)}`,
+    );
+  }
+
   const denied = await request(`${firestoreBase}/${household}/metadata/sync`, { headers: auth(outsider) });
   if (denied.status !== 403) throw new Error(`Não-membro deveria receber 403: ${JSON.stringify(denied)}`);
+
+  const readPrivateConfig = await request(
+    `${firestoreBase}/privateConfig/registrationAllowlist`,
+    { headers: auth(outsider) },
+  );
+  if (readPrivateConfig.status !== 403) {
+    throw new Error(
+      `Configuração privada deveria receber 403: ${JSON.stringify(readPrivateConfig)}`,
+    );
+  }
 
   const wrongEmail = await signUp('wrong@example.com');
   const wrongClaim = await commit(wrongEmail, [
@@ -107,7 +173,9 @@ async function main() {
   ]);
   if (wrongClaim.status !== 403) throw new Error(`E-mail errado deveria receber 403: ${JSON.stringify(wrongClaim)}`);
 
-  console.log('REGRAS_OK: dono, convite, membro e negação para não-membro validados.');
+  console.log(
+    'REGRAS_OK: dono, convite, membro, não-membro e allowlist privada validados.',
+  );
 }
 
 main().catch((error) => {

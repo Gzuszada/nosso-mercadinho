@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'cloud_models.dart';
+
 class AuthAccount {
   const AuthAccount({required this.uid, this.email});
 
@@ -54,6 +56,43 @@ class CloudAuthService {
   }
 
   Future<void> signOut() => _auth.signOut();
+
+  Future<List<CloudHousehold>> discoverHouseholds() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      return const [];
+    }
+
+    final membershipSnapshot = await _firestore
+        .collectionGroup('members')
+        .where('uid', isEqualTo: user.uid)
+        .get();
+
+    final households = <CloudHousehold>[];
+    for (final membership in membershipSnapshot.docs) {
+      final householdId = membership.reference.parent.parent?.id;
+      if (householdId == null) {
+        continue;
+      }
+      if (households.any((household) => household.id == householdId)) {
+        continue;
+      }
+
+      final household = await _firestore
+          .collection('households')
+          .doc(householdId)
+          .get();
+      final name = household.data()?['name'];
+      if (name is String && name.trim().isNotEmpty) {
+        households.add(CloudHousehold(id: householdId, name: name.trim()));
+      }
+    }
+
+    households.sort(
+      (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+    );
+    return households;
+  }
 
   Future<String> createHousehold({required String name}) async {
     final user = _auth.currentUser;

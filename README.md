@@ -1,10 +1,10 @@
 # Nosso Mercadinho
 
-Aplicativo Android pessoal com dados locais, também publicado como PWA. Abra `app\` no VS Code. O identificador Android está definido como `br.com.nocorre.mercado`; a versão atual é `1.0.1+9`. A entrada no mercado exige uma conta autorizada; depois do login, o banco local continua disponível para operação offline.
+Aplicativo Android pessoal com dados locais, também publicado como PWA. Abra `app\` no VS Code. O identificador Android está definido como `br.com.nocorre.mercado`; a versão atual é `1.0.2+10`. A entrada no mercado exige uma conta autorizada; depois do login, o banco local continua disponível para operação offline. O app também descobre as casas vinculadas à conta, restaura o nome da casa selecionada e permite trocar a casa em **Ajustes → Conta e sincronização**.
 
 ## Download do APK
 
-A release assinada está disponível em [nosso-mercadinho-1.0.1.apk](https://github.com/Gzuszada/nosso-mercadinho/releases/download/v1.0.1/nosso-mercadinho-1.0.1.apk). SHA-256: `6E5B038FF253326D42A1B6ACC73250BBB3336EF5E7C4CD1550D67D229C018A74`.
+A release assinada está disponível em [nosso-mercadinho-1.0.2.apk](https://github.com/Gzuszada/nosso-mercadinho/releases/download/v1.0.2/nosso-mercadinho-1.0.2.apk). SHA-256: `D8A92164E0AC9EF73060DEA9D933AA796E4F168AE5A70E0033BED59C76A45C77`.
 
 ## O que já funciona
 

@@ -17,6 +17,12 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Permite localizar as casas do próprio usuário sem permitir que ele
+    // consulte registros de membro de outras contas.
+    match /{path=**}/members/{userId} {
+      allow read: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+
     match /householdInvites/{code} {
       allow read: if signedIn() &&
         (resource.data.email == request.auth.token.email ||
@@ -37,7 +43,9 @@ service cloud.firestore {
 
       match /members/{userId} {
         allow read: if signedIn() &&
-          (request.auth.uid == userId || isMember(householdId));
+          (request.auth.uid == userId ||
+            resource.data.uid == request.auth.uid ||
+            isMember(householdId));
         allow create: if signedIn() &&
           request.auth.uid == userId &&
           (getAfter(/databases/$(database)/documents/households/$(householdId)).data.ownerUid == request.auth.uid ||
@@ -67,4 +75,3 @@ service cloud.firestore {
     }
   }
 }
-

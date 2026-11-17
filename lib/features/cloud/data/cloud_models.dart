@@ -4,6 +4,13 @@ import 'package:crypto/crypto.dart';
 
 enum CloudSyncConflictArea { catalog, imports, shopping }
 
+class CloudHousehold {
+  const CloudHousehold({required this.id, required this.name});
+
+  final String id;
+  final String name;
+}
+
 enum CloudSyncResolutionSource { local, remote }
 
 class CloudSyncResolution {

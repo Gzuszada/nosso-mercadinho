@@ -61,4 +61,16 @@ class SettingsRepository {
           );
     });
   }
+
+  Future<void> selectCloudHousehold(String householdId) async {
+    final current = await getCloudSyncSettings();
+    if (current?.householdId == householdId) {
+      return;
+    }
+    await saveCloudSyncSettings(
+      householdId: householdId,
+      remoteRevision: 0,
+      lastSyncedHash: null,
+    );
+  }
 }

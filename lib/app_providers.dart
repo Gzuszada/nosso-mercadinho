@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'data/app_database.dart';
 import 'features/catalog/data/catalog_repository.dart';
 import 'features/cloud/data/cloud_auth_service.dart';
+import 'features/cloud/data/cloud_models.dart';
 import 'features/cloud/data/cloud_sync_service.dart';
 import 'features/settings/data/reset_service.dart';
 import 'features/settings/data/settings_repository.dart';
@@ -33,6 +34,49 @@ final cloudAuthServiceProvider = Provider<CloudAuthService>(
 final authStateProvider = StreamProvider<AuthAccount?>(
   (ref) => ref.watch(cloudAuthServiceProvider).authStateChanges,
 );
+
+final cloudHouseholdsProvider = FutureProvider<List<CloudHousehold>>((
+  ref,
+) async {
+  final authState = ref.watch(authStateProvider);
+  if (authState.hasError) {
+    throw authState.error!;
+  }
+  final account = authState.asData?.value;
+  if (authState.isLoading || account == null) {
+    return const [];
+  }
+
+  final households = await ref
+      .read(cloudAuthServiceProvider)
+      .discoverHouseholds();
+  if (households.length == 1) {
+    await ref
+        .read(settingsRepositoryProvider)
+        .selectCloudHousehold(households.single.id);
+  }
+  return households;
+});
+
+final selectedCloudHouseholdProvider = FutureProvider<CloudHousehold?>((
+  ref,
+) async {
+  await ref.watch(cloudHouseholdsProvider.future);
+  final settings = await ref
+      .read(settingsRepositoryProvider)
+      .getCloudSyncSettings();
+  final selectedId = settings?.householdId;
+  if (selectedId == null) {
+    return null;
+  }
+  final households = await ref.watch(cloudHouseholdsProvider.future);
+  for (final household in households) {
+    if (household.id == selectedId) {
+      return household;
+    }
+  }
+  return null;
+});
 
 final firebaseInitializationErrorProvider = Provider<String?>((ref) => null);
 

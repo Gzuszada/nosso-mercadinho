@@ -87,6 +87,7 @@ class AuthGate extends ConsumerWidget {
     }
 
     final authState = ref.watch(authStateProvider);
+    ref.watch(cloudHouseholdsProvider);
     return authState.when(
       loading: () =>
           const Scaffold(body: Center(child: CircularProgressIndicator())),

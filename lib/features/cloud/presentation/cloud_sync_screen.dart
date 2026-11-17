@@ -32,8 +32,16 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
   final _inviteEmailController = TextEditingController();
   final _inviteCodeController = TextEditingController();
   bool _busy = false;
+  bool _loadingHouseholds = false;
   String? _householdId;
   String? _inviteCode;
+  List<CloudHousehold> _households = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadHouseholds());
+  }
 
   @override
   void dispose() {
@@ -70,6 +78,38 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
       ),
     ),
     const Divider(),
+    if (_loadingHouseholds)
+      const ListTile(
+        leading: SizedBox.square(
+          dimension: 24,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+        title: Text('Buscando suas casas…'),
+      )
+    else if (_households.isNotEmpty) ...[
+      Text('Minhas casas', style: Theme.of(context).textTheme.titleMedium),
+      const SizedBox(height: 8),
+      for (final household in _households)
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: Icon(
+            household.id == _householdId
+                ? Icons.check_circle
+                : Icons.radio_button_unchecked,
+            color: household.id == _householdId
+                ? Theme.of(context).colorScheme.primary
+                : null,
+          ),
+          title: Text(household.name),
+          subtitle: Text(
+            household.id == _householdId
+                ? 'Casa selecionada'
+                : 'Toque para selecionar esta casa',
+          ),
+          onTap: _busy ? null : () => _selectHousehold(household.id),
+        ),
+      const SizedBox(height: 12),
+    ],
     TextField(
       controller: _householdNameController,
       decoration: const InputDecoration(labelText: 'Nome da casa'),
@@ -125,6 +165,64 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
     ],
   ];
 
+  Future<void> _loadHouseholds() async {
+    if (!mounted) {
+      return;
+    }
+    setState(() => _loadingHouseholds = true);
+    try {
+      final settings = await ref
+          .read(settingsRepositoryProvider)
+          .getCloudSyncSettings();
+      final households = await ref
+          .read(cloudAuthServiceProvider)
+          .discoverHouseholds();
+      if (!mounted) {
+        return;
+      }
+
+      var selectedId = settings?.householdId;
+      if (households.length == 1) {
+        selectedId = households.single.id;
+      } else if (selectedId != null &&
+          !households.any((household) => household.id == selectedId)) {
+        selectedId = null;
+      }
+
+      setState(() {
+        _households = households;
+        _householdId = selectedId;
+      });
+
+      if (selectedId != null && selectedId != settings?.householdId) {
+        await ref
+            .read(settingsRepositoryProvider)
+            .selectCloudHousehold(selectedId);
+      }
+    } on Object catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Não foi possível buscar suas casas: $error')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _loadingHouseholds = false);
+      }
+    }
+  }
+
+  Future<void> _selectHousehold(String? householdId) async {
+    if (householdId == null || householdId == _householdId) {
+      return;
+    }
+    setState(() => _householdId = householdId);
+    await ref
+        .read(settingsRepositoryProvider)
+        .selectCloudHousehold(householdId);
+    ref.invalidate(selectedCloudHouseholdProvider);
+  }
+
   Future<void> _run(Future<void> Function() action) async {
     setState(() => _busy = true);
     try {
@@ -155,7 +253,18 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
     final id = await ref
         .read(cloudAuthServiceProvider)
         .createHousehold(name: _householdNameController.text);
-    setState(() => _householdId = id);
+    await ref.read(settingsRepositoryProvider).selectCloudHousehold(id);
+    ref.invalidate(selectedCloudHouseholdProvider);
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _householdId = id;
+      _households = [
+        ..._households.where((household) => household.id != id),
+        CloudHousehold(id: id, name: _householdNameController.text.trim()),
+      ];
+    });
   });
 
   Future<void> _createInvite() => _run(() async {
@@ -176,7 +285,13 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
     final id = await ref
         .read(cloudAuthServiceProvider)
         .joinHousehold(code: _inviteCodeController.text);
+    await ref.read(settingsRepositoryProvider).selectCloudHousehold(id);
+    ref.invalidate(selectedCloudHouseholdProvider);
+    if (!mounted) {
+      return;
+    }
     setState(() => _householdId = id);
+    await _loadHouseholds();
   });
 
   Future<void> _synchronize() => _run(() async {

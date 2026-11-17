@@ -38,8 +38,8 @@ class SettingsScreen extends ConsumerWidget {
           ListTile(
             leading: const Icon(Icons.cloud_sync_outlined),
             title: const Text('Conta e sincronização'),
-            subtitle: const Text(
-              'Gerenciar a conta, criar uma casa ou compartilhar os dados com outra pessoa.',
+            subtitle: Text(
+              ref.watch(selectedCloudHouseholdProvider).asData?.value?.name ?? 'Gerenciar a conta, criar uma casa ou compartilhar os dados com outra pessoa.',
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(
