@@ -1,6 +1,6 @@
 # Progresso
 
-Etapa 4 aprovada para confiabilidade e APK de uso pessoal, fora da Google Play. O Identity Platform, o provedor E-mail/Senha e a blocking function de cadastro estão ativos. O gate que exige login antes do mercado foi implementado e validado; a nova versão da PWA/APK está em preparação. Resta confirmar o e-mail da Iasmim e concluir o teste final com duas contas.
+Etapa 4 aprovada para confiabilidade e APK de uso pessoal, fora da Google Play. O Identity Platform, o provedor E-mail/Senha e a blocking function de cadastro estão ativos. O gate que exige login antes do mercado foi implementado, validado e publicado na PWA e no APK `1.0.1+9`. Resta confirmar o e-mail da Iasmim e concluir o teste final com duas contas.
 
 ## Estado atual — 16/11/2026
 
@@ -10,12 +10,12 @@ Etapa 4 aprovada para confiabilidade e APK de uso pessoal, fora da Google Play. 
 - Firestore `(default)` criado e publicado em `southamerica-east1` no novo projeto; as regras compilaram e foram liberadas. O fluxo de convite e acesso já foi validado no Emulator.
 - Sync compartilhado implementado por `catalog`, `imports` e `shopping`, com hash SHA-256 canônico, revisão e conflitos tipados. “Usar remota” restaura a área no Drift sem sobrescrever silenciosamente os hashes-base locais.
 - A Interface resolve múltiplos conflitos sequencialmente e os códigos de convite usam `Random.secure()`. Backup aceita schema 7 mantendo compatibilidade de leitura.
-- `flutter analyze`: sem problemas. `flutter test --no-pub`: 79 testes aprovados, incluindo o gate de autenticação. Functions: build TypeScript e 3 testes da allowlist aprovados. A publicação da versão `1.0.1+9` está em preparação.
+- `flutter analyze`: sem problemas. `flutter test --no-pub`: 79 testes aprovados, incluindo o gate de autenticação. Functions: build TypeScript e 3 testes da allowlist aprovados. Build Web release e Hosting da versão `1.0.1+9` concluídos; o bundle público contém o gate e não contém e-mails ou hashes.
 - Cadastro restrito no servidor: blocking function `beforeCreateUser` com allowlist privada de hashes SHA-256, regras públicas negando a leitura da configuração e falha fechada quando a lista ou a Function estiver ausente. A allowlist provisória contém somente o e-mail principal; o segundo hash depende da confirmação do e-mail da Iasmim.
 - O Identity Platform foi inicializado, o provedor E-mail/Senha foi habilitado e a blocking function `beforeCreateUser` foi publicada e vinculada ao evento `beforeCreate`. Teste real: e-mail fora da allowlist foi recusado com `PERMISSION_DENIED`; e-mail temporariamente autorizado foi aceito, com a conta de teste excluída e a lista restaurada para um hash.
 - Pendência: confirmar o e-mail da Iasmim e substituir a allowlist provisória pela lista completa com os dois hashes. O e-mail principal já pode criar conta; a Iasmim permanece bloqueada até essa confirmação.
 - Pendência de validação: executar o fluxo real com duas contas, inclusive criação da casa, convite, sincronização, alterações nos dois dispositivos e resolução de conflito.
-- Versão do app: `1.0.1+9` (Android build 9). O login é obrigatório antes de acessar qualquer área do mercado; após autenticar, o Drift local continua funcionando offline.
+- Versão do app: `1.0.1+9` (Android build 9). O login é obrigatório antes de acessar qualquer área do mercado; após autenticar, o Drift local continua funcionando offline. APK release assinado gerado (`br.com.nocorre.mercado`, assinatura v2 válida); SHA-256 `6E5B038FF253326D42A1B6ACC73250BBB3336EF5E7C4CD1550D67D229C018A74`.
 - Schema Drift 6: `purchase_lines.is_label_total` identifica linhas cujo total pago veio da etiqueta. `total_cents` é autoritativo; `unit_price_cents` é o valor derivado necessário para exibir a base de cálculo.
 - Backup formato 6, com `formatVersion` encaminhado na restauração; formatos 1 a 6 são aceitos de forma independente. Listas com status `open` são preservadas.
 - Compras por peso aceitam o total real da etiqueta. O “último pago” usa o total e a quantidade da linha válida mais recente, sem agregar outras linhas do mesmo produto na viagem de referência.

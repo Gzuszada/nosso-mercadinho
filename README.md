@@ -2,6 +2,10 @@
 
 Aplicativo Android pessoal com dados locais, também publicado como PWA. Abra `app\` no VS Code. O identificador Android está definido como `br.com.nocorre.mercado`; a versão atual é `1.0.1+9`. A entrada no mercado exige uma conta autorizada; depois do login, o banco local continua disponível para operação offline.
 
+## Download do APK
+
+A release assinada está disponível em [nosso-mercadinho-1.0.1.apk](https://github.com/Gzuszada/nosso-mercadinho/releases/download/v1.0.1/nosso-mercadinho-1.0.1.apk). SHA-256: `6E5B038FF253326D42A1B6ACC73250BBB3336EF5E7C4CD1550D67D229C018A74`.
+
 ## O que já funciona
 
 - Catálogo local persistente, categorias/subcategorias, importação revisável e backup/restauração.
