@@ -48,7 +48,9 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
 
   List<Widget> _buildSignIn() => [
     const Text(
-      'A conta permite compartilhar a mesma casa entre duas pessoas. O app continua funcionando offline.',
+      'A conta permite compartilhar a mesma casa entre duas pessoas. '
+      'O cadastro é restrito aos e-mails autorizados. '
+      'O app continua funcionando offline.',
     ),
     const SizedBox(height: 16),
     TextField(
@@ -69,7 +71,7 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
     ),
     TextButton(
       onPressed: _busy ? null : _register,
-      child: const Text('Criar conta'),
+      child: const Text('Criar conta autorizada'),
     ),
     const Divider(height: 40),
     TextField(

@@ -25,10 +25,22 @@ class CloudAuthService {
     required String email,
     required String password,
   }) async {
-    await _auth.createUserWithEmailAndPassword(
-      email: email.trim(),
-      password: password,
-    );
+    try {
+      await _auth.createUserWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
+      );
+    } on FirebaseAuthException catch (error) {
+      if (error.code == 'permission-denied' ||
+          error.code == 'operation-not-allowed' ||
+          error.code == 'internal-error') {
+        throw StateError(
+          'Este e-mail não está autorizado ou o cadastro seguro ainda não '
+          'está disponível.',
+        );
+      }
+      rethrow;
+    }
   }
 
   Future<void> signOut() => _auth.signOut();

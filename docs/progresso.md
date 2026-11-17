@@ -11,6 +11,8 @@ Etapa 4 aprovada para confiabilidade e APK de uso pessoal, fora da Google Play. 
 - Sync compartilhado implementado por `catalog`, `imports` e `shopping`, com hash SHA-256 canônico, revisão e conflitos tipados. “Usar remota” restaura a área no Drift sem sobrescrever silenciosamente os hashes-base locais.
 - A Interface resolve múltiplos conflitos sequencialmente e os códigos de convite usam `Random.secure()`. Backup aceita schema 7 mantendo compatibilidade de leitura.
 - `flutter analyze`: sem problemas. `flutter test --no-pub`: 77 testes aprovados. Build Web release concluído e publicado.
+- Cadastro restrito no servidor: blocking function `beforeCreateUser` com allowlist privada de hashes SHA-256, regras públicas negando a leitura da configuração e falha fechada quando a lista ou a Function estiver ausente. A allowlist provisória contém somente o e-mail principal; o segundo hash depende da confirmação do e-mail da Iasmim.
+- O provedor E-mail/Senha foi mantido desabilitado enquanto o projeto não é GCIP, pois o Google recusou instalar a blocking function com `OPERATION_NOT_ALLOWED: Blocking Functions may only be configured for GCIP projects`. Isso fecha temporariamente o cadastro sem afetar o app offline.
 - Pendência externa: ativar o billing do Google Cloud, inicializar o Identity Platform e habilitar o provedor E-mail/Senha. Até lá, a PWA e o Drift offline funcionam, mas cadastro e login não.
 - Pendência de validação: executar o fluxo real com duas contas, inclusive criação da casa, convite, sincronização, alterações nos dois dispositivos e resolução de conflito.
 - Versão do app: `1.0.0+8` (Android build 8).

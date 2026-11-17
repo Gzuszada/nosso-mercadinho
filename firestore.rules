@@ -11,6 +11,12 @@ service cloud.firestore {
         exists(/databases/$(database)/documents/households/$(householdId)/members/$(request.auth.uid));
     }
 
+    // Configuração administrativa da allowlist: somente o Admin SDK,
+    // usado pelas Functions, pode ler ou gravar estes documentos.
+    match /privateConfig/{documentId} {
+      allow read, write: if false;
+    }
+
     match /householdInvites/{code} {
       allow read: if signedIn() &&
         (resource.data.email == request.auth.token.email ||

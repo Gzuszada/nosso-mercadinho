@@ -94,6 +94,8 @@ Atualizado em 16/11/2026. Este registro documenta decisões aprovadas para a Eta
 - Conflitos são tipados por área e a interface resolve múltiplos conflitos sequencialmente. Códigos de convite são gerados com `Random.secure()`.
 - O snapshot remoto reutiliza o formato validado do `BackupService`; o schema 7 é aceito e as versões anteriores permanecem legíveis.
 - O Identity Platform ainda depende da ativação de billing pelo usuário e da habilitação de E-mail/Senha. Hosting, Firestore, regras e operação local não dependem dessa etapa.
+- O cadastro público será restrito no servidor pela blocking function `beforeCreateUser`. A allowlist fica em Firestore privado como hashes SHA-256 dos e-mails autorizados; as regras públicas negam leitura e gravação. A ausência de configuração bloqueia o cadastro, e chamadas diretas à API de criação de conta também são recusadas.
+- Por segurança, E-mail/Senha permanecerá desabilitado até o projeto ser inicializado como GCIP e a blocking function ser implantada. Habilitar o provedor antes criaria uma janela de cadastro público; desabilitá-lo não impede o login de contas que venham a ser criadas após a ativação segura.
 
 ## Pendências para concluir a Etapa 4
 
