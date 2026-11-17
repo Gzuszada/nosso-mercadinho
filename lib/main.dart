@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app_providers.dart';
 import 'firebase_options.dart';
+import 'features/cloud/presentation/auth_screen.dart';
 import 'features/catalog/presentation/catalog_screen.dart';
 import 'features/settings/presentation/settings_screen.dart';
 import 'features/shopping/presentation/shopping_history_screen.dart';
@@ -13,14 +14,25 @@ import 'features/shopping/presentation/shopping_trips_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  String? firebaseInitializationError;
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
   } on Object {
-    // O app continua disponível offline quando a inicialização da nuvem falha.
+    firebaseInitializationError =
+        'Não foi possível conectar ao serviço de conta.';
   }
-  runApp(const ProviderScope(child: MercadoApp()));
+  runApp(
+    ProviderScope(
+      overrides: [
+        firebaseInitializationErrorProvider.overrideWithValue(
+          firebaseInitializationError,
+        ),
+      ],
+      child: const MercadoApp(),
+    ),
+  );
 }
 
 class MercadoApp extends ConsumerWidget {
@@ -59,7 +71,67 @@ class MercadoApp extends ConsumerWidget {
         ),
       ),
       themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      home: const MercadoHome(),
+      home: const AuthGate(),
+    );
+  }
+}
+
+class AuthGate extends ConsumerWidget {
+  const AuthGate({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final initializationError = ref.watch(firebaseInitializationErrorProvider);
+    if (initializationError != null) {
+      return _ServiceUnavailableScreen(message: initializationError);
+    }
+
+    final authState = ref.watch(authStateProvider);
+    return authState.when(
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
+      error: (error, _) => _ServiceUnavailableScreen(
+        message: 'Não foi possível verificar sua sessão. Tente novamente.',
+      ),
+      data: (account) =>
+          account == null ? const AuthScreen() : const MercadoHome(),
+    );
+  }
+}
+
+class _ServiceUnavailableScreen extends StatelessWidget {
+  const _ServiceUnavailableScreen({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.cloud_off_outlined, size: 56),
+                const SizedBox(height: 16),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'O mercado permanece fechado até que o serviço de conta '
+                  'esteja disponível.',
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

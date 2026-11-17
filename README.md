@@ -1,6 +1,6 @@
 # Nosso Mercadinho
 
-Aplicativo Android pessoal e offline, também publicado como PWA. Abra `app\` no VS Code. O identificador Android está definido como `br.com.nocorre.mercado`; a versão atual é `1.0.0+8`.
+Aplicativo Android pessoal com dados locais, também publicado como PWA. Abra `app\` no VS Code. O identificador Android está definido como `br.com.nocorre.mercado`; a versão atual é `1.0.1+9`. A entrada no mercado exige uma conta autorizada; depois do login, o banco local continua disponível para operação offline.
 
 ## O que já funciona
 
@@ -96,12 +96,12 @@ Não edite `lib\data\app_database.g.dart` manualmente. Verificações e decisõe
 
 ## Nosso Mercado na Web e sincronização da casa
 
-A versão Web é publicada em `https://nosso-mercado-casa.web.app`. No iPhone (Safari), abra esse endereço, toque em **Compartilhar** e depois em **Adicionar à Tela de Início**. O app instalado abre em tela cheia e continua usando o Drift local quando a internet está indisponível.
+A versão Web é publicada em `https://nosso-mercado-casa.web.app`. No iPhone (Safari), abra esse endereço, toque em **Compartilhar** e depois em **Adicionar à Tela de Início**. O app instalado abre em tela cheia. A tela de entrada exige uma conta autorizada; após autenticar, o app continua usando o Drift local quando a internet está indisponível.
 
-Em **Configurações → Conta e sincronização**, as duas pessoas da casa podem:
+As duas pessoas da casa podem:
 
-1. criar/login uma conta com e-mail e senha;
-2. criar a casa no primeiro dispositivo;
+1. entrar ou criar uma conta autorizada com e-mail e senha na tela inicial;
+2. criar a casa no primeiro dispositivo em **Configurações → Conta e sincronização**;
 3. gerar um código de convite para o e-mail da segunda pessoa;
 4. entrar com o código no segundo dispositivo;
 5. tocar em **Sincronizar agora**.
@@ -137,7 +137,7 @@ firebase emulators:exec --only firestore,auth --project demo-nosso-mercado "node
 
 Este aplicativo não será publicado na Google Play. O Android passou a exigir registro de pacotes para instalações em dispositivos certificados no Brasil a partir de 30/09/2026. A rota escolhida é a conta gratuita **Limited distribution** do Android Developer Console, fora da Play Store, para registrar o pacote e autorizar o telefone. Ela exige uma conta Google com verificação em duas etapas e perfil de pagamentos com nome/endereço; não exige documento oficial de identidade conforme a documentação atual. O usuário precisa concluir esse cadastro diretamente com Google; não compartilhe credenciais com o assistente. Consulte [Android developer verification](https://developer.android.com/developer-verification) e [Limited distribution](https://developer.android.com/developer-verification/guides/limited-distribution).
 
-O ID foi alterado de `com.example.mercado` para `br.com.nocorre.mercado`, com versão atual `1.0.0+8`. A release usa uma chave própria e pode atualizar a instalação release anterior do mesmo pacote, preservando os dados locais. Builds debug e release têm assinaturas diferentes e não podem substituir um ao outro como atualização; por isso, a primeira instalação da release deve ser feita sem desinstalar a versão anterior
+O ID foi alterado de `com.example.mercado` para `br.com.nocorre.mercado`, com versão atual `1.0.1+9`. A release usa uma chave própria e pode atualizar a instalação release anterior do mesmo pacote, preservando os dados locais. Builds debug e release têm assinaturas diferentes e não podem substituir um ao outro como atualização; por isso, a primeira instalação da release deve ser feita sem desinstalar a versão anterior
 
 ### Política de backup Android
 

@@ -30,6 +30,12 @@ final cloudAuthServiceProvider = Provider<CloudAuthService>(
   (ref) => CloudAuthService(),
 );
 
+final authStateProvider = StreamProvider<AuthAccount?>(
+  (ref) => ref.watch(cloudAuthServiceProvider).authStateChanges,
+);
+
+final firebaseInitializationErrorProvider = Provider<String?>((ref) => null);
+
 final cloudSyncServiceProvider = Provider<CloudSyncService>(
   (ref) => CloudSyncService(
     database: ref.watch(databaseProvider),

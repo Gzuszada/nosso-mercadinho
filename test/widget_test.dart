@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:mercado/app_providers.dart';
 import 'package:mercado/data/app_database.dart';
+import 'package:mercado/features/cloud/data/cloud_auth_service.dart';
 import 'package:mercado/features/catalog/data/catalog_import.dart';
 import 'package:mercado/features/catalog/data/catalog_repository.dart';
 import 'package:mercado/features/shopping/data/shopping_repository.dart';
@@ -34,7 +35,12 @@ void main() {
     (tester) async {
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [databaseProvider.overrideWithValue(database)],
+          overrides: [
+            databaseProvider.overrideWithValue(database),
+            authStateProvider.overrideWith(
+              (ref) => Stream.value(const AuthAccount(uid: 'test-user')),
+            ),
+          ],
           child: const MercadoApp(),
         ),
       );
@@ -47,6 +53,7 @@ void main() {
       expect(find.text('Importar catálogo inicial'), findsOneWidget);
 
       await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
       await tester.pump(const Duration(milliseconds: 1));
     },
   );
@@ -69,7 +76,12 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [databaseProvider.overrideWithValue(database)],
+        overrides: [
+          databaseProvider.overrideWithValue(database),
+          authStateProvider.overrideWith(
+            (ref) => Stream.value(const AuthAccount(uid: 'test-user')),
+          ),
+        ],
         child: const MercadoApp(),
       ),
     );

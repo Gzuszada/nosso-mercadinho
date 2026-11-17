@@ -95,11 +95,12 @@ Atualizado em 16/11/2026. Este registro documenta decisões aprovadas para a Eta
 - O snapshot remoto reutiliza o formato validado do `BackupService`; o schema 7 é aceito e as versões anteriores permanecem legíveis.
 - O Identity Platform está inicializado, com E-mail/Senha habilitado e a blocking function `beforeCreateUser` publicada. O provedor só foi reaberto depois de o teste real confirmar que um e-mail não autorizado é bloqueado e que o trigger `beforeCreate` está vinculado.
 - O cadastro público é restrito no servidor pela blocking function `beforeCreateUser`. A allowlist fica em Firestore privado como hashes SHA-256 dos e-mails autorizados; as regras públicas negam leitura e gravação. A ausência de configuração bloqueia o cadastro, e chamadas diretas à API de criação de conta também são recusadas.
+- O acesso ao mercado exige autenticação: sem uma sessão válida, o `AuthGate` mostra somente **Entrar** e **Criar conta autorizada**. Se o Firebase não inicializar, o app falha fechado e mantém o mercado fechado. Depois do login, o Drift local permanece disponível para operação offline e o logout retorna à tela de entrada.
 - Enquanto a lista não estiver completa, a allowlist contém somente o e-mail principal conhecido. A Iasmim deve permanecer bloqueada até a confirmação do endereço, evitando autorizar a pessoa errada por suposição.
 
 ## Pendências para concluir a Etapa 4
 
-- Testes automatizados executados: persistência do carrinho ao reabrir SQLite, restauração isolada, migrações, backup, lista `open`, total de etiqueta, “último pago” por linha, fluxo pós-compra, acessibilidade com fonte ampliada e sincronização em nuvem; suíte completa passou com 77 testes e análise limpa. APK release assinado foi gerado e a assinatura APK v2 foi verificada.
+- Testes automatizados executados: persistência do carrinho ao reabrir SQLite, restauração isolada, migrações, backup, lista `open`, total de etiqueta, “último pago” por linha, fluxo pós-compra, acessibilidade com fonte ampliada, sincronização em nuvem e gate de autenticação; suíte completa passou com 79 testes e análise limpa. As Functions passaram no build TypeScript e nos 3 testes da allowlist.
 - Cadastro/registro do pacote no Android Developer Console e autorização do telefone são ações que o usuário deve executar em contas/dispositivos próprios.
 - Teste manual de migração do backup e instalação do APK release no telefone, sem desinstalar a instalação atual até validar os dados.
 - Confirmar o e-mail da Iasmim, atualizar a allowlist com os dois hashes e validar o fluxo real com duas contas.

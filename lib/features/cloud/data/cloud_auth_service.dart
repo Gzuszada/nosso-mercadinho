@@ -3,6 +3,13 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+class AuthAccount {
+  const AuthAccount({required this.uid, this.email});
+
+  final String uid;
+  final String? email;
+}
+
 class CloudAuthService {
   CloudAuthService({FirebaseAuth? auth, FirebaseFirestore? firestore})
     : _auth = auth ?? FirebaseAuth.instance,
@@ -12,7 +19,10 @@ class CloudAuthService {
   final FirebaseFirestore _firestore;
 
   User? get currentUser => _auth.currentUser;
-  Stream<User?> get authStateChanges => _auth.authStateChanges();
+  Stream<AuthAccount?> get authStateChanges => _auth.authStateChanges().map(
+    (user) =>
+        user == null ? null : AuthAccount(uid: user.uid, email: user.email),
+  );
 
   Future<void> signIn({required String email, required String password}) async {
     await _auth.signInWithEmailAndPassword(

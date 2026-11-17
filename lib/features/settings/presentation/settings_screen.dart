@@ -39,7 +39,7 @@ class SettingsScreen extends ConsumerWidget {
             leading: const Icon(Icons.cloud_sync_outlined),
             title: const Text('Conta e sincronização'),
             subtitle: const Text(
-              'Entrar, criar uma casa ou compartilhar os dados com outra pessoa.',
+              'Gerenciar a conta, criar uma casa ou compartilhar os dados com outra pessoa.',
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(

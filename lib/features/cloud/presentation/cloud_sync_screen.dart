@@ -5,6 +5,21 @@ import '../../../app_providers.dart';
 import '../data/cloud_models.dart';
 import '../data/cloud_sync_service.dart';
 
+class _SignedOutMessage extends StatelessWidget {
+  const _SignedOutMessage();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 24),
+      child: Text(
+        'Sua sessão foi encerrada. Entre novamente para acessar o mercado.',
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+}
+
 class CloudSyncScreen extends ConsumerStatefulWidget {
   const CloudSyncScreen({super.key});
 
@@ -13,8 +28,6 @@ class CloudSyncScreen extends ConsumerStatefulWidget {
 }
 
 class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
   final _householdNameController = TextEditingController();
   final _inviteEmailController = TextEditingController();
   final _inviteCodeController = TextEditingController();
@@ -24,8 +37,6 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
     _householdNameController.dispose();
     _inviteEmailController.dispose();
     _inviteCodeController.dispose();
@@ -40,61 +51,14 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          if (user == null) ..._buildSignIn() else ..._buildAccount(user.email),
+          if (user == null)
+            const _SignedOutMessage()
+          else
+            ..._buildAccount(user.email),
         ],
       ),
     );
   }
-
-  List<Widget> _buildSignIn() => [
-    const Text(
-      'A conta permite compartilhar a mesma casa entre duas pessoas. '
-      'O cadastro é restrito aos e-mails autorizados. '
-      'O app continua funcionando offline.',
-    ),
-    const SizedBox(height: 16),
-    TextField(
-      controller: _emailController,
-      keyboardType: TextInputType.emailAddress,
-      decoration: const InputDecoration(labelText: 'E-mail'),
-    ),
-    const SizedBox(height: 12),
-    TextField(
-      controller: _passwordController,
-      obscureText: true,
-      decoration: const InputDecoration(labelText: 'Senha'),
-    ),
-    const SizedBox(height: 16),
-    FilledButton(
-      onPressed: _busy ? null : _signIn,
-      child: const Text('Entrar'),
-    ),
-    TextButton(
-      onPressed: _busy ? null : _register,
-      child: const Text('Criar conta autorizada'),
-    ),
-    const Divider(height: 40),
-    TextField(
-      controller: _householdNameController,
-      decoration: const InputDecoration(labelText: 'Nome da casa'),
-    ),
-    const SizedBox(height: 12),
-    OutlinedButton(
-      onPressed: _busy ? null : _createHousehold,
-      child: const Text('Criar casa'),
-    ),
-    const SizedBox(height: 20),
-    TextField(
-      controller: _inviteCodeController,
-      textCapitalization: TextCapitalization.characters,
-      decoration: const InputDecoration(labelText: 'Código de convite'),
-    ),
-    const SizedBox(height: 12),
-    OutlinedButton(
-      onPressed: _busy ? null : _joinHousehold,
-      child: const Text('Entrar na casa'),
-    ),
-  ];
 
   List<Widget> _buildAccount(String? email) => [
     ListTile(
@@ -178,28 +142,13 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
     }
   }
 
-  Future<void> _signIn() => _run(() async {
-    await ref
-        .read(cloudAuthServiceProvider)
-        .signIn(
-          email: _emailController.text,
-          password: _passwordController.text,
-        );
-    await _loadHousehold();
-  });
-
-  Future<void> _register() => _run(() async {
-    await ref
-        .read(cloudAuthServiceProvider)
-        .register(
-          email: _emailController.text,
-          password: _passwordController.text,
-        );
-  });
-
   Future<void> _signOut() => _run(() async {
     await ref.read(cloudAuthServiceProvider).signOut();
+    if (!mounted) {
+      return;
+    }
     setState(() => _householdId = null);
+    Navigator.of(context).popUntil((route) => route.isFirst);
   });
 
   Future<void> _createHousehold() => _run(() async {
@@ -296,14 +245,5 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
           ? CloudSyncResolutionSource.remote
           : CloudSyncResolutionSource.local,
     );
-  }
-
-  Future<void> _loadHousehold() async {
-    final settings = await ref
-        .read(settingsRepositoryProvider)
-        .getCloudSyncSettings();
-    if (mounted && settings?.householdId != null) {
-      setState(() => _householdId = settings?.householdId);
-    }
   }
 }
