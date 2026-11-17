@@ -93,14 +93,14 @@ Atualizado em 16/11/2026. Este registro documenta decisões aprovadas para a Eta
 - A detecção de alterações usa hash SHA-256 canônico e revisão. Os hashes-base locais e os hashes remotos são persistidos separadamente para que uma escolha explícita de “usar remota” não produza sobrescrita silenciosa em uma sincronização posterior.
 - Conflitos são tipados por área e a interface resolve múltiplos conflitos sequencialmente. Códigos de convite são gerados com `Random.secure()`.
 - O snapshot remoto reutiliza o formato validado do `BackupService`; o schema 7 é aceito e as versões anteriores permanecem legíveis.
-- O Identity Platform ainda depende da ativação de billing pelo usuário e da habilitação de E-mail/Senha. Hosting, Firestore, regras e operação local não dependem dessa etapa.
-- O cadastro público será restrito no servidor pela blocking function `beforeCreateUser`. A allowlist fica em Firestore privado como hashes SHA-256 dos e-mails autorizados; as regras públicas negam leitura e gravação. A ausência de configuração bloqueia o cadastro, e chamadas diretas à API de criação de conta também são recusadas.
-- Por segurança, E-mail/Senha permanecerá desabilitado até o projeto ser inicializado como GCIP e a blocking function ser implantada. Habilitar o provedor antes criaria uma janela de cadastro público; desabilitá-lo não impede o login de contas que venham a ser criadas após a ativação segura.
+- O Identity Platform está inicializado, com E-mail/Senha habilitado e a blocking function `beforeCreateUser` publicada. O provedor só foi reaberto depois de o teste real confirmar que um e-mail não autorizado é bloqueado e que o trigger `beforeCreate` está vinculado.
+- O cadastro público é restrito no servidor pela blocking function `beforeCreateUser`. A allowlist fica em Firestore privado como hashes SHA-256 dos e-mails autorizados; as regras públicas negam leitura e gravação. A ausência de configuração bloqueia o cadastro, e chamadas diretas à API de criação de conta também são recusadas.
+- Enquanto a lista não estiver completa, a allowlist contém somente o e-mail principal conhecido. A Iasmim deve permanecer bloqueada até a confirmação do endereço, evitando autorizar a pessoa errada por suposição.
 
 ## Pendências para concluir a Etapa 4
 
 - Testes automatizados executados: persistência do carrinho ao reabrir SQLite, restauração isolada, migrações, backup, lista `open`, total de etiqueta, “último pago” por linha, fluxo pós-compra, acessibilidade com fonte ampliada e sincronização em nuvem; suíte completa passou com 77 testes e análise limpa. APK release assinado foi gerado e a assinatura APK v2 foi verificada.
 - Cadastro/registro do pacote no Android Developer Console e autorização do telefone são ações que o usuário deve executar em contas/dispositivos próprios.
 - Teste manual de migração do backup e instalação do APK release no telefone, sem desinstalar a instalação atual até validar os dados.
-- Ativar o billing do Google Cloud, inicializar o Identity Platform, habilitar E-mail/Senha e validar o fluxo real com duas contas.
+- Confirmar o e-mail da Iasmim, atualizar a allowlist com os dois hashes e validar o fluxo real com duas contas.
 - Nenhum extra (estoque, validade, código de barras ou OCR) foi aprovado ou implementado.

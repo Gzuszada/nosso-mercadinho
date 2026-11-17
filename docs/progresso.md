@@ -1,6 +1,6 @@
 # Progresso
 
-Etapa 4 aprovada para confiabilidade e APK de uso pessoal, fora da Google Play. A PWA e o espelho compartilhado no Firestore foram publicados; o login por e-mail/senha e o teste final com duas contas dependem da ativação do billing do Identity Platform.
+Etapa 4 aprovada para confiabilidade e APK de uso pessoal, fora da Google Play. A PWA e o espelho compartilhado no Firestore foram publicados. O Identity Platform, o provedor E-mail/Senha e a blocking function de cadastro estão ativos; resta confirmar o e-mail da Iasmim e concluir o teste final com duas contas.
 
 ## Estado atual — 16/11/2026
 
@@ -12,8 +12,8 @@ Etapa 4 aprovada para confiabilidade e APK de uso pessoal, fora da Google Play. 
 - A Interface resolve múltiplos conflitos sequencialmente e os códigos de convite usam `Random.secure()`. Backup aceita schema 7 mantendo compatibilidade de leitura.
 - `flutter analyze`: sem problemas. `flutter test --no-pub`: 77 testes aprovados. Build Web release concluído e publicado.
 - Cadastro restrito no servidor: blocking function `beforeCreateUser` com allowlist privada de hashes SHA-256, regras públicas negando a leitura da configuração e falha fechada quando a lista ou a Function estiver ausente. A allowlist provisória contém somente o e-mail principal; o segundo hash depende da confirmação do e-mail da Iasmim.
-- O provedor E-mail/Senha foi mantido desabilitado enquanto o projeto não é GCIP, pois o Google recusou instalar a blocking function com `OPERATION_NOT_ALLOWED: Blocking Functions may only be configured for GCIP projects`. Isso fecha temporariamente o cadastro sem afetar o app offline.
-- Pendência externa: ativar o billing do Google Cloud, inicializar o Identity Platform e habilitar o provedor E-mail/Senha. Até lá, a PWA e o Drift offline funcionam, mas cadastro e login não.
+- O Identity Platform foi inicializado, o provedor E-mail/Senha foi habilitado e a blocking function `beforeCreateUser` foi publicada e vinculada ao evento `beforeCreate`. Teste real: e-mail fora da allowlist foi recusado com `PERMISSION_DENIED`; e-mail temporariamente autorizado foi aceito, com a conta de teste excluída e a lista restaurada para um hash.
+- Pendência: confirmar o e-mail da Iasmim e substituir a allowlist provisória pela lista completa com os dois hashes. O e-mail principal já pode criar conta; a Iasmim permanece bloqueada até essa confirmação.
 - Pendência de validação: executar o fluxo real com duas contas, inclusive criação da casa, convite, sincronização, alterações nos dois dispositivos e resolução de conflito.
 - Versão do app: `1.0.0+8` (Android build 8).
 - Schema Drift 6: `purchase_lines.is_label_total` identifica linhas cujo total pago veio da etiqueta. `total_cents` é autoritativo; `unit_price_cents` é o valor derivado necessário para exibir a base de cálculo.

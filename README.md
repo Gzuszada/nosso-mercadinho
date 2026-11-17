@@ -108,20 +108,21 @@ Em **Configurações → Conta e sincronização**, as duas pessoas da casa pode
 
 A primeira sincronização publica os dados locais da casa. Se os dois dispositivos já tiverem alterações divergentes, o app mostra o conflito por área (catálogo, importações ou listas/compras) e permite manter a versão local ou aplicar a remota. Firestore é o espelho compartilhado; o banco Drift local continua sendo a fonte imediata e offline.
 
-O projeto Firebase `nosso-mercado-casa` (nome de exibição **Nosso Mercado**) usa o banco `(default)` em `southamerica-east1`. **Pendência no console:** o Identity Platform deste projeto ainda precisa de billing habilitado para criar o provisor E-mail/Senha (`CONFIGURATION_NOT_FOUND` / `BILLING_NOT_ENABLED`). Depois de ativar o billing em [Google Cloud Billing](https://console.cloud.google.com/billing), habilite **Authentication → Email/Password**. O Firestore e as regras já estão configurados; a PWA e o modo offline funcionam mesmo antes dessa ativação.
+O projeto Firebase `nosso-mercado-casa` (nome de exibição **Nosso Mercado**) usa o banco `(default)` em `southamerica-east1`. O Identity Platform está inicializado, o provedor **Authentication → Email/Password** está habilitado e a blocking function `beforeCreateUser` está publicada em `us-central1`. O Firestore, as regras e a operação offline permanecem disponíveis mesmo se o cadastro em nuvem estiver indisponível.
+
 
 ### Cadastro restrito por e-mail
 
 A criação de contas é validada no servidor pela Identity Platform blocking function `beforeCreateUser`. A lista privada fica em `privateConfig/registrationAllowlist`, contém apenas hashes SHA-256 dos e-mails autorizados e é negada explicitamente pelas regras públicas do Firestore. Se a configuração estiver ausente ou a Function estiver indisponível, o cadastro falha fechado: nenhuma conta nova é criada.
 
-Depois de publicar as Functions, configure os e-mails autorizados:
+Para gerenciar os e-mails autorizados:
 
 ```powershell
 Set-Location functions
 npm run allowlist
 ```
 
-Informe um e-mail por linha e pressione Enter em uma linha vazia para finalizar. Os endereços são usados apenas para calcular os hashes e não são gravados nem exibidos pelo script. Para adicionar ou remover alguém, execute o comando novamente com a nova lista completa. Nunca publique os e-mails em arquivos do app, no `README` ou em commits.
+Informe um e-mail por linha e pressione Enter em uma linha vazia para finalizar. Os endereços são usados apenas para calcular os hashes e não são gravados nem exibidos pelo script. Para adicionar ou remover alguém, execute o comando novamente com a nova lista completa. Enquanto o e-mail da Iasmim não estiver confirmado, mantenha a lista somente com o e-mail principal conhecido. Nunca publique os e-mails em arquivos do app, no `README` ou em commits.
 
 
 Regras locais podem ser verificadas com:
