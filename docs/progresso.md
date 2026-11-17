@@ -7,7 +7,7 @@ Etapa 4 aprovada para confiabilidade e APK de uso pessoal, fora da Google Play. 
 - PWA **Nosso Mercado** publicada em `https://nosso-mercado-casa.web.app`, no novo projeto Firebase `nosso-mercado-casa`. Os aplicativos Android (`br.com.nocorre.mercado`) e Web foram registrados nesse projeto.
 - A versão anterior `1.0.0+8` mantém o mesmo `applicationId` e a mesma chave de assinatura, permitindo atualização do APK sem perda do banco Drift local.
 - A validação HTTP pública confirmou `index.html`, manifesto, service worker, ícones, `drift_worker.js`, `sqlite3.wasm` e `main.dart.js` com HTTP 200 e tipos adequados. O bundle publicado não contém o limite inteiro de 64 bits que causava problemas de interoperabilidade no SQLite web.
-- Firestore `(default)` em `southamerica-east1`; as regras compilam no Emulator e serão publicadas no novo projeto assim que a propagação da API for concluída. O fluxo de convite e acesso já foi validado no Emulator.
+- Firestore `(default)` criado e publicado em `southamerica-east1` no novo projeto; as regras compilaram e foram liberadas. O fluxo de convite e acesso já foi validado no Emulator.
 - Sync compartilhado implementado por `catalog`, `imports` e `shopping`, com hash SHA-256 canônico, revisão e conflitos tipados. “Usar remota” restaura a área no Drift sem sobrescrever silenciosamente os hashes-base locais.
 - A Interface resolve múltiplos conflitos sequencialmente e os códigos de convite usam `Random.secure()`. Backup aceita schema 7 mantendo compatibilidade de leitura.
 - `flutter analyze`: sem problemas. `flutter test --no-pub`: 77 testes aprovados. Build Web release concluído e publicado.

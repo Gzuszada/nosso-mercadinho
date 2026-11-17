@@ -108,7 +108,7 @@ Em **Configurações → Conta e sincronização**, as duas pessoas da casa pode
 
 A primeira sincronização publica os dados locais da casa. Se os dois dispositivos já tiverem alterações divergentes, o app mostra o conflito por área (catálogo, importações ou listas/compras) e permite manter a versão local ou aplicar a remota. Firestore é o espelho compartilhado; o banco Drift local continua sendo a fonte imediata e offline.
 
-O projeto Firebase usa o banco `(default)` em `southamerica-east1`. **Pendência no console:** o Identity Platform deste projeto ainda precisa de billing habilitado para criar o provisor E-mail/Senha (`CONFIGURATION_NOT_FOUND` / `BILLING_NOT_ENABLED`). Depois de ativar o billing em [Google Cloud Billing](https://console.cloud.google.com/billing), habilite **Authentication → Email/Password**. O Firestore e as regras já estão configurados; a PWA e o modo offline funcionam mesmo antes dessa ativação.
+O projeto Firebase `nosso-mercado-casa` (nome de exibição **Nosso Mercado**) usa o banco `(default)` em `southamerica-east1`. **Pendência no console:** o Identity Platform deste projeto ainda precisa de billing habilitado para criar o provisor E-mail/Senha (`CONFIGURATION_NOT_FOUND` / `BILLING_NOT_ENABLED`). Depois de ativar o billing em [Google Cloud Billing](https://console.cloud.google.com/billing), habilite **Authentication → Email/Password**. O Firestore e as regras já estão configurados; a PWA e o modo offline funcionam mesmo antes dessa ativação.
 
 Regras locais podem ser verificadas com:
 
