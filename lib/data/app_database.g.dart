@@ -431,9 +431,6 @@ class $SubcategoriesTable extends Subcategories
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES categories (id) ON DELETE RESTRICT',
-    ),
   );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
@@ -901,9 +898,6 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
     true,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES categories (id) ON DELETE RESTRICT',
-    ),
   );
   static const VerificationMeta _subcategoryIdMeta = const VerificationMeta(
     'subcategoryId',
@@ -915,9 +909,6 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
     true,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES subcategories (id) ON DELETE RESTRICT',
-    ),
   );
   static const VerificationMeta _measurementModeMeta = const VerificationMeta(
     'measurementMode',
@@ -1879,9 +1870,6 @@ class $ImportEntriesTable extends ImportEntries
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES import_batches (id) ON DELETE CASCADE',
-    ),
   );
   static const VerificationMeta _sourceSheetMeta = const VerificationMeta(
     'sourceSheet',
@@ -1972,9 +1960,6 @@ class $ImportEntriesTable extends ImportEntries
     true,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES products (id) ON DELETE SET NULL',
-    ),
   );
   @override
   List<GeneratedColumn> get $columns => [
@@ -2886,586 +2871,6 @@ class ShoppingPlansCompanion extends UpdateCompanion<ShoppingPlan> {
   }
 }
 
-class $ShoppingTripsTable extends ShoppingTrips
-    with TableInfo<$ShoppingTripsTable, ShoppingTrip> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $ShoppingTripsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-    'id',
-    aliasedName,
-    false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'PRIMARY KEY AUTOINCREMENT',
-    ),
-  );
-  static const VerificationMeta _planIdMeta = const VerificationMeta('planId');
-  @override
-  late final GeneratedColumn<int> planId = GeneratedColumn<int>(
-    'plan_id',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES shopping_plans (id) ON DELETE RESTRICT',
-    ),
-  );
-  static const VerificationMeta _originPlanNameSnapshotMeta =
-      const VerificationMeta('originPlanNameSnapshot');
-  @override
-  late final GeneratedColumn<String> originPlanNameSnapshot =
-      GeneratedColumn<String>(
-        'origin_plan_name_snapshot',
-        aliasedName,
-        true,
-        type: DriftSqlType.string,
-        requiredDuringInsert: false,
-      );
-  static const VerificationMeta _purchaseDateMeta = const VerificationMeta(
-    'purchaseDate',
-  );
-  @override
-  late final GeneratedColumn<String> purchaseDate = GeneratedColumn<String>(
-    'purchase_date',
-    aliasedName,
-    false,
-    additionalChecks: GeneratedColumn.checkTextLength(
-      minTextLength: 10,
-      maxTextLength: 10,
-    ),
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _marketNameMeta = const VerificationMeta(
-    'marketName',
-  );
-  @override
-  late final GeneratedColumn<String> marketName = GeneratedColumn<String>(
-    'market_name',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _statusMeta = const VerificationMeta('status');
-  @override
-  late final GeneratedColumn<String> status = GeneratedColumn<String>(
-    'status',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant('in_progress'),
-  );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
-  @override
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-    'created_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-    defaultValue: currentDateAndTime,
-  );
-  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
-    'updatedAt',
-  );
-  @override
-  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
-    'updated_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-    defaultValue: currentDateAndTime,
-  );
-  static const VerificationMeta _completedAtMeta = const VerificationMeta(
-    'completedAt',
-  );
-  @override
-  late final GeneratedColumn<DateTime> completedAt = GeneratedColumn<DateTime>(
-    'completed_at',
-    aliasedName,
-    true,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-  );
-  @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    planId,
-    originPlanNameSnapshot,
-    purchaseDate,
-    marketName,
-    status,
-    createdAt,
-    updatedAt,
-    completedAt,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'shopping_trips';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<ShoppingTrip> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('plan_id')) {
-      context.handle(
-        _planIdMeta,
-        planId.isAcceptableOrUnknown(data['plan_id']!, _planIdMeta),
-      );
-    }
-    if (data.containsKey('origin_plan_name_snapshot')) {
-      context.handle(
-        _originPlanNameSnapshotMeta,
-        originPlanNameSnapshot.isAcceptableOrUnknown(
-          data['origin_plan_name_snapshot']!,
-          _originPlanNameSnapshotMeta,
-        ),
-      );
-    }
-    if (data.containsKey('purchase_date')) {
-      context.handle(
-        _purchaseDateMeta,
-        purchaseDate.isAcceptableOrUnknown(
-          data['purchase_date']!,
-          _purchaseDateMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_purchaseDateMeta);
-    }
-    if (data.containsKey('market_name')) {
-      context.handle(
-        _marketNameMeta,
-        marketName.isAcceptableOrUnknown(data['market_name']!, _marketNameMeta),
-      );
-    }
-    if (data.containsKey('status')) {
-      context.handle(
-        _statusMeta,
-        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
-      );
-    }
-    if (data.containsKey('created_at')) {
-      context.handle(
-        _createdAtMeta,
-        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
-      );
-    }
-    if (data.containsKey('updated_at')) {
-      context.handle(
-        _updatedAtMeta,
-        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
-      );
-    }
-    if (data.containsKey('completed_at')) {
-      context.handle(
-        _completedAtMeta,
-        completedAt.isAcceptableOrUnknown(
-          data['completed_at']!,
-          _completedAtMeta,
-        ),
-      );
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  ShoppingTrip map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return ShoppingTrip(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}id'],
-      )!,
-      planId: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}plan_id'],
-      ),
-      originPlanNameSnapshot: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}origin_plan_name_snapshot'],
-      ),
-      purchaseDate: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}purchase_date'],
-      )!,
-      marketName: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}market_name'],
-      ),
-      status: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}status'],
-      )!,
-      createdAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}created_at'],
-      )!,
-      updatedAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}updated_at'],
-      )!,
-      completedAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}completed_at'],
-      ),
-    );
-  }
-
-  @override
-  $ShoppingTripsTable createAlias(String alias) {
-    return $ShoppingTripsTable(attachedDatabase, alias);
-  }
-}
-
-class ShoppingTrip extends DataClass implements Insertable<ShoppingTrip> {
-  final int id;
-  final int? planId;
-  final String? originPlanNameSnapshot;
-  final String purchaseDate;
-  final String? marketName;
-  final String status;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-  final DateTime? completedAt;
-  const ShoppingTrip({
-    required this.id,
-    this.planId,
-    this.originPlanNameSnapshot,
-    required this.purchaseDate,
-    this.marketName,
-    required this.status,
-    required this.createdAt,
-    required this.updatedAt,
-    this.completedAt,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    if (!nullToAbsent || planId != null) {
-      map['plan_id'] = Variable<int>(planId);
-    }
-    if (!nullToAbsent || originPlanNameSnapshot != null) {
-      map['origin_plan_name_snapshot'] = Variable<String>(
-        originPlanNameSnapshot,
-      );
-    }
-    map['purchase_date'] = Variable<String>(purchaseDate);
-    if (!nullToAbsent || marketName != null) {
-      map['market_name'] = Variable<String>(marketName);
-    }
-    map['status'] = Variable<String>(status);
-    map['created_at'] = Variable<DateTime>(createdAt);
-    map['updated_at'] = Variable<DateTime>(updatedAt);
-    if (!nullToAbsent || completedAt != null) {
-      map['completed_at'] = Variable<DateTime>(completedAt);
-    }
-    return map;
-  }
-
-  ShoppingTripsCompanion toCompanion(bool nullToAbsent) {
-    return ShoppingTripsCompanion(
-      id: Value(id),
-      planId: planId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(planId),
-      originPlanNameSnapshot: originPlanNameSnapshot == null && nullToAbsent
-          ? const Value.absent()
-          : Value(originPlanNameSnapshot),
-      purchaseDate: Value(purchaseDate),
-      marketName: marketName == null && nullToAbsent
-          ? const Value.absent()
-          : Value(marketName),
-      status: Value(status),
-      createdAt: Value(createdAt),
-      updatedAt: Value(updatedAt),
-      completedAt: completedAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(completedAt),
-    );
-  }
-
-  factory ShoppingTrip.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return ShoppingTrip(
-      id: serializer.fromJson<int>(json['id']),
-      planId: serializer.fromJson<int?>(json['planId']),
-      originPlanNameSnapshot: serializer.fromJson<String?>(
-        json['originPlanNameSnapshot'],
-      ),
-      purchaseDate: serializer.fromJson<String>(json['purchaseDate']),
-      marketName: serializer.fromJson<String?>(json['marketName']),
-      status: serializer.fromJson<String>(json['status']),
-      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
-      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
-      completedAt: serializer.fromJson<DateTime?>(json['completedAt']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'planId': serializer.toJson<int?>(planId),
-      'originPlanNameSnapshot': serializer.toJson<String?>(
-        originPlanNameSnapshot,
-      ),
-      'purchaseDate': serializer.toJson<String>(purchaseDate),
-      'marketName': serializer.toJson<String?>(marketName),
-      'status': serializer.toJson<String>(status),
-      'createdAt': serializer.toJson<DateTime>(createdAt),
-      'updatedAt': serializer.toJson<DateTime>(updatedAt),
-      'completedAt': serializer.toJson<DateTime?>(completedAt),
-    };
-  }
-
-  ShoppingTrip copyWith({
-    int? id,
-    Value<int?> planId = const Value.absent(),
-    Value<String?> originPlanNameSnapshot = const Value.absent(),
-    String? purchaseDate,
-    Value<String?> marketName = const Value.absent(),
-    String? status,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    Value<DateTime?> completedAt = const Value.absent(),
-  }) => ShoppingTrip(
-    id: id ?? this.id,
-    planId: planId.present ? planId.value : this.planId,
-    originPlanNameSnapshot: originPlanNameSnapshot.present
-        ? originPlanNameSnapshot.value
-        : this.originPlanNameSnapshot,
-    purchaseDate: purchaseDate ?? this.purchaseDate,
-    marketName: marketName.present ? marketName.value : this.marketName,
-    status: status ?? this.status,
-    createdAt: createdAt ?? this.createdAt,
-    updatedAt: updatedAt ?? this.updatedAt,
-    completedAt: completedAt.present ? completedAt.value : this.completedAt,
-  );
-  ShoppingTrip copyWithCompanion(ShoppingTripsCompanion data) {
-    return ShoppingTrip(
-      id: data.id.present ? data.id.value : this.id,
-      planId: data.planId.present ? data.planId.value : this.planId,
-      originPlanNameSnapshot: data.originPlanNameSnapshot.present
-          ? data.originPlanNameSnapshot.value
-          : this.originPlanNameSnapshot,
-      purchaseDate: data.purchaseDate.present
-          ? data.purchaseDate.value
-          : this.purchaseDate,
-      marketName: data.marketName.present
-          ? data.marketName.value
-          : this.marketName,
-      status: data.status.present ? data.status.value : this.status,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
-      completedAt: data.completedAt.present
-          ? data.completedAt.value
-          : this.completedAt,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('ShoppingTrip(')
-          ..write('id: $id, ')
-          ..write('planId: $planId, ')
-          ..write('originPlanNameSnapshot: $originPlanNameSnapshot, ')
-          ..write('purchaseDate: $purchaseDate, ')
-          ..write('marketName: $marketName, ')
-          ..write('status: $status, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt, ')
-          ..write('completedAt: $completedAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    id,
-    planId,
-    originPlanNameSnapshot,
-    purchaseDate,
-    marketName,
-    status,
-    createdAt,
-    updatedAt,
-    completedAt,
-  );
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is ShoppingTrip &&
-          other.id == this.id &&
-          other.planId == this.planId &&
-          other.originPlanNameSnapshot == this.originPlanNameSnapshot &&
-          other.purchaseDate == this.purchaseDate &&
-          other.marketName == this.marketName &&
-          other.status == this.status &&
-          other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt &&
-          other.completedAt == this.completedAt);
-}
-
-class ShoppingTripsCompanion extends UpdateCompanion<ShoppingTrip> {
-  final Value<int> id;
-  final Value<int?> planId;
-  final Value<String?> originPlanNameSnapshot;
-  final Value<String> purchaseDate;
-  final Value<String?> marketName;
-  final Value<String> status;
-  final Value<DateTime> createdAt;
-  final Value<DateTime> updatedAt;
-  final Value<DateTime?> completedAt;
-  const ShoppingTripsCompanion({
-    this.id = const Value.absent(),
-    this.planId = const Value.absent(),
-    this.originPlanNameSnapshot = const Value.absent(),
-    this.purchaseDate = const Value.absent(),
-    this.marketName = const Value.absent(),
-    this.status = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.updatedAt = const Value.absent(),
-    this.completedAt = const Value.absent(),
-  });
-  ShoppingTripsCompanion.insert({
-    this.id = const Value.absent(),
-    this.planId = const Value.absent(),
-    this.originPlanNameSnapshot = const Value.absent(),
-    required String purchaseDate,
-    this.marketName = const Value.absent(),
-    this.status = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.updatedAt = const Value.absent(),
-    this.completedAt = const Value.absent(),
-  }) : purchaseDate = Value(purchaseDate);
-  static Insertable<ShoppingTrip> custom({
-    Expression<int>? id,
-    Expression<int>? planId,
-    Expression<String>? originPlanNameSnapshot,
-    Expression<String>? purchaseDate,
-    Expression<String>? marketName,
-    Expression<String>? status,
-    Expression<DateTime>? createdAt,
-    Expression<DateTime>? updatedAt,
-    Expression<DateTime>? completedAt,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (planId != null) 'plan_id': planId,
-      if (originPlanNameSnapshot != null)
-        'origin_plan_name_snapshot': originPlanNameSnapshot,
-      if (purchaseDate != null) 'purchase_date': purchaseDate,
-      if (marketName != null) 'market_name': marketName,
-      if (status != null) 'status': status,
-      if (createdAt != null) 'created_at': createdAt,
-      if (updatedAt != null) 'updated_at': updatedAt,
-      if (completedAt != null) 'completed_at': completedAt,
-    });
-  }
-
-  ShoppingTripsCompanion copyWith({
-    Value<int>? id,
-    Value<int?>? planId,
-    Value<String?>? originPlanNameSnapshot,
-    Value<String>? purchaseDate,
-    Value<String?>? marketName,
-    Value<String>? status,
-    Value<DateTime>? createdAt,
-    Value<DateTime>? updatedAt,
-    Value<DateTime?>? completedAt,
-  }) {
-    return ShoppingTripsCompanion(
-      id: id ?? this.id,
-      planId: planId ?? this.planId,
-      originPlanNameSnapshot:
-          originPlanNameSnapshot ?? this.originPlanNameSnapshot,
-      purchaseDate: purchaseDate ?? this.purchaseDate,
-      marketName: marketName ?? this.marketName,
-      status: status ?? this.status,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-      completedAt: completedAt ?? this.completedAt,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (planId.present) {
-      map['plan_id'] = Variable<int>(planId.value);
-    }
-    if (originPlanNameSnapshot.present) {
-      map['origin_plan_name_snapshot'] = Variable<String>(
-        originPlanNameSnapshot.value,
-      );
-    }
-    if (purchaseDate.present) {
-      map['purchase_date'] = Variable<String>(purchaseDate.value);
-    }
-    if (marketName.present) {
-      map['market_name'] = Variable<String>(marketName.value);
-    }
-    if (status.present) {
-      map['status'] = Variable<String>(status.value);
-    }
-    if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
-    }
-    if (updatedAt.present) {
-      map['updated_at'] = Variable<DateTime>(updatedAt.value);
-    }
-    if (completedAt.present) {
-      map['completed_at'] = Variable<DateTime>(completedAt.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('ShoppingTripsCompanion(')
-          ..write('id: $id, ')
-          ..write('planId: $planId, ')
-          ..write('originPlanNameSnapshot: $originPlanNameSnapshot, ')
-          ..write('purchaseDate: $purchaseDate, ')
-          ..write('marketName: $marketName, ')
-          ..write('status: $status, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt, ')
-          ..write('completedAt: $completedAt')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class $PlannedItemsTable extends PlannedItems
     with TableInfo<$PlannedItemsTable, PlannedItem> {
   @override
@@ -3493,9 +2898,6 @@ class $PlannedItemsTable extends PlannedItems
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES shopping_plans (id) ON DELETE RESTRICT',
-    ),
   );
   static const VerificationMeta _productIdMeta = const VerificationMeta(
     'productId',
@@ -3507,9 +2909,6 @@ class $PlannedItemsTable extends PlannedItems
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES products (id) ON DELETE RESTRICT',
-    ),
   );
   static const VerificationMeta _measurementModeMeta = const VerificationMeta(
     'measurementMode',
@@ -3602,9 +3001,6 @@ class $PlannedItemsTable extends PlannedItems
         true,
         type: DriftSqlType.int,
         requiredDuringInsert: false,
-        defaultConstraints: GeneratedColumn.constraintIsAlways(
-          'REFERENCES shopping_trips (id) ON DELETE RESTRICT',
-        ),
       );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
@@ -4299,6 +3695,583 @@ class PlannedItemsCompanion extends UpdateCompanion<PlannedItem> {
   }
 }
 
+class $ShoppingTripsTable extends ShoppingTrips
+    with TableInfo<$ShoppingTripsTable, ShoppingTrip> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ShoppingTripsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _planIdMeta = const VerificationMeta('planId');
+  @override
+  late final GeneratedColumn<int> planId = GeneratedColumn<int>(
+    'plan_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _originPlanNameSnapshotMeta =
+      const VerificationMeta('originPlanNameSnapshot');
+  @override
+  late final GeneratedColumn<String> originPlanNameSnapshot =
+      GeneratedColumn<String>(
+        'origin_plan_name_snapshot',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _purchaseDateMeta = const VerificationMeta(
+    'purchaseDate',
+  );
+  @override
+  late final GeneratedColumn<String> purchaseDate = GeneratedColumn<String>(
+    'purchase_date',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 10,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _marketNameMeta = const VerificationMeta(
+    'marketName',
+  );
+  @override
+  late final GeneratedColumn<String> marketName = GeneratedColumn<String>(
+    'market_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('in_progress'),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _completedAtMeta = const VerificationMeta(
+    'completedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> completedAt = GeneratedColumn<DateTime>(
+    'completed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    planId,
+    originPlanNameSnapshot,
+    purchaseDate,
+    marketName,
+    status,
+    createdAt,
+    updatedAt,
+    completedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'shopping_trips';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ShoppingTrip> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('plan_id')) {
+      context.handle(
+        _planIdMeta,
+        planId.isAcceptableOrUnknown(data['plan_id']!, _planIdMeta),
+      );
+    }
+    if (data.containsKey('origin_plan_name_snapshot')) {
+      context.handle(
+        _originPlanNameSnapshotMeta,
+        originPlanNameSnapshot.isAcceptableOrUnknown(
+          data['origin_plan_name_snapshot']!,
+          _originPlanNameSnapshotMeta,
+        ),
+      );
+    }
+    if (data.containsKey('purchase_date')) {
+      context.handle(
+        _purchaseDateMeta,
+        purchaseDate.isAcceptableOrUnknown(
+          data['purchase_date']!,
+          _purchaseDateMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_purchaseDateMeta);
+    }
+    if (data.containsKey('market_name')) {
+      context.handle(
+        _marketNameMeta,
+        marketName.isAcceptableOrUnknown(data['market_name']!, _marketNameMeta),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('completed_at')) {
+      context.handle(
+        _completedAtMeta,
+        completedAt.isAcceptableOrUnknown(
+          data['completed_at']!,
+          _completedAtMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ShoppingTrip map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ShoppingTrip(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      planId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}plan_id'],
+      ),
+      originPlanNameSnapshot: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}origin_plan_name_snapshot'],
+      ),
+      purchaseDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}purchase_date'],
+      )!,
+      marketName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}market_name'],
+      ),
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      completedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}completed_at'],
+      ),
+    );
+  }
+
+  @override
+  $ShoppingTripsTable createAlias(String alias) {
+    return $ShoppingTripsTable(attachedDatabase, alias);
+  }
+}
+
+class ShoppingTrip extends DataClass implements Insertable<ShoppingTrip> {
+  final int id;
+  final int? planId;
+  final String? originPlanNameSnapshot;
+  final String purchaseDate;
+  final String? marketName;
+  final String status;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? completedAt;
+  const ShoppingTrip({
+    required this.id,
+    this.planId,
+    this.originPlanNameSnapshot,
+    required this.purchaseDate,
+    this.marketName,
+    required this.status,
+    required this.createdAt,
+    required this.updatedAt,
+    this.completedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    if (!nullToAbsent || planId != null) {
+      map['plan_id'] = Variable<int>(planId);
+    }
+    if (!nullToAbsent || originPlanNameSnapshot != null) {
+      map['origin_plan_name_snapshot'] = Variable<String>(
+        originPlanNameSnapshot,
+      );
+    }
+    map['purchase_date'] = Variable<String>(purchaseDate);
+    if (!nullToAbsent || marketName != null) {
+      map['market_name'] = Variable<String>(marketName);
+    }
+    map['status'] = Variable<String>(status);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || completedAt != null) {
+      map['completed_at'] = Variable<DateTime>(completedAt);
+    }
+    return map;
+  }
+
+  ShoppingTripsCompanion toCompanion(bool nullToAbsent) {
+    return ShoppingTripsCompanion(
+      id: Value(id),
+      planId: planId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(planId),
+      originPlanNameSnapshot: originPlanNameSnapshot == null && nullToAbsent
+          ? const Value.absent()
+          : Value(originPlanNameSnapshot),
+      purchaseDate: Value(purchaseDate),
+      marketName: marketName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(marketName),
+      status: Value(status),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      completedAt: completedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(completedAt),
+    );
+  }
+
+  factory ShoppingTrip.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ShoppingTrip(
+      id: serializer.fromJson<int>(json['id']),
+      planId: serializer.fromJson<int?>(json['planId']),
+      originPlanNameSnapshot: serializer.fromJson<String?>(
+        json['originPlanNameSnapshot'],
+      ),
+      purchaseDate: serializer.fromJson<String>(json['purchaseDate']),
+      marketName: serializer.fromJson<String?>(json['marketName']),
+      status: serializer.fromJson<String>(json['status']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      completedAt: serializer.fromJson<DateTime?>(json['completedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'planId': serializer.toJson<int?>(planId),
+      'originPlanNameSnapshot': serializer.toJson<String?>(
+        originPlanNameSnapshot,
+      ),
+      'purchaseDate': serializer.toJson<String>(purchaseDate),
+      'marketName': serializer.toJson<String?>(marketName),
+      'status': serializer.toJson<String>(status),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'completedAt': serializer.toJson<DateTime?>(completedAt),
+    };
+  }
+
+  ShoppingTrip copyWith({
+    int? id,
+    Value<int?> planId = const Value.absent(),
+    Value<String?> originPlanNameSnapshot = const Value.absent(),
+    String? purchaseDate,
+    Value<String?> marketName = const Value.absent(),
+    String? status,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> completedAt = const Value.absent(),
+  }) => ShoppingTrip(
+    id: id ?? this.id,
+    planId: planId.present ? planId.value : this.planId,
+    originPlanNameSnapshot: originPlanNameSnapshot.present
+        ? originPlanNameSnapshot.value
+        : this.originPlanNameSnapshot,
+    purchaseDate: purchaseDate ?? this.purchaseDate,
+    marketName: marketName.present ? marketName.value : this.marketName,
+    status: status ?? this.status,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    completedAt: completedAt.present ? completedAt.value : this.completedAt,
+  );
+  ShoppingTrip copyWithCompanion(ShoppingTripsCompanion data) {
+    return ShoppingTrip(
+      id: data.id.present ? data.id.value : this.id,
+      planId: data.planId.present ? data.planId.value : this.planId,
+      originPlanNameSnapshot: data.originPlanNameSnapshot.present
+          ? data.originPlanNameSnapshot.value
+          : this.originPlanNameSnapshot,
+      purchaseDate: data.purchaseDate.present
+          ? data.purchaseDate.value
+          : this.purchaseDate,
+      marketName: data.marketName.present
+          ? data.marketName.value
+          : this.marketName,
+      status: data.status.present ? data.status.value : this.status,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      completedAt: data.completedAt.present
+          ? data.completedAt.value
+          : this.completedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ShoppingTrip(')
+          ..write('id: $id, ')
+          ..write('planId: $planId, ')
+          ..write('originPlanNameSnapshot: $originPlanNameSnapshot, ')
+          ..write('purchaseDate: $purchaseDate, ')
+          ..write('marketName: $marketName, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('completedAt: $completedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    planId,
+    originPlanNameSnapshot,
+    purchaseDate,
+    marketName,
+    status,
+    createdAt,
+    updatedAt,
+    completedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ShoppingTrip &&
+          other.id == this.id &&
+          other.planId == this.planId &&
+          other.originPlanNameSnapshot == this.originPlanNameSnapshot &&
+          other.purchaseDate == this.purchaseDate &&
+          other.marketName == this.marketName &&
+          other.status == this.status &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.completedAt == this.completedAt);
+}
+
+class ShoppingTripsCompanion extends UpdateCompanion<ShoppingTrip> {
+  final Value<int> id;
+  final Value<int?> planId;
+  final Value<String?> originPlanNameSnapshot;
+  final Value<String> purchaseDate;
+  final Value<String?> marketName;
+  final Value<String> status;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> completedAt;
+  const ShoppingTripsCompanion({
+    this.id = const Value.absent(),
+    this.planId = const Value.absent(),
+    this.originPlanNameSnapshot = const Value.absent(),
+    this.purchaseDate = const Value.absent(),
+    this.marketName = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.completedAt = const Value.absent(),
+  });
+  ShoppingTripsCompanion.insert({
+    this.id = const Value.absent(),
+    this.planId = const Value.absent(),
+    this.originPlanNameSnapshot = const Value.absent(),
+    required String purchaseDate,
+    this.marketName = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.completedAt = const Value.absent(),
+  }) : purchaseDate = Value(purchaseDate);
+  static Insertable<ShoppingTrip> custom({
+    Expression<int>? id,
+    Expression<int>? planId,
+    Expression<String>? originPlanNameSnapshot,
+    Expression<String>? purchaseDate,
+    Expression<String>? marketName,
+    Expression<String>? status,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? completedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (planId != null) 'plan_id': planId,
+      if (originPlanNameSnapshot != null)
+        'origin_plan_name_snapshot': originPlanNameSnapshot,
+      if (purchaseDate != null) 'purchase_date': purchaseDate,
+      if (marketName != null) 'market_name': marketName,
+      if (status != null) 'status': status,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (completedAt != null) 'completed_at': completedAt,
+    });
+  }
+
+  ShoppingTripsCompanion copyWith({
+    Value<int>? id,
+    Value<int?>? planId,
+    Value<String?>? originPlanNameSnapshot,
+    Value<String>? purchaseDate,
+    Value<String?>? marketName,
+    Value<String>? status,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? completedAt,
+  }) {
+    return ShoppingTripsCompanion(
+      id: id ?? this.id,
+      planId: planId ?? this.planId,
+      originPlanNameSnapshot:
+          originPlanNameSnapshot ?? this.originPlanNameSnapshot,
+      purchaseDate: purchaseDate ?? this.purchaseDate,
+      marketName: marketName ?? this.marketName,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      completedAt: completedAt ?? this.completedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (planId.present) {
+      map['plan_id'] = Variable<int>(planId.value);
+    }
+    if (originPlanNameSnapshot.present) {
+      map['origin_plan_name_snapshot'] = Variable<String>(
+        originPlanNameSnapshot.value,
+      );
+    }
+    if (purchaseDate.present) {
+      map['purchase_date'] = Variable<String>(purchaseDate.value);
+    }
+    if (marketName.present) {
+      map['market_name'] = Variable<String>(marketName.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (completedAt.present) {
+      map['completed_at'] = Variable<DateTime>(completedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ShoppingTripsCompanion(')
+          ..write('id: $id, ')
+          ..write('planId: $planId, ')
+          ..write('originPlanNameSnapshot: $originPlanNameSnapshot, ')
+          ..write('purchaseDate: $purchaseDate, ')
+          ..write('marketName: $marketName, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('completedAt: $completedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $PurchaseLinesTable extends PurchaseLines
     with TableInfo<$PurchaseLinesTable, PurchaseLine> {
   @override
@@ -4326,9 +4299,6 @@ class $PurchaseLinesTable extends PurchaseLines
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES shopping_trips (id) ON DELETE CASCADE',
-    ),
   );
   static const VerificationMeta _productIdMeta = const VerificationMeta(
     'productId',
@@ -4340,9 +4310,6 @@ class $PurchaseLinesTable extends PurchaseLines
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES products (id) ON DELETE RESTRICT',
-    ),
   );
   static const VerificationMeta _plannedItemIdMeta = const VerificationMeta(
     'plannedItemId',
@@ -4354,9 +4321,6 @@ class $PurchaseLinesTable extends PurchaseLines
     true,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES planned_items (id) ON DELETE RESTRICT',
-    ),
   );
   static const VerificationMeta _measurementModeMeta = const VerificationMeta(
     'measurementMode',
@@ -5742,8 +5706,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ImportBatchesTable importBatches = $ImportBatchesTable(this);
   late final $ImportEntriesTable importEntries = $ImportEntriesTable(this);
   late final $ShoppingPlansTable shoppingPlans = $ShoppingPlansTable(this);
-  late final $ShoppingTripsTable shoppingTrips = $ShoppingTripsTable(this);
   late final $PlannedItemsTable plannedItems = $PlannedItemsTable(this);
+  late final $ShoppingTripsTable shoppingTrips = $ShoppingTripsTable(this);
   late final $PurchaseLinesTable purchaseLines = $PurchaseLinesTable(this);
   late final $AppPreferencesTable appPreferences = $AppPreferencesTable(this);
   late final $CloudSyncSettingsTable cloudSyncSettings =
@@ -5759,36 +5723,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     importBatches,
     importEntries,
     shoppingPlans,
-    shoppingTrips,
     plannedItems,
+    shoppingTrips,
     purchaseLines,
     appPreferences,
     cloudSyncSettings,
   ];
-  @override
-  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
-    WritePropagation(
-      on: TableUpdateQuery.onTableName(
-        'import_batches',
-        limitUpdateKind: UpdateKind.delete,
-      ),
-      result: [TableUpdate('import_entries', kind: UpdateKind.delete)],
-    ),
-    WritePropagation(
-      on: TableUpdateQuery.onTableName(
-        'products',
-        limitUpdateKind: UpdateKind.delete,
-      ),
-      result: [TableUpdate('import_entries', kind: UpdateKind.update)],
-    ),
-    WritePropagation(
-      on: TableUpdateQuery.onTableName(
-        'shopping_trips',
-        limitUpdateKind: UpdateKind.delete,
-      ),
-      result: [TableUpdate('purchase_lines', kind: UpdateKind.delete)],
-    ),
-  ]);
 }
 
 typedef $$CategoriesTableCreateCompanionBuilder = CategoriesCompanion Function({
@@ -5807,48 +5747,6 @@ typedef $$CategoriesTableUpdateCompanionBuilder = CategoriesCompanion Function({
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
 });
-
-final class $$CategoriesTableReferences
-    extends BaseReferences<_$AppDatabase, $CategoriesTable, Category> {
-  $$CategoriesTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static MultiTypedResultKey<$SubcategoriesTable, List<Subcategory>>
-  _subcategoriesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.subcategories,
-    aliasName: 'categories__id__subcategories__category_id',
-  );
-
-  $$SubcategoriesTableProcessedTableManager get subcategoriesRefs {
-    final manager = $$SubcategoriesTableTableManager(
-      $_db,
-      $_db.subcategories,
-    ).filter((f) => f.categoryId.id.sqlEquals($_itemColumn<int>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_subcategoriesRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-
-  static MultiTypedResultKey<$ProductsTable, List<Product>> _productsRefsTable(
-    _$AppDatabase db,
-  ) => MultiTypedResultKey.fromTable(
-    db.products,
-    aliasName: 'categories__id__products__category_id',
-  );
-
-  $$ProductsTableProcessedTableManager get productsRefs {
-    final manager = $$ProductsTableTableManager(
-      $_db,
-      $_db.products,
-    ).filter((f) => f.categoryId.id.sqlEquals($_itemColumn<int>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_productsRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-}
 
 class $$CategoriesTableFilterComposer
     extends Composer<_$AppDatabase, $CategoriesTable> {
@@ -5888,56 +5786,6 @@ class $$CategoriesTableFilterComposer
     column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
   );
-
-  Expression<bool> subcategoriesRefs(
-    Expression<bool> Function($$SubcategoriesTableFilterComposer f) f,
-  ) {
-    final $$SubcategoriesTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.subcategories,
-      getReferencedColumn: (t) => t.categoryId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$SubcategoriesTableFilterComposer(
-            $db: $db,
-            $table: $db.subcategories,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<bool> productsRefs(
-    Expression<bool> Function($$ProductsTableFilterComposer f) f,
-  ) {
-    final $$ProductsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.products,
-      getReferencedColumn: (t) => t.categoryId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ProductsTableFilterComposer(
-            $db: $db,
-            $table: $db.products,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$CategoriesTableOrderingComposer
@@ -6008,56 +5856,6 @@ class $$CategoriesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
-
-  Expression<T> subcategoriesRefs<T extends Object>(
-    Expression<T> Function($$SubcategoriesTableAnnotationComposer a) f,
-  ) {
-    final $$SubcategoriesTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.subcategories,
-      getReferencedColumn: (t) => t.categoryId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$SubcategoriesTableAnnotationComposer(
-            $db: $db,
-            $table: $db.subcategories,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<T> productsRefs<T extends Object>(
-    Expression<T> Function($$ProductsTableAnnotationComposer a) f,
-  ) {
-    final $$ProductsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.products,
-      getReferencedColumn: (t) => t.categoryId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ProductsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.products,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$CategoriesTableTableManager
@@ -6071,9 +5869,9 @@ class $$CategoriesTableTableManager
           $$CategoriesTableAnnotationComposer,
           $$CategoriesTableCreateCompanionBuilder,
           $$CategoriesTableUpdateCompanionBuilder,
-          (Category, $$CategoriesTableReferences),
+          (Category, BaseReferences<_$AppDatabase, $CategoriesTable, Category>),
           Category,
-          PrefetchHooks Function({bool subcategoriesRefs, bool productsRefs})
+          PrefetchHooks Function()
         > {
   $$CategoriesTableTableManager(_$AppDatabase db, $CategoriesTable table)
     : super(
@@ -6119,68 +5917,9 @@ class $$CategoriesTableTableManager
                 updatedAt: updatedAt,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable<$CategoriesTable, Category>(table),
-                  $$CategoriesTableReferences(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback:
-              ({subcategoriesRefs = false, productsRefs = false}) {
-                return PrefetchHooks(
-                  db: db,
-                  explicitlyWatchedTables: [
-                    if (subcategoriesRefs) db.subcategories,
-                    if (productsRefs) db.products,
-                  ],
-                  addJoins: null,
-                  getPrefetchedDataCallback: (items) async {
-                    return [
-                      if (subcategoriesRefs)
-                        await $_getPrefetchedDataByColumns<
-                          Category,
-                          $CategoriesTable,
-                          Subcategory,
-                          $SubcategoriesTable
-                        >(
-                          currentTable: table,
-                          referencedTable: $$CategoriesTableReferences
-                              ._subcategoriesRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$CategoriesTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).subcategoriesRefs,
-                          currentColumn: 'id',
-                          referencedColumn: 'category_id',
-                          typedResults: items,
-                        ),
-                      if (productsRefs)
-                        await $_getPrefetchedDataByColumns<
-                          Category,
-                          $CategoriesTable,
-                          Product,
-                          $ProductsTable
-                        >(
-                          currentTable: table,
-                          referencedTable: $$CategoriesTableReferences
-                              ._productsRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$CategoriesTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).productsRefs,
-                          currentColumn: 'id',
-                          referencedColumn: 'category_id',
-                          typedResults: items,
-                        ),
-                    ];
-                  },
-                );
-              },
+          prefetchHooksCallback: null,
         ),
       );
 }
@@ -6195,9 +5934,9 @@ typedef $$CategoriesTableProcessedTableManager =
       $$CategoriesTableAnnotationComposer,
       $$CategoriesTableCreateCompanionBuilder,
       $$CategoriesTableUpdateCompanionBuilder,
-      (Category, $$CategoriesTableReferences),
+      (Category, BaseReferences<_$AppDatabase, $CategoriesTable, Category>),
       Category,
-      PrefetchHooks Function({bool subcategoriesRefs, bool productsRefs})
+      PrefetchHooks Function()
     >;
 typedef $$SubcategoriesTableCreateCompanionBuilder =
     SubcategoriesCompanion Function({
@@ -6220,51 +5959,6 @@ typedef $$SubcategoriesTableUpdateCompanionBuilder =
       Value<DateTime> updatedAt,
     });
 
-final class $$SubcategoriesTableReferences
-    extends BaseReferences<_$AppDatabase, $SubcategoriesTable, Subcategory> {
-  $$SubcategoriesTableReferences(
-    super.$_db,
-    super.$_table,
-    super.$_typedResult,
-  );
-
-  static $CategoriesTable _categoryIdTable(_$AppDatabase db) =>
-      db.categories.createAlias('subcategories__category_id__categories__id');
-
-  $$CategoriesTableProcessedTableManager get categoryId {
-    final $_column = $_itemColumn<int>('category_id')!;
-
-    final manager = $$CategoriesTableTableManager(
-      $_db,
-      $_db.categories,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_categoryIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-
-  static MultiTypedResultKey<$ProductsTable, List<Product>> _productsRefsTable(
-    _$AppDatabase db,
-  ) => MultiTypedResultKey.fromTable(
-    db.products,
-    aliasName: 'subcategories__id__products__subcategory_id',
-  );
-
-  $$ProductsTableProcessedTableManager get productsRefs {
-    final manager = $$ProductsTableTableManager(
-      $_db,
-      $_db.products,
-    ).filter((f) => f.subcategoryId.id.sqlEquals($_itemColumn<int>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_productsRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-}
-
 class $$SubcategoriesTableFilterComposer
     extends Composer<_$AppDatabase, $SubcategoriesTable> {
   $$SubcategoriesTableFilterComposer({
@@ -6276,6 +5970,11 @@ class $$SubcategoriesTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get categoryId => $composableBuilder(
+    column: $table.categoryId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6303,54 +6002,6 @@ class $$SubcategoriesTableFilterComposer
     column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
   );
-
-  $$CategoriesTableFilterComposer get categoryId {
-    final $$CategoriesTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.categoryId,
-      referencedTable: $db.categories,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CategoriesTableFilterComposer(
-            $db: $db,
-            $table: $db.categories,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  Expression<bool> productsRefs(
-    Expression<bool> Function($$ProductsTableFilterComposer f) f,
-  ) {
-    final $$ProductsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.products,
-      getReferencedColumn: (t) => t.subcategoryId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ProductsTableFilterComposer(
-            $db: $db,
-            $table: $db.products,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$SubcategoriesTableOrderingComposer
@@ -6364,6 +6015,11 @@ class $$SubcategoriesTableOrderingComposer
   });
   ColumnOrderings<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get categoryId => $composableBuilder(
+    column: $table.categoryId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -6391,29 +6047,6 @@ class $$SubcategoriesTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
-
-  $$CategoriesTableOrderingComposer get categoryId {
-    final $$CategoriesTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.categoryId,
-      referencedTable: $db.categories,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CategoriesTableOrderingComposer(
-            $db: $db,
-            $table: $db.categories,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$SubcategoriesTableAnnotationComposer
@@ -6427,6 +6060,11 @@ class $$SubcategoriesTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
@@ -6444,54 +6082,6 @@ class $$SubcategoriesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
-
-  $$CategoriesTableAnnotationComposer get categoryId {
-    final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.categoryId,
-      referencedTable: $db.categories,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CategoriesTableAnnotationComposer(
-            $db: $db,
-            $table: $db.categories,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  Expression<T> productsRefs<T extends Object>(
-    Expression<T> Function($$ProductsTableAnnotationComposer a) f,
-  ) {
-    final $$ProductsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.products,
-      getReferencedColumn: (t) => t.subcategoryId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ProductsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.products,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$SubcategoriesTableTableManager
@@ -6505,9 +6095,12 @@ class $$SubcategoriesTableTableManager
           $$SubcategoriesTableAnnotationComposer,
           $$SubcategoriesTableCreateCompanionBuilder,
           $$SubcategoriesTableUpdateCompanionBuilder,
-          (Subcategory, $$SubcategoriesTableReferences),
+          (
+            Subcategory,
+            BaseReferences<_$AppDatabase, $SubcategoriesTable, Subcategory>,
+          ),
           Subcategory,
-          PrefetchHooks Function({bool categoryId, bool productsRefs})
+          PrefetchHooks Function()
         > {
   $$SubcategoriesTableTableManager(_$AppDatabase db, $SubcategoriesTable table)
     : super(
@@ -6557,73 +6150,9 @@ class $$SubcategoriesTableTableManager
                 updatedAt: updatedAt,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable<$SubcategoriesTable, Subcategory>(table),
-                  $$SubcategoriesTableReferences(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: ({categoryId = false, productsRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (productsRefs) db.products],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (categoryId) {
-                      state = state.withJoin(
-                        currentTable: table,
-                        currentColumn: table.categoryId,
-                        referencedTable: $$SubcategoriesTableReferences
-                            ._categoryIdTable(db),
-                        referencedColumn: $$SubcategoriesTableReferences
-                            ._categoryIdTable(db)
-                            .id,
-                      ) as T;
-                    }
-
-                    return state;
-                  },
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (productsRefs)
-                    await $_getPrefetchedDataByColumns<
-                      Subcategory,
-                      $SubcategoriesTable,
-                      Product,
-                      $ProductsTable
-                    >(
-                      currentTable: table,
-                      referencedTable: $$SubcategoriesTableReferences
-                          ._productsRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$SubcategoriesTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).productsRefs,
-                      currentColumn: 'id',
-                      referencedColumn: 'subcategory_id',
-                      typedResults: items,
-                    ),
-                ];
-              },
-            );
-          },
+          prefetchHooksCallback: null,
         ),
       );
 }
@@ -6638,9 +6167,12 @@ typedef $$SubcategoriesTableProcessedTableManager =
       $$SubcategoriesTableAnnotationComposer,
       $$SubcategoriesTableCreateCompanionBuilder,
       $$SubcategoriesTableUpdateCompanionBuilder,
-      (Subcategory, $$SubcategoriesTableReferences),
+      (
+        Subcategory,
+        BaseReferences<_$AppDatabase, $SubcategoriesTable, Subcategory>,
+      ),
       Subcategory,
-      PrefetchHooks Function({bool categoryId, bool productsRefs})
+      PrefetchHooks Function()
     >;
 typedef $$ProductsTableCreateCompanionBuilder = ProductsCompanion Function({
   Value<int> id,
@@ -6667,100 +6199,6 @@ typedef $$ProductsTableUpdateCompanionBuilder = ProductsCompanion Function({
   Value<DateTime> updatedAt,
 });
 
-final class $$ProductsTableReferences
-    extends BaseReferences<_$AppDatabase, $ProductsTable, Product> {
-  $$ProductsTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static $CategoriesTable _categoryIdTable(_$AppDatabase db) =>
-      db.categories.createAlias('products__category_id__categories__id');
-
-  $$CategoriesTableProcessedTableManager? get categoryId {
-    final $_column = $_itemColumn<int>('category_id');
-    if ($_column == null) return null;
-    final manager = $$CategoriesTableTableManager(
-      $_db,
-      $_db.categories,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_categoryIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-
-  static $SubcategoriesTable _subcategoryIdTable(_$AppDatabase db) => db
-      .subcategories
-      .createAlias('products__subcategory_id__subcategories__id');
-
-  $$SubcategoriesTableProcessedTableManager? get subcategoryId {
-    final $_column = $_itemColumn<int>('subcategory_id');
-    if ($_column == null) return null;
-    final manager = $$SubcategoriesTableTableManager(
-      $_db,
-      $_db.subcategories,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_subcategoryIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-
-  static MultiTypedResultKey<$ImportEntriesTable, List<ImportEntry>>
-  _importEntriesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.importEntries,
-    aliasName: 'products__id__import_entries__product_id',
-  );
-
-  $$ImportEntriesTableProcessedTableManager get importEntriesRefs {
-    final manager = $$ImportEntriesTableTableManager(
-      $_db,
-      $_db.importEntries,
-    ).filter((f) => f.productId.id.sqlEquals($_itemColumn<int>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_importEntriesRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-
-  static MultiTypedResultKey<$PlannedItemsTable, List<PlannedItem>>
-  _plannedItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.plannedItems,
-    aliasName: 'products__id__planned_items__product_id',
-  );
-
-  $$PlannedItemsTableProcessedTableManager get plannedItemsRefs {
-    final manager = $$PlannedItemsTableTableManager(
-      $_db,
-      $_db.plannedItems,
-    ).filter((f) => f.productId.id.sqlEquals($_itemColumn<int>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_plannedItemsRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-
-  static MultiTypedResultKey<$PurchaseLinesTable, List<PurchaseLine>>
-  _purchaseLinesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.purchaseLines,
-    aliasName: 'products__id__purchase_lines__product_id',
-  );
-
-  $$PurchaseLinesTableProcessedTableManager get purchaseLinesRefs {
-    final manager = $$PurchaseLinesTableTableManager(
-      $_db,
-      $_db.purchaseLines,
-    ).filter((f) => f.productId.id.sqlEquals($_itemColumn<int>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_purchaseLinesRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-}
-
 class $$ProductsTableFilterComposer
     extends Composer<_$AppDatabase, $ProductsTable> {
   $$ProductsTableFilterComposer({
@@ -6777,6 +6215,16 @@ class $$ProductsTableFilterComposer
 
   ColumnFilters<String> get name => $composableBuilder(
     column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get subcategoryId => $composableBuilder(
+    column: $table.subcategoryId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6809,127 +6257,6 @@ class $$ProductsTableFilterComposer
     column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
   );
-
-  $$CategoriesTableFilterComposer get categoryId {
-    final $$CategoriesTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.categoryId,
-      referencedTable: $db.categories,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CategoriesTableFilterComposer(
-            $db: $db,
-            $table: $db.categories,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$SubcategoriesTableFilterComposer get subcategoryId {
-    final $$SubcategoriesTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.subcategoryId,
-      referencedTable: $db.subcategories,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$SubcategoriesTableFilterComposer(
-            $db: $db,
-            $table: $db.subcategories,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  Expression<bool> importEntriesRefs(
-    Expression<bool> Function($$ImportEntriesTableFilterComposer f) f,
-  ) {
-    final $$ImportEntriesTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.importEntries,
-      getReferencedColumn: (t) => t.productId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ImportEntriesTableFilterComposer(
-            $db: $db,
-            $table: $db.importEntries,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<bool> plannedItemsRefs(
-    Expression<bool> Function($$PlannedItemsTableFilterComposer f) f,
-  ) {
-    final $$PlannedItemsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.plannedItems,
-      getReferencedColumn: (t) => t.productId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$PlannedItemsTableFilterComposer(
-            $db: $db,
-            $table: $db.plannedItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<bool> purchaseLinesRefs(
-    Expression<bool> Function($$PurchaseLinesTableFilterComposer f) f,
-  ) {
-    final $$PurchaseLinesTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.purchaseLines,
-      getReferencedColumn: (t) => t.productId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$PurchaseLinesTableFilterComposer(
-            $db: $db,
-            $table: $db.purchaseLines,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$ProductsTableOrderingComposer
@@ -6948,6 +6275,16 @@ class $$ProductsTableOrderingComposer
 
   ColumnOrderings<String> get name => $composableBuilder(
     column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get subcategoryId => $composableBuilder(
+    column: $table.subcategoryId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -6980,52 +6317,6 @@ class $$ProductsTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
-
-  $$CategoriesTableOrderingComposer get categoryId {
-    final $$CategoriesTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.categoryId,
-      referencedTable: $db.categories,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CategoriesTableOrderingComposer(
-            $db: $db,
-            $table: $db.categories,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$SubcategoriesTableOrderingComposer get subcategoryId {
-    final $$SubcategoriesTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.subcategoryId,
-      referencedTable: $db.subcategories,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$SubcategoriesTableOrderingComposer(
-            $db: $db,
-            $table: $db.subcategories,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$ProductsTableAnnotationComposer
@@ -7042,6 +6333,16 @@ class $$ProductsTableAnnotationComposer
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get subcategoryId => $composableBuilder(
+    column: $table.subcategoryId,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get measurementMode => $composableBuilder(
     column: $table.measurementMode,
@@ -7068,127 +6369,6 @@ class $$ProductsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
-
-  $$CategoriesTableAnnotationComposer get categoryId {
-    final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.categoryId,
-      referencedTable: $db.categories,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CategoriesTableAnnotationComposer(
-            $db: $db,
-            $table: $db.categories,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$SubcategoriesTableAnnotationComposer get subcategoryId {
-    final $$SubcategoriesTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.subcategoryId,
-      referencedTable: $db.subcategories,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$SubcategoriesTableAnnotationComposer(
-            $db: $db,
-            $table: $db.subcategories,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  Expression<T> importEntriesRefs<T extends Object>(
-    Expression<T> Function($$ImportEntriesTableAnnotationComposer a) f,
-  ) {
-    final $$ImportEntriesTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.importEntries,
-      getReferencedColumn: (t) => t.productId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ImportEntriesTableAnnotationComposer(
-            $db: $db,
-            $table: $db.importEntries,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<T> plannedItemsRefs<T extends Object>(
-    Expression<T> Function($$PlannedItemsTableAnnotationComposer a) f,
-  ) {
-    final $$PlannedItemsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.plannedItems,
-      getReferencedColumn: (t) => t.productId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$PlannedItemsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.plannedItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<T> purchaseLinesRefs<T extends Object>(
-    Expression<T> Function($$PurchaseLinesTableAnnotationComposer a) f,
-  ) {
-    final $$PurchaseLinesTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.purchaseLines,
-      getReferencedColumn: (t) => t.productId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$PurchaseLinesTableAnnotationComposer(
-            $db: $db,
-            $table: $db.purchaseLines,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$ProductsTableTableManager
@@ -7202,15 +6382,9 @@ class $$ProductsTableTableManager
           $$ProductsTableAnnotationComposer,
           $$ProductsTableCreateCompanionBuilder,
           $$ProductsTableUpdateCompanionBuilder,
-          (Product, $$ProductsTableReferences),
+          (Product, BaseReferences<_$AppDatabase, $ProductsTable, Product>),
           Product,
-          PrefetchHooks Function({
-            bool categoryId,
-            bool subcategoryId,
-            bool importEntriesRefs,
-            bool plannedItemsRefs,
-            bool purchaseLinesRefs,
-          })
+          PrefetchHooks Function()
         > {
   $$ProductsTableTableManager(_$AppDatabase db, $ProductsTable table)
     : super(
@@ -7272,135 +6446,9 @@ class $$ProductsTableTableManager
                 updatedAt: updatedAt,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable<$ProductsTable, Product>(table),
-                  $$ProductsTableReferences(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback:
-              ({
-                categoryId = false,
-                subcategoryId = false,
-                importEntriesRefs = false,
-                plannedItemsRefs = false,
-                purchaseLinesRefs = false,
-              }) {
-                return PrefetchHooks(
-                  db: db,
-                  explicitlyWatchedTables: [
-                    if (importEntriesRefs) db.importEntries,
-                    if (plannedItemsRefs) db.plannedItems,
-                    if (purchaseLinesRefs) db.purchaseLines,
-                  ],
-                  addJoins:
-                      <
-                        T extends TableManagerState<
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic
-                        >
-                      >(state) {
-                        if (categoryId) {
-                          state = state.withJoin(
-                            currentTable: table,
-                            currentColumn: table.categoryId,
-                            referencedTable: $$ProductsTableReferences
-                                ._categoryIdTable(db),
-                            referencedColumn: $$ProductsTableReferences
-                                ._categoryIdTable(db)
-                                .id,
-                          ) as T;
-                        }
-                        if (subcategoryId) {
-                          state = state.withJoin(
-                            currentTable: table,
-                            currentColumn: table.subcategoryId,
-                            referencedTable: $$ProductsTableReferences
-                                ._subcategoryIdTable(db),
-                            referencedColumn: $$ProductsTableReferences
-                                ._subcategoryIdTable(db)
-                                .id,
-                          ) as T;
-                        }
-
-                        return state;
-                      },
-                  getPrefetchedDataCallback: (items) async {
-                    return [
-                      if (importEntriesRefs)
-                        await $_getPrefetchedDataByColumns<
-                          Product,
-                          $ProductsTable,
-                          ImportEntry,
-                          $ImportEntriesTable
-                        >(
-                          currentTable: table,
-                          referencedTable: $$ProductsTableReferences
-                              ._importEntriesRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$ProductsTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).importEntriesRefs,
-                          currentColumn: 'id',
-                          referencedColumn: 'product_id',
-                          typedResults: items,
-                        ),
-                      if (plannedItemsRefs)
-                        await $_getPrefetchedDataByColumns<
-                          Product,
-                          $ProductsTable,
-                          PlannedItem,
-                          $PlannedItemsTable
-                        >(
-                          currentTable: table,
-                          referencedTable: $$ProductsTableReferences
-                              ._plannedItemsRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$ProductsTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).plannedItemsRefs,
-                          currentColumn: 'id',
-                          referencedColumn: 'product_id',
-                          typedResults: items,
-                        ),
-                      if (purchaseLinesRefs)
-                        await $_getPrefetchedDataByColumns<
-                          Product,
-                          $ProductsTable,
-                          PurchaseLine,
-                          $PurchaseLinesTable
-                        >(
-                          currentTable: table,
-                          referencedTable: $$ProductsTableReferences
-                              ._purchaseLinesRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$ProductsTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).purchaseLinesRefs,
-                          currentColumn: 'id',
-                          referencedColumn: 'product_id',
-                          typedResults: items,
-                        ),
-                    ];
-                  },
-                );
-              },
+          prefetchHooksCallback: null,
         ),
       );
 }
@@ -7415,15 +6463,9 @@ typedef $$ProductsTableProcessedTableManager =
       $$ProductsTableAnnotationComposer,
       $$ProductsTableCreateCompanionBuilder,
       $$ProductsTableUpdateCompanionBuilder,
-      (Product, $$ProductsTableReferences),
+      (Product, BaseReferences<_$AppDatabase, $ProductsTable, Product>),
       Product,
-      PrefetchHooks Function({
-        bool categoryId,
-        bool subcategoryId,
-        bool importEntriesRefs,
-        bool plannedItemsRefs,
-        bool purchaseLinesRefs,
-      })
+      PrefetchHooks Function()
     >;
 typedef $$ImportBatchesTableCreateCompanionBuilder =
     ImportBatchesCompanion Function({
@@ -7441,33 +6483,6 @@ typedef $$ImportBatchesTableUpdateCompanionBuilder =
       Value<int> entryCount,
       Value<DateTime> importedAt,
     });
-
-final class $$ImportBatchesTableReferences
-    extends BaseReferences<_$AppDatabase, $ImportBatchesTable, ImportBatch> {
-  $$ImportBatchesTableReferences(
-    super.$_db,
-    super.$_table,
-    super.$_typedResult,
-  );
-
-  static MultiTypedResultKey<$ImportEntriesTable, List<ImportEntry>>
-  _importEntriesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.importEntries,
-    aliasName: 'import_batches__id__import_entries__batch_id',
-  );
-
-  $$ImportEntriesTableProcessedTableManager get importEntriesRefs {
-    final manager = $$ImportEntriesTableTableManager(
-      $_db,
-      $_db.importEntries,
-    ).filter((f) => f.batchId.id.sqlEquals($_itemColumn<int>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_importEntriesRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-}
 
 class $$ImportBatchesTableFilterComposer
     extends Composer<_$AppDatabase, $ImportBatchesTable> {
@@ -7502,31 +6517,6 @@ class $$ImportBatchesTableFilterComposer
     column: $table.importedAt,
     builder: (column) => ColumnFilters(column),
   );
-
-  Expression<bool> importEntriesRefs(
-    Expression<bool> Function($$ImportEntriesTableFilterComposer f) f,
-  ) {
-    final $$ImportEntriesTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.importEntries,
-      getReferencedColumn: (t) => t.batchId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ImportEntriesTableFilterComposer(
-            $db: $db,
-            $table: $db.importEntries,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$ImportBatchesTableOrderingComposer
@@ -7593,31 +6583,6 @@ class $$ImportBatchesTableAnnotationComposer
     column: $table.importedAt,
     builder: (column) => column,
   );
-
-  Expression<T> importEntriesRefs<T extends Object>(
-    Expression<T> Function($$ImportEntriesTableAnnotationComposer a) f,
-  ) {
-    final $$ImportEntriesTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.importEntries,
-      getReferencedColumn: (t) => t.batchId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ImportEntriesTableAnnotationComposer(
-            $db: $db,
-            $table: $db.importEntries,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$ImportBatchesTableTableManager
@@ -7631,9 +6596,12 @@ class $$ImportBatchesTableTableManager
           $$ImportBatchesTableAnnotationComposer,
           $$ImportBatchesTableCreateCompanionBuilder,
           $$ImportBatchesTableUpdateCompanionBuilder,
-          (ImportBatch, $$ImportBatchesTableReferences),
+          (
+            ImportBatch,
+            BaseReferences<_$AppDatabase, $ImportBatchesTable, ImportBatch>,
+          ),
           ImportBatch,
-          PrefetchHooks Function({bool importEntriesRefs})
+          PrefetchHooks Function()
         > {
   $$ImportBatchesTableTableManager(_$AppDatabase db, $ImportBatchesTable table)
     : super(
@@ -7675,46 +6643,9 @@ class $$ImportBatchesTableTableManager
                 importedAt: importedAt,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable<$ImportBatchesTable, ImportBatch>(table),
-                  $$ImportBatchesTableReferences(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: ({importEntriesRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [
-                if (importEntriesRefs) db.importEntries,
-              ],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (importEntriesRefs)
-                    await $_getPrefetchedDataByColumns<
-                      ImportBatch,
-                      $ImportBatchesTable,
-                      ImportEntry,
-                      $ImportEntriesTable
-                    >(
-                      currentTable: table,
-                      referencedTable: $$ImportBatchesTableReferences
-                          ._importEntriesRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$ImportBatchesTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).importEntriesRefs,
-                      currentColumn: 'id',
-                      referencedColumn: 'batch_id',
-                      typedResults: items,
-                    ),
-                ];
-              },
-            );
-          },
+          prefetchHooksCallback: null,
         ),
       );
 }
@@ -7729,9 +6660,12 @@ typedef $$ImportBatchesTableProcessedTableManager =
       $$ImportBatchesTableAnnotationComposer,
       $$ImportBatchesTableCreateCompanionBuilder,
       $$ImportBatchesTableUpdateCompanionBuilder,
-      (ImportBatch, $$ImportBatchesTableReferences),
+      (
+        ImportBatch,
+        BaseReferences<_$AppDatabase, $ImportBatchesTable, ImportBatch>,
+      ),
       ImportBatch,
-      PrefetchHooks Function({bool importEntriesRefs})
+      PrefetchHooks Function()
     >;
 typedef $$ImportEntriesTableCreateCompanionBuilder =
     ImportEntriesCompanion Function({
@@ -7760,49 +6694,6 @@ typedef $$ImportEntriesTableUpdateCompanionBuilder =
       Value<int?> productId,
     });
 
-final class $$ImportEntriesTableReferences
-    extends BaseReferences<_$AppDatabase, $ImportEntriesTable, ImportEntry> {
-  $$ImportEntriesTableReferences(
-    super.$_db,
-    super.$_table,
-    super.$_typedResult,
-  );
-
-  static $ImportBatchesTable _batchIdTable(_$AppDatabase db) => db.importBatches
-      .createAlias('import_entries__batch_id__import_batches__id');
-
-  $$ImportBatchesTableProcessedTableManager get batchId {
-    final $_column = $_itemColumn<int>('batch_id')!;
-
-    final manager = $$ImportBatchesTableTableManager(
-      $_db,
-      $_db.importBatches,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_batchIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-
-  static $ProductsTable _productIdTable(_$AppDatabase db) =>
-      db.products.createAlias('import_entries__product_id__products__id');
-
-  $$ProductsTableProcessedTableManager? get productId {
-    final $_column = $_itemColumn<int>('product_id');
-    if ($_column == null) return null;
-    final manager = $$ProductsTableTableManager(
-      $_db,
-      $_db.products,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_productIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-}
-
 class $$ImportEntriesTableFilterComposer
     extends Composer<_$AppDatabase, $ImportEntriesTable> {
   $$ImportEntriesTableFilterComposer({
@@ -7814,6 +6705,11 @@ class $$ImportEntriesTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get batchId => $composableBuilder(
+    column: $table.batchId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7852,51 +6748,10 @@ class $$ImportEntriesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  $$ImportBatchesTableFilterComposer get batchId {
-    final $$ImportBatchesTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.batchId,
-      referencedTable: $db.importBatches,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ImportBatchesTableFilterComposer(
-            $db: $db,
-            $table: $db.importBatches,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$ProductsTableFilterComposer get productId {
-    final $$ProductsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.productId,
-      referencedTable: $db.products,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ProductsTableFilterComposer(
-            $db: $db,
-            $table: $db.products,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
+  ColumnFilters<int> get productId => $composableBuilder(
+    column: $table.productId,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$ImportEntriesTableOrderingComposer
@@ -7910,6 +6765,11 @@ class $$ImportEntriesTableOrderingComposer
   });
   ColumnOrderings<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get batchId => $composableBuilder(
+    column: $table.batchId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -7948,51 +6808,10 @@ class $$ImportEntriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  $$ImportBatchesTableOrderingComposer get batchId {
-    final $$ImportBatchesTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.batchId,
-      referencedTable: $db.importBatches,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ImportBatchesTableOrderingComposer(
-            $db: $db,
-            $table: $db.importBatches,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$ProductsTableOrderingComposer get productId {
-    final $$ProductsTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.productId,
-      referencedTable: $db.products,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ProductsTableOrderingComposer(
-            $db: $db,
-            $table: $db.products,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
+  ColumnOrderings<int> get productId => $composableBuilder(
+    column: $table.productId,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ImportEntriesTableAnnotationComposer
@@ -8006,6 +6825,9 @@ class $$ImportEntriesTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get batchId =>
+      $composableBuilder(column: $table.batchId, builder: (column) => column);
 
   GeneratedColumn<String> get sourceSheet => $composableBuilder(
     column: $table.sourceSheet,
@@ -8038,51 +6860,8 @@ class $$ImportEntriesTableAnnotationComposer
   GeneratedColumn<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
 
-  $$ImportBatchesTableAnnotationComposer get batchId {
-    final $$ImportBatchesTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.batchId,
-      referencedTable: $db.importBatches,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ImportBatchesTableAnnotationComposer(
-            $db: $db,
-            $table: $db.importBatches,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$ProductsTableAnnotationComposer get productId {
-    final $$ProductsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.productId,
-      referencedTable: $db.products,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ProductsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.products,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
+  GeneratedColumn<int> get productId =>
+      $composableBuilder(column: $table.productId, builder: (column) => column);
 }
 
 class $$ImportEntriesTableTableManager
@@ -8096,9 +6875,12 @@ class $$ImportEntriesTableTableManager
           $$ImportEntriesTableAnnotationComposer,
           $$ImportEntriesTableCreateCompanionBuilder,
           $$ImportEntriesTableUpdateCompanionBuilder,
-          (ImportEntry, $$ImportEntriesTableReferences),
+          (
+            ImportEntry,
+            BaseReferences<_$AppDatabase, $ImportEntriesTable, ImportEntry>,
+          ),
           ImportEntry,
-          PrefetchHooks Function({bool batchId, bool productId})
+          PrefetchHooks Function()
         > {
   $$ImportEntriesTableTableManager(_$AppDatabase db, $ImportEntriesTable table)
     : super(
@@ -8160,63 +6942,9 @@ class $$ImportEntriesTableTableManager
                 productId: productId,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable<$ImportEntriesTable, ImportEntry>(table),
-                  $$ImportEntriesTableReferences(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: ({batchId = false, productId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (batchId) {
-                      state = state.withJoin(
-                        currentTable: table,
-                        currentColumn: table.batchId,
-                        referencedTable: $$ImportEntriesTableReferences
-                            ._batchIdTable(db),
-                        referencedColumn: $$ImportEntriesTableReferences
-                            ._batchIdTable(db)
-                            .id,
-                      ) as T;
-                    }
-                    if (productId) {
-                      state = state.withJoin(
-                        currentTable: table,
-                        currentColumn: table.productId,
-                        referencedTable: $$ImportEntriesTableReferences
-                            ._productIdTable(db),
-                        referencedColumn: $$ImportEntriesTableReferences
-                            ._productIdTable(db)
-                            .id,
-                      ) as T;
-                    }
-
-                    return state;
-                  },
-              getPrefetchedDataCallback: (items) async {
-                return [];
-              },
-            );
-          },
+          prefetchHooksCallback: null,
         ),
       );
 }
@@ -8231,9 +6959,12 @@ typedef $$ImportEntriesTableProcessedTableManager =
       $$ImportEntriesTableAnnotationComposer,
       $$ImportEntriesTableCreateCompanionBuilder,
       $$ImportEntriesTableUpdateCompanionBuilder,
-      (ImportEntry, $$ImportEntriesTableReferences),
+      (
+        ImportEntry,
+        BaseReferences<_$AppDatabase, $ImportEntriesTable, ImportEntry>,
+      ),
       ImportEntry,
-      PrefetchHooks Function({bool batchId, bool productId})
+      PrefetchHooks Function()
     >;
 typedef $$ShoppingPlansTableCreateCompanionBuilder =
     ShoppingPlansCompanion Function({
@@ -8253,51 +6984,6 @@ typedef $$ShoppingPlansTableUpdateCompanionBuilder =
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
-
-final class $$ShoppingPlansTableReferences
-    extends BaseReferences<_$AppDatabase, $ShoppingPlansTable, ShoppingPlan> {
-  $$ShoppingPlansTableReferences(
-    super.$_db,
-    super.$_table,
-    super.$_typedResult,
-  );
-
-  static MultiTypedResultKey<$ShoppingTripsTable, List<ShoppingTrip>>
-  _shoppingTripsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.shoppingTrips,
-    aliasName: 'shopping_plans__id__shopping_trips__plan_id',
-  );
-
-  $$ShoppingTripsTableProcessedTableManager get shoppingTripsRefs {
-    final manager = $$ShoppingTripsTableTableManager(
-      $_db,
-      $_db.shoppingTrips,
-    ).filter((f) => f.planId.id.sqlEquals($_itemColumn<int>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_shoppingTripsRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-
-  static MultiTypedResultKey<$PlannedItemsTable, List<PlannedItem>>
-  _plannedItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.plannedItems,
-    aliasName: 'shopping_plans__id__planned_items__plan_id',
-  );
-
-  $$PlannedItemsTableProcessedTableManager get plannedItemsRefs {
-    final manager = $$PlannedItemsTableTableManager(
-      $_db,
-      $_db.plannedItems,
-    ).filter((f) => f.planId.id.sqlEquals($_itemColumn<int>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_plannedItemsRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-}
 
 class $$ShoppingPlansTableFilterComposer
     extends Composer<_$AppDatabase, $ShoppingPlansTable> {
@@ -8337,56 +7023,6 @@ class $$ShoppingPlansTableFilterComposer
     column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
   );
-
-  Expression<bool> shoppingTripsRefs(
-    Expression<bool> Function($$ShoppingTripsTableFilterComposer f) f,
-  ) {
-    final $$ShoppingTripsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.shoppingTrips,
-      getReferencedColumn: (t) => t.planId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ShoppingTripsTableFilterComposer(
-            $db: $db,
-            $table: $db.shoppingTrips,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<bool> plannedItemsRefs(
-    Expression<bool> Function($$PlannedItemsTableFilterComposer f) f,
-  ) {
-    final $$PlannedItemsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.plannedItems,
-      getReferencedColumn: (t) => t.planId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$PlannedItemsTableFilterComposer(
-            $db: $db,
-            $table: $db.plannedItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$ShoppingPlansTableOrderingComposer
@@ -8455,56 +7091,6 @@ class $$ShoppingPlansTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
-
-  Expression<T> shoppingTripsRefs<T extends Object>(
-    Expression<T> Function($$ShoppingTripsTableAnnotationComposer a) f,
-  ) {
-    final $$ShoppingTripsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.shoppingTrips,
-      getReferencedColumn: (t) => t.planId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ShoppingTripsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.shoppingTrips,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<T> plannedItemsRefs<T extends Object>(
-    Expression<T> Function($$PlannedItemsTableAnnotationComposer a) f,
-  ) {
-    final $$PlannedItemsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.plannedItems,
-      getReferencedColumn: (t) => t.planId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$PlannedItemsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.plannedItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$ShoppingPlansTableTableManager
@@ -8518,12 +7104,12 @@ class $$ShoppingPlansTableTableManager
           $$ShoppingPlansTableAnnotationComposer,
           $$ShoppingPlansTableCreateCompanionBuilder,
           $$ShoppingPlansTableUpdateCompanionBuilder,
-          (ShoppingPlan, $$ShoppingPlansTableReferences),
+          (
+            ShoppingPlan,
+            BaseReferences<_$AppDatabase, $ShoppingPlansTable, ShoppingPlan>,
+          ),
           ShoppingPlan,
-          PrefetchHooks Function({
-            bool shoppingTripsRefs,
-            bool plannedItemsRefs,
-          })
+          PrefetchHooks Function()
         > {
   $$ShoppingPlansTableTableManager(_$AppDatabase db, $ShoppingPlansTable table)
     : super(
@@ -8569,68 +7155,9 @@ class $$ShoppingPlansTableTableManager
                 updatedAt: updatedAt,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable<$ShoppingPlansTable, ShoppingPlan>(table),
-                  $$ShoppingPlansTableReferences(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback:
-              ({shoppingTripsRefs = false, plannedItemsRefs = false}) {
-                return PrefetchHooks(
-                  db: db,
-                  explicitlyWatchedTables: [
-                    if (shoppingTripsRefs) db.shoppingTrips,
-                    if (plannedItemsRefs) db.plannedItems,
-                  ],
-                  addJoins: null,
-                  getPrefetchedDataCallback: (items) async {
-                    return [
-                      if (shoppingTripsRefs)
-                        await $_getPrefetchedDataByColumns<
-                          ShoppingPlan,
-                          $ShoppingPlansTable,
-                          ShoppingTrip,
-                          $ShoppingTripsTable
-                        >(
-                          currentTable: table,
-                          referencedTable: $$ShoppingPlansTableReferences
-                              ._shoppingTripsRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$ShoppingPlansTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).shoppingTripsRefs,
-                          currentColumn: 'id',
-                          referencedColumn: 'plan_id',
-                          typedResults: items,
-                        ),
-                      if (plannedItemsRefs)
-                        await $_getPrefetchedDataByColumns<
-                          ShoppingPlan,
-                          $ShoppingPlansTable,
-                          PlannedItem,
-                          $PlannedItemsTable
-                        >(
-                          currentTable: table,
-                          referencedTable: $$ShoppingPlansTableReferences
-                              ._plannedItemsRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$ShoppingPlansTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).plannedItemsRefs,
-                          currentColumn: 'id',
-                          referencedColumn: 'plan_id',
-                          typedResults: items,
-                        ),
-                    ];
-                  },
-                );
-              },
+          prefetchHooksCallback: null,
         ),
       );
 }
@@ -8645,600 +7172,12 @@ typedef $$ShoppingPlansTableProcessedTableManager =
       $$ShoppingPlansTableAnnotationComposer,
       $$ShoppingPlansTableCreateCompanionBuilder,
       $$ShoppingPlansTableUpdateCompanionBuilder,
-      (ShoppingPlan, $$ShoppingPlansTableReferences),
+      (
+        ShoppingPlan,
+        BaseReferences<_$AppDatabase, $ShoppingPlansTable, ShoppingPlan>,
+      ),
       ShoppingPlan,
-      PrefetchHooks Function({bool shoppingTripsRefs, bool plannedItemsRefs})
-    >;
-typedef $$ShoppingTripsTableCreateCompanionBuilder =
-    ShoppingTripsCompanion Function({
-      Value<int> id,
-      Value<int?> planId,
-      Value<String?> originPlanNameSnapshot,
-      required String purchaseDate,
-      Value<String?> marketName,
-      Value<String> status,
-      Value<DateTime> createdAt,
-      Value<DateTime> updatedAt,
-      Value<DateTime?> completedAt,
-    });
-typedef $$ShoppingTripsTableUpdateCompanionBuilder =
-    ShoppingTripsCompanion Function({
-      Value<int> id,
-      Value<int?> planId,
-      Value<String?> originPlanNameSnapshot,
-      Value<String> purchaseDate,
-      Value<String?> marketName,
-      Value<String> status,
-      Value<DateTime> createdAt,
-      Value<DateTime> updatedAt,
-      Value<DateTime?> completedAt,
-    });
-
-final class $$ShoppingTripsTableReferences
-    extends BaseReferences<_$AppDatabase, $ShoppingTripsTable, ShoppingTrip> {
-  $$ShoppingTripsTableReferences(
-    super.$_db,
-    super.$_table,
-    super.$_typedResult,
-  );
-
-  static $ShoppingPlansTable _planIdTable(_$AppDatabase db) => db.shoppingPlans
-      .createAlias('shopping_trips__plan_id__shopping_plans__id');
-
-  $$ShoppingPlansTableProcessedTableManager? get planId {
-    final $_column = $_itemColumn<int>('plan_id');
-    if ($_column == null) return null;
-    final manager = $$ShoppingPlansTableTableManager(
-      $_db,
-      $_db.shoppingPlans,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_planIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-
-  static MultiTypedResultKey<$PlannedItemsTable, List<PlannedItem>>
-  _plannedItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.plannedItems,
-    aliasName: 'shopping_trips__id__planned_items__estimate_reference_trip_id',
-  );
-
-  $$PlannedItemsTableProcessedTableManager get plannedItemsRefs {
-    final manager = $$PlannedItemsTableTableManager($_db, $_db.plannedItems)
-        .filter(
-          (f) =>
-              f.estimateReferenceTripId.id.sqlEquals($_itemColumn<int>('id')!),
-        );
-
-    final cache = $_typedResult.readTableOrNull(_plannedItemsRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-
-  static MultiTypedResultKey<$PurchaseLinesTable, List<PurchaseLine>>
-  _purchaseLinesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.purchaseLines,
-    aliasName: 'shopping_trips__id__purchase_lines__trip_id',
-  );
-
-  $$PurchaseLinesTableProcessedTableManager get purchaseLinesRefs {
-    final manager = $$PurchaseLinesTableTableManager(
-      $_db,
-      $_db.purchaseLines,
-    ).filter((f) => f.tripId.id.sqlEquals($_itemColumn<int>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_purchaseLinesRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-}
-
-class $$ShoppingTripsTableFilterComposer
-    extends Composer<_$AppDatabase, $ShoppingTripsTable> {
-  $$ShoppingTripsTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get originPlanNameSnapshot => $composableBuilder(
-    column: $table.originPlanNameSnapshot,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get purchaseDate => $composableBuilder(
-    column: $table.purchaseDate,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get marketName => $composableBuilder(
-    column: $table.marketName,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get status => $composableBuilder(
-    column: $table.status,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get createdAt => $composableBuilder(
-    column: $table.createdAt,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
-    column: $table.updatedAt,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get completedAt => $composableBuilder(
-    column: $table.completedAt,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  $$ShoppingPlansTableFilterComposer get planId {
-    final $$ShoppingPlansTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.planId,
-      referencedTable: $db.shoppingPlans,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ShoppingPlansTableFilterComposer(
-            $db: $db,
-            $table: $db.shoppingPlans,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  Expression<bool> plannedItemsRefs(
-    Expression<bool> Function($$PlannedItemsTableFilterComposer f) f,
-  ) {
-    final $$PlannedItemsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.plannedItems,
-      getReferencedColumn: (t) => t.estimateReferenceTripId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$PlannedItemsTableFilterComposer(
-            $db: $db,
-            $table: $db.plannedItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<bool> purchaseLinesRefs(
-    Expression<bool> Function($$PurchaseLinesTableFilterComposer f) f,
-  ) {
-    final $$PurchaseLinesTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.purchaseLines,
-      getReferencedColumn: (t) => t.tripId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$PurchaseLinesTableFilterComposer(
-            $db: $db,
-            $table: $db.purchaseLines,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-}
-
-class $$ShoppingTripsTableOrderingComposer
-    extends Composer<_$AppDatabase, $ShoppingTripsTable> {
-  $$ShoppingTripsTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get originPlanNameSnapshot => $composableBuilder(
-    column: $table.originPlanNameSnapshot,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get purchaseDate => $composableBuilder(
-    column: $table.purchaseDate,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get marketName => $composableBuilder(
-    column: $table.marketName,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get status => $composableBuilder(
-    column: $table.status,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
-    column: $table.createdAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
-    column: $table.updatedAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get completedAt => $composableBuilder(
-    column: $table.completedAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  $$ShoppingPlansTableOrderingComposer get planId {
-    final $$ShoppingPlansTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.planId,
-      referencedTable: $db.shoppingPlans,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ShoppingPlansTableOrderingComposer(
-            $db: $db,
-            $table: $db.shoppingPlans,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-}
-
-class $$ShoppingTripsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $ShoppingTripsTable> {
-  $$ShoppingTripsTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get originPlanNameSnapshot => $composableBuilder(
-    column: $table.originPlanNameSnapshot,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get purchaseDate => $composableBuilder(
-    column: $table.purchaseDate,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get marketName => $composableBuilder(
-    column: $table.marketName,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get status =>
-      $composableBuilder(column: $table.status, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get updatedAt =>
-      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get completedAt => $composableBuilder(
-    column: $table.completedAt,
-    builder: (column) => column,
-  );
-
-  $$ShoppingPlansTableAnnotationComposer get planId {
-    final $$ShoppingPlansTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.planId,
-      referencedTable: $db.shoppingPlans,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ShoppingPlansTableAnnotationComposer(
-            $db: $db,
-            $table: $db.shoppingPlans,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  Expression<T> plannedItemsRefs<T extends Object>(
-    Expression<T> Function($$PlannedItemsTableAnnotationComposer a) f,
-  ) {
-    final $$PlannedItemsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.plannedItems,
-      getReferencedColumn: (t) => t.estimateReferenceTripId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$PlannedItemsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.plannedItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<T> purchaseLinesRefs<T extends Object>(
-    Expression<T> Function($$PurchaseLinesTableAnnotationComposer a) f,
-  ) {
-    final $$PurchaseLinesTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.purchaseLines,
-      getReferencedColumn: (t) => t.tripId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$PurchaseLinesTableAnnotationComposer(
-            $db: $db,
-            $table: $db.purchaseLines,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-}
-
-class $$ShoppingTripsTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $ShoppingTripsTable,
-          ShoppingTrip,
-          $$ShoppingTripsTableFilterComposer,
-          $$ShoppingTripsTableOrderingComposer,
-          $$ShoppingTripsTableAnnotationComposer,
-          $$ShoppingTripsTableCreateCompanionBuilder,
-          $$ShoppingTripsTableUpdateCompanionBuilder,
-          (ShoppingTrip, $$ShoppingTripsTableReferences),
-          ShoppingTrip,
-          PrefetchHooks Function({
-            bool planId,
-            bool plannedItemsRefs,
-            bool purchaseLinesRefs,
-          })
-        > {
-  $$ShoppingTripsTableTableManager(_$AppDatabase db, $ShoppingTripsTable table)
-    : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$ShoppingTripsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$ShoppingTripsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$ShoppingTripsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                Value<int?> planId = const Value.absent(),
-                Value<String?> originPlanNameSnapshot = const Value.absent(),
-                Value<String> purchaseDate = const Value.absent(),
-                Value<String?> marketName = const Value.absent(),
-                Value<String> status = const Value.absent(),
-                Value<DateTime> createdAt = const Value.absent(),
-                Value<DateTime> updatedAt = const Value.absent(),
-                Value<DateTime?> completedAt = const Value.absent(),
-              }) => ShoppingTripsCompanion(
-                id: id,
-                planId: planId,
-                originPlanNameSnapshot: originPlanNameSnapshot,
-                purchaseDate: purchaseDate,
-                marketName: marketName,
-                status: status,
-                createdAt: createdAt,
-                updatedAt: updatedAt,
-                completedAt: completedAt,
-              ),
-          createCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                Value<int?> planId = const Value.absent(),
-                Value<String?> originPlanNameSnapshot = const Value.absent(),
-                required String purchaseDate,
-                Value<String?> marketName = const Value.absent(),
-                Value<String> status = const Value.absent(),
-                Value<DateTime> createdAt = const Value.absent(),
-                Value<DateTime> updatedAt = const Value.absent(),
-                Value<DateTime?> completedAt = const Value.absent(),
-              }) => ShoppingTripsCompanion.insert(
-                id: id,
-                planId: planId,
-                originPlanNameSnapshot: originPlanNameSnapshot,
-                purchaseDate: purchaseDate,
-                marketName: marketName,
-                status: status,
-                createdAt: createdAt,
-                updatedAt: updatedAt,
-                completedAt: completedAt,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable<$ShoppingTripsTable, ShoppingTrip>(table),
-                  $$ShoppingTripsTableReferences(db, table, e),
-                ),
-              )
-              .toList(),
-          prefetchHooksCallback:
-              ({
-                planId = false,
-                plannedItemsRefs = false,
-                purchaseLinesRefs = false,
-              }) {
-                return PrefetchHooks(
-                  db: db,
-                  explicitlyWatchedTables: [
-                    if (plannedItemsRefs) db.plannedItems,
-                    if (purchaseLinesRefs) db.purchaseLines,
-                  ],
-                  addJoins:
-                      <
-                        T extends TableManagerState<
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic
-                        >
-                      >(state) {
-                        if (planId) {
-                          state = state.withJoin(
-                            currentTable: table,
-                            currentColumn: table.planId,
-                            referencedTable: $$ShoppingTripsTableReferences
-                                ._planIdTable(db),
-                            referencedColumn: $$ShoppingTripsTableReferences
-                                ._planIdTable(db)
-                                .id,
-                          ) as T;
-                        }
-
-                        return state;
-                      },
-                  getPrefetchedDataCallback: (items) async {
-                    return [
-                      if (plannedItemsRefs)
-                        await $_getPrefetchedDataByColumns<
-                          ShoppingTrip,
-                          $ShoppingTripsTable,
-                          PlannedItem,
-                          $PlannedItemsTable
-                        >(
-                          currentTable: table,
-                          referencedTable: $$ShoppingTripsTableReferences
-                              ._plannedItemsRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$ShoppingTripsTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).plannedItemsRefs,
-                          currentColumn: 'id',
-                          referencedColumn: 'estimate_reference_trip_id',
-                          typedResults: items,
-                        ),
-                      if (purchaseLinesRefs)
-                        await $_getPrefetchedDataByColumns<
-                          ShoppingTrip,
-                          $ShoppingTripsTable,
-                          PurchaseLine,
-                          $PurchaseLinesTable
-                        >(
-                          currentTable: table,
-                          referencedTable: $$ShoppingTripsTableReferences
-                              ._purchaseLinesRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$ShoppingTripsTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).purchaseLinesRefs,
-                          currentColumn: 'id',
-                          referencedColumn: 'trip_id',
-                          typedResults: items,
-                        ),
-                    ];
-                  },
-                );
-              },
-        ),
-      );
-}
-
-typedef $$ShoppingTripsTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $ShoppingTripsTable,
-      ShoppingTrip,
-      $$ShoppingTripsTableFilterComposer,
-      $$ShoppingTripsTableOrderingComposer,
-      $$ShoppingTripsTableAnnotationComposer,
-      $$ShoppingTripsTableCreateCompanionBuilder,
-      $$ShoppingTripsTableUpdateCompanionBuilder,
-      (ShoppingTrip, $$ShoppingTripsTableReferences),
-      ShoppingTrip,
-      PrefetchHooks Function({
-        bool planId,
-        bool plannedItemsRefs,
-        bool purchaseLinesRefs,
-      })
+      PrefetchHooks Function()
     >;
 typedef $$PlannedItemsTableCreateCompanionBuilder =
     PlannedItemsCompanion Function({
@@ -9273,84 +7212,6 @@ typedef $$PlannedItemsTableUpdateCompanionBuilder =
       Value<DateTime> updatedAt,
     });
 
-final class $$PlannedItemsTableReferences
-    extends BaseReferences<_$AppDatabase, $PlannedItemsTable, PlannedItem> {
-  $$PlannedItemsTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static $ShoppingPlansTable _planIdTable(_$AppDatabase db) => db.shoppingPlans
-      .createAlias('planned_items__plan_id__shopping_plans__id');
-
-  $$ShoppingPlansTableProcessedTableManager get planId {
-    final $_column = $_itemColumn<int>('plan_id')!;
-
-    final manager = $$ShoppingPlansTableTableManager(
-      $_db,
-      $_db.shoppingPlans,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_planIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-
-  static $ProductsTable _productIdTable(_$AppDatabase db) =>
-      db.products.createAlias('planned_items__product_id__products__id');
-
-  $$ProductsTableProcessedTableManager get productId {
-    final $_column = $_itemColumn<int>('product_id')!;
-
-    final manager = $$ProductsTableTableManager(
-      $_db,
-      $_db.products,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_productIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-
-  static $ShoppingTripsTable _estimateReferenceTripIdTable(_$AppDatabase db) =>
-      db.shoppingTrips.createAlias(
-        'planned_items__estimate_reference_trip_id__shopping_trips__id',
-      );
-
-  $$ShoppingTripsTableProcessedTableManager? get estimateReferenceTripId {
-    final $_column = $_itemColumn<int>('estimate_reference_trip_id');
-    if ($_column == null) return null;
-    final manager = $$ShoppingTripsTableTableManager(
-      $_db,
-      $_db.shoppingTrips,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(
-      _estimateReferenceTripIdTable($_db),
-    );
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-
-  static MultiTypedResultKey<$PurchaseLinesTable, List<PurchaseLine>>
-  _purchaseLinesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.purchaseLines,
-    aliasName: 'planned_items__id__purchase_lines__planned_item_id',
-  );
-
-  $$PurchaseLinesTableProcessedTableManager get purchaseLinesRefs {
-    final manager = $$PurchaseLinesTableTableManager(
-      $_db,
-      $_db.purchaseLines,
-    ).filter((f) => f.plannedItemId.id.sqlEquals($_itemColumn<int>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_purchaseLinesRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-}
-
 class $$PlannedItemsTableFilterComposer
     extends Composer<_$AppDatabase, $PlannedItemsTable> {
   $$PlannedItemsTableFilterComposer({
@@ -9362,6 +7223,16 @@ class $$PlannedItemsTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get planId => $composableBuilder(
+    column: $table.planId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get productId => $composableBuilder(
+    column: $table.productId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -9400,6 +7271,11 @@ class $$PlannedItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get estimateReferenceTripId => $composableBuilder(
+    column: $table.estimateReferenceTripId,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
@@ -9409,100 +7285,6 @@ class $$PlannedItemsTableFilterComposer
     column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
   );
-
-  $$ShoppingPlansTableFilterComposer get planId {
-    final $$ShoppingPlansTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.planId,
-      referencedTable: $db.shoppingPlans,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ShoppingPlansTableFilterComposer(
-            $db: $db,
-            $table: $db.shoppingPlans,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$ProductsTableFilterComposer get productId {
-    final $$ProductsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.productId,
-      referencedTable: $db.products,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ProductsTableFilterComposer(
-            $db: $db,
-            $table: $db.products,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$ShoppingTripsTableFilterComposer get estimateReferenceTripId {
-    final $$ShoppingTripsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.estimateReferenceTripId,
-      referencedTable: $db.shoppingTrips,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ShoppingTripsTableFilterComposer(
-            $db: $db,
-            $table: $db.shoppingTrips,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  Expression<bool> purchaseLinesRefs(
-    Expression<bool> Function($$PurchaseLinesTableFilterComposer f) f,
-  ) {
-    final $$PurchaseLinesTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.purchaseLines,
-      getReferencedColumn: (t) => t.plannedItemId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$PurchaseLinesTableFilterComposer(
-            $db: $db,
-            $table: $db.purchaseLines,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$PlannedItemsTableOrderingComposer
@@ -9516,6 +7298,16 @@ class $$PlannedItemsTableOrderingComposer
   });
   ColumnOrderings<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get planId => $composableBuilder(
+    column: $table.planId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get productId => $composableBuilder(
+    column: $table.productId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -9554,6 +7346,11 @@ class $$PlannedItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get estimateReferenceTripId => $composableBuilder(
+    column: $table.estimateReferenceTripId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -9563,75 +7360,6 @@ class $$PlannedItemsTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
-
-  $$ShoppingPlansTableOrderingComposer get planId {
-    final $$ShoppingPlansTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.planId,
-      referencedTable: $db.shoppingPlans,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ShoppingPlansTableOrderingComposer(
-            $db: $db,
-            $table: $db.shoppingPlans,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$ProductsTableOrderingComposer get productId {
-    final $$ProductsTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.productId,
-      referencedTable: $db.products,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ProductsTableOrderingComposer(
-            $db: $db,
-            $table: $db.products,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$ShoppingTripsTableOrderingComposer get estimateReferenceTripId {
-    final $$ShoppingTripsTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.estimateReferenceTripId,
-      referencedTable: $db.shoppingTrips,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ShoppingTripsTableOrderingComposer(
-            $db: $db,
-            $table: $db.shoppingTrips,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$PlannedItemsTableAnnotationComposer
@@ -9645,6 +7373,12 @@ class $$PlannedItemsTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get planId =>
+      $composableBuilder(column: $table.planId, builder: (column) => column);
+
+  GeneratedColumn<int> get productId =>
+      $composableBuilder(column: $table.productId, builder: (column) => column);
 
   GeneratedColumn<String> get measurementMode => $composableBuilder(
     column: $table.measurementMode,
@@ -9677,105 +7411,16 @@ class $$PlannedItemsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<int> get estimateReferenceTripId => $composableBuilder(
+    column: $table.estimateReferenceTripId,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
-
-  $$ShoppingPlansTableAnnotationComposer get planId {
-    final $$ShoppingPlansTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.planId,
-      referencedTable: $db.shoppingPlans,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ShoppingPlansTableAnnotationComposer(
-            $db: $db,
-            $table: $db.shoppingPlans,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$ProductsTableAnnotationComposer get productId {
-    final $$ProductsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.productId,
-      referencedTable: $db.products,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ProductsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.products,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$ShoppingTripsTableAnnotationComposer get estimateReferenceTripId {
-    final $$ShoppingTripsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.estimateReferenceTripId,
-      referencedTable: $db.shoppingTrips,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ShoppingTripsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.shoppingTrips,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  Expression<T> purchaseLinesRefs<T extends Object>(
-    Expression<T> Function($$PurchaseLinesTableAnnotationComposer a) f,
-  ) {
-    final $$PurchaseLinesTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.purchaseLines,
-      getReferencedColumn: (t) => t.plannedItemId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$PurchaseLinesTableAnnotationComposer(
-            $db: $db,
-            $table: $db.purchaseLines,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$PlannedItemsTableTableManager
@@ -9789,14 +7434,12 @@ class $$PlannedItemsTableTableManager
           $$PlannedItemsTableAnnotationComposer,
           $$PlannedItemsTableCreateCompanionBuilder,
           $$PlannedItemsTableUpdateCompanionBuilder,
-          (PlannedItem, $$PlannedItemsTableReferences),
+          (
+            PlannedItem,
+            BaseReferences<_$AppDatabase, $PlannedItemsTable, PlannedItem>,
+          ),
           PlannedItem,
-          PrefetchHooks Function({
-            bool planId,
-            bool productId,
-            bool estimateReferenceTripId,
-            bool purchaseLinesRefs,
-          })
+          PrefetchHooks Function()
         > {
   $$PlannedItemsTableTableManager(_$AppDatabase db, $PlannedItemsTable table)
     : super(
@@ -9870,103 +7513,9 @@ class $$PlannedItemsTableTableManager
                 updatedAt: updatedAt,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable<$PlannedItemsTable, PlannedItem>(table),
-                  $$PlannedItemsTableReferences(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback:
-              ({
-                planId = false,
-                productId = false,
-                estimateReferenceTripId = false,
-                purchaseLinesRefs = false,
-              }) {
-                return PrefetchHooks(
-                  db: db,
-                  explicitlyWatchedTables: [
-                    if (purchaseLinesRefs) db.purchaseLines,
-                  ],
-                  addJoins:
-                      <
-                        T extends TableManagerState<
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic
-                        >
-                      >(state) {
-                        if (planId) {
-                          state = state.withJoin(
-                            currentTable: table,
-                            currentColumn: table.planId,
-                            referencedTable: $$PlannedItemsTableReferences
-                                ._planIdTable(db),
-                            referencedColumn: $$PlannedItemsTableReferences
-                                ._planIdTable(db)
-                                .id,
-                          ) as T;
-                        }
-                        if (productId) {
-                          state = state.withJoin(
-                            currentTable: table,
-                            currentColumn: table.productId,
-                            referencedTable: $$PlannedItemsTableReferences
-                                ._productIdTable(db),
-                            referencedColumn: $$PlannedItemsTableReferences
-                                ._productIdTable(db)
-                                .id,
-                          ) as T;
-                        }
-                        if (estimateReferenceTripId) {
-                          state = state.withJoin(
-                            currentTable: table,
-                            currentColumn: table.estimateReferenceTripId,
-                            referencedTable: $$PlannedItemsTableReferences
-                                ._estimateReferenceTripIdTable(db),
-                            referencedColumn: $$PlannedItemsTableReferences
-                                ._estimateReferenceTripIdTable(db)
-                                .id,
-                          ) as T;
-                        }
-
-                        return state;
-                      },
-                  getPrefetchedDataCallback: (items) async {
-                    return [
-                      if (purchaseLinesRefs)
-                        await $_getPrefetchedDataByColumns<
-                          PlannedItem,
-                          $PlannedItemsTable,
-                          PurchaseLine,
-                          $PurchaseLinesTable
-                        >(
-                          currentTable: table,
-                          referencedTable: $$PlannedItemsTableReferences
-                              ._purchaseLinesRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$PlannedItemsTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).purchaseLinesRefs,
-                          currentColumn: 'id',
-                          referencedColumn: 'planned_item_id',
-                          typedResults: items,
-                        ),
-                    ];
-                  },
-                );
-              },
+          prefetchHooksCallback: null,
         ),
       );
 }
@@ -9981,14 +7530,290 @@ typedef $$PlannedItemsTableProcessedTableManager =
       $$PlannedItemsTableAnnotationComposer,
       $$PlannedItemsTableCreateCompanionBuilder,
       $$PlannedItemsTableUpdateCompanionBuilder,
-      (PlannedItem, $$PlannedItemsTableReferences),
+      (
+        PlannedItem,
+        BaseReferences<_$AppDatabase, $PlannedItemsTable, PlannedItem>,
+      ),
       PlannedItem,
-      PrefetchHooks Function({
-        bool planId,
-        bool productId,
-        bool estimateReferenceTripId,
-        bool purchaseLinesRefs,
-      })
+      PrefetchHooks Function()
+    >;
+typedef $$ShoppingTripsTableCreateCompanionBuilder =
+    ShoppingTripsCompanion Function({
+      Value<int> id,
+      Value<int?> planId,
+      Value<String?> originPlanNameSnapshot,
+      required String purchaseDate,
+      Value<String?> marketName,
+      Value<String> status,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> completedAt,
+    });
+typedef $$ShoppingTripsTableUpdateCompanionBuilder =
+    ShoppingTripsCompanion Function({
+      Value<int> id,
+      Value<int?> planId,
+      Value<String?> originPlanNameSnapshot,
+      Value<String> purchaseDate,
+      Value<String?> marketName,
+      Value<String> status,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> completedAt,
+    });
+
+class $$ShoppingTripsTableFilterComposer
+    extends Composer<_$AppDatabase, $ShoppingTripsTable> {
+  $$ShoppingTripsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get planId => $composableBuilder(
+    column: $table.planId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get originPlanNameSnapshot => $composableBuilder(
+    column: $table.originPlanNameSnapshot,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get purchaseDate => $composableBuilder(
+    column: $table.purchaseDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get marketName => $composableBuilder(
+    column: $table.marketName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ShoppingTripsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ShoppingTripsTable> {
+  $$ShoppingTripsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get planId => $composableBuilder(
+    column: $table.planId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get originPlanNameSnapshot => $composableBuilder(
+    column: $table.originPlanNameSnapshot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get purchaseDate => $composableBuilder(
+    column: $table.purchaseDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get marketName => $composableBuilder(
+    column: $table.marketName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ShoppingTripsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ShoppingTripsTable> {
+  $$ShoppingTripsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get planId =>
+      $composableBuilder(column: $table.planId, builder: (column) => column);
+
+  GeneratedColumn<String> get originPlanNameSnapshot => $composableBuilder(
+    column: $table.originPlanNameSnapshot,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get purchaseDate => $composableBuilder(
+    column: $table.purchaseDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get marketName => $composableBuilder(
+    column: $table.marketName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$ShoppingTripsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ShoppingTripsTable,
+          ShoppingTrip,
+          $$ShoppingTripsTableFilterComposer,
+          $$ShoppingTripsTableOrderingComposer,
+          $$ShoppingTripsTableAnnotationComposer,
+          $$ShoppingTripsTableCreateCompanionBuilder,
+          $$ShoppingTripsTableUpdateCompanionBuilder,
+          (
+            ShoppingTrip,
+            BaseReferences<_$AppDatabase, $ShoppingTripsTable, ShoppingTrip>,
+          ),
+          ShoppingTrip,
+          PrefetchHooks Function()
+        > {
+  $$ShoppingTripsTableTableManager(_$AppDatabase db, $ShoppingTripsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ShoppingTripsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ShoppingTripsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ShoppingTripsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int?> planId = const Value.absent(),
+                Value<String?> originPlanNameSnapshot = const Value.absent(),
+                Value<String> purchaseDate = const Value.absent(),
+                Value<String?> marketName = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> completedAt = const Value.absent(),
+              }) => ShoppingTripsCompanion(
+                id: id,
+                planId: planId,
+                originPlanNameSnapshot: originPlanNameSnapshot,
+                purchaseDate: purchaseDate,
+                marketName: marketName,
+                status: status,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                completedAt: completedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int?> planId = const Value.absent(),
+                Value<String?> originPlanNameSnapshot = const Value.absent(),
+                required String purchaseDate,
+                Value<String?> marketName = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> completedAt = const Value.absent(),
+              }) => ShoppingTripsCompanion.insert(
+                id: id,
+                planId: planId,
+                originPlanNameSnapshot: originPlanNameSnapshot,
+                purchaseDate: purchaseDate,
+                marketName: marketName,
+                status: status,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                completedAt: completedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ShoppingTripsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ShoppingTripsTable,
+      ShoppingTrip,
+      $$ShoppingTripsTableFilterComposer,
+      $$ShoppingTripsTableOrderingComposer,
+      $$ShoppingTripsTableAnnotationComposer,
+      $$ShoppingTripsTableCreateCompanionBuilder,
+      $$ShoppingTripsTableUpdateCompanionBuilder,
+      (
+        ShoppingTrip,
+        BaseReferences<_$AppDatabase, $ShoppingTripsTable, ShoppingTrip>,
+      ),
+      ShoppingTrip,
+      PrefetchHooks Function()
     >;
 typedef $$PurchaseLinesTableCreateCompanionBuilder =
     PurchaseLinesCompanion Function({
@@ -10027,67 +7852,6 @@ typedef $$PurchaseLinesTableUpdateCompanionBuilder =
       Value<DateTime> updatedAt,
     });
 
-final class $$PurchaseLinesTableReferences
-    extends BaseReferences<_$AppDatabase, $PurchaseLinesTable, PurchaseLine> {
-  $$PurchaseLinesTableReferences(
-    super.$_db,
-    super.$_table,
-    super.$_typedResult,
-  );
-
-  static $ShoppingTripsTable _tripIdTable(_$AppDatabase db) => db.shoppingTrips
-      .createAlias('purchase_lines__trip_id__shopping_trips__id');
-
-  $$ShoppingTripsTableProcessedTableManager get tripId {
-    final $_column = $_itemColumn<int>('trip_id')!;
-
-    final manager = $$ShoppingTripsTableTableManager(
-      $_db,
-      $_db.shoppingTrips,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_tripIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-
-  static $ProductsTable _productIdTable(_$AppDatabase db) =>
-      db.products.createAlias('purchase_lines__product_id__products__id');
-
-  $$ProductsTableProcessedTableManager get productId {
-    final $_column = $_itemColumn<int>('product_id')!;
-
-    final manager = $$ProductsTableTableManager(
-      $_db,
-      $_db.products,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_productIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-
-  static $PlannedItemsTable _plannedItemIdTable(_$AppDatabase db) => db
-      .plannedItems
-      .createAlias('purchase_lines__planned_item_id__planned_items__id');
-
-  $$PlannedItemsTableProcessedTableManager? get plannedItemId {
-    final $_column = $_itemColumn<int>('planned_item_id');
-    if ($_column == null) return null;
-    final manager = $$PlannedItemsTableTableManager(
-      $_db,
-      $_db.plannedItems,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_plannedItemIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-}
-
 class $$PurchaseLinesTableFilterComposer
     extends Composer<_$AppDatabase, $PurchaseLinesTable> {
   $$PurchaseLinesTableFilterComposer({
@@ -10099,6 +7863,21 @@ class $$PurchaseLinesTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get tripId => $composableBuilder(
+    column: $table.tripId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get productId => $composableBuilder(
+    column: $table.productId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get plannedItemId => $composableBuilder(
+    column: $table.plannedItemId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -10156,75 +7935,6 @@ class $$PurchaseLinesTableFilterComposer
     column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
   );
-
-  $$ShoppingTripsTableFilterComposer get tripId {
-    final $$ShoppingTripsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.tripId,
-      referencedTable: $db.shoppingTrips,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ShoppingTripsTableFilterComposer(
-            $db: $db,
-            $table: $db.shoppingTrips,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$ProductsTableFilterComposer get productId {
-    final $$ProductsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.productId,
-      referencedTable: $db.products,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ProductsTableFilterComposer(
-            $db: $db,
-            $table: $db.products,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$PlannedItemsTableFilterComposer get plannedItemId {
-    final $$PlannedItemsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.plannedItemId,
-      referencedTable: $db.plannedItems,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$PlannedItemsTableFilterComposer(
-            $db: $db,
-            $table: $db.plannedItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$PurchaseLinesTableOrderingComposer
@@ -10238,6 +7948,21 @@ class $$PurchaseLinesTableOrderingComposer
   });
   ColumnOrderings<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get tripId => $composableBuilder(
+    column: $table.tripId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get productId => $composableBuilder(
+    column: $table.productId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get plannedItemId => $composableBuilder(
+    column: $table.plannedItemId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -10295,75 +8020,6 @@ class $$PurchaseLinesTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
-
-  $$ShoppingTripsTableOrderingComposer get tripId {
-    final $$ShoppingTripsTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.tripId,
-      referencedTable: $db.shoppingTrips,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ShoppingTripsTableOrderingComposer(
-            $db: $db,
-            $table: $db.shoppingTrips,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$ProductsTableOrderingComposer get productId {
-    final $$ProductsTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.productId,
-      referencedTable: $db.products,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ProductsTableOrderingComposer(
-            $db: $db,
-            $table: $db.products,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$PlannedItemsTableOrderingComposer get plannedItemId {
-    final $$PlannedItemsTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.plannedItemId,
-      referencedTable: $db.plannedItems,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$PlannedItemsTableOrderingComposer(
-            $db: $db,
-            $table: $db.plannedItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$PurchaseLinesTableAnnotationComposer
@@ -10377,6 +8033,17 @@ class $$PurchaseLinesTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get tripId =>
+      $composableBuilder(column: $table.tripId, builder: (column) => column);
+
+  GeneratedColumn<int> get productId =>
+      $composableBuilder(column: $table.productId, builder: (column) => column);
+
+  GeneratedColumn<int> get plannedItemId => $composableBuilder(
+    column: $table.plannedItemId,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get measurementMode => $composableBuilder(
     column: $table.measurementMode,
@@ -10424,75 +8091,6 @@ class $$PurchaseLinesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
-
-  $$ShoppingTripsTableAnnotationComposer get tripId {
-    final $$ShoppingTripsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.tripId,
-      referencedTable: $db.shoppingTrips,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ShoppingTripsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.shoppingTrips,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$ProductsTableAnnotationComposer get productId {
-    final $$ProductsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.productId,
-      referencedTable: $db.products,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ProductsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.products,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$PlannedItemsTableAnnotationComposer get plannedItemId {
-    final $$PlannedItemsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.plannedItemId,
-      referencedTable: $db.plannedItems,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$PlannedItemsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.plannedItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$PurchaseLinesTableTableManager
@@ -10506,13 +8104,12 @@ class $$PurchaseLinesTableTableManager
           $$PurchaseLinesTableAnnotationComposer,
           $$PurchaseLinesTableCreateCompanionBuilder,
           $$PurchaseLinesTableUpdateCompanionBuilder,
-          (PurchaseLine, $$PurchaseLinesTableReferences),
+          (
+            PurchaseLine,
+            BaseReferences<_$AppDatabase, $PurchaseLinesTable, PurchaseLine>,
+          ),
           PurchaseLine,
-          PrefetchHooks Function({
-            bool tripId,
-            bool productId,
-            bool plannedItemId,
-          })
+          PrefetchHooks Function()
         > {
   $$PurchaseLinesTableTableManager(_$AppDatabase db, $PurchaseLinesTable table)
     : super(
@@ -10594,75 +8191,9 @@ class $$PurchaseLinesTableTableManager
                 updatedAt: updatedAt,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable<$PurchaseLinesTable, PurchaseLine>(table),
-                  $$PurchaseLinesTableReferences(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback:
-              ({tripId = false, productId = false, plannedItemId = false}) {
-                return PrefetchHooks(
-                  db: db,
-                  explicitlyWatchedTables: [],
-                  addJoins:
-                      <
-                        T extends TableManagerState<
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic
-                        >
-                      >(state) {
-                        if (tripId) {
-                          state = state.withJoin(
-                            currentTable: table,
-                            currentColumn: table.tripId,
-                            referencedTable: $$PurchaseLinesTableReferences
-                                ._tripIdTable(db),
-                            referencedColumn: $$PurchaseLinesTableReferences
-                                ._tripIdTable(db)
-                                .id,
-                          ) as T;
-                        }
-                        if (productId) {
-                          state = state.withJoin(
-                            currentTable: table,
-                            currentColumn: table.productId,
-                            referencedTable: $$PurchaseLinesTableReferences
-                                ._productIdTable(db),
-                            referencedColumn: $$PurchaseLinesTableReferences
-                                ._productIdTable(db)
-                                .id,
-                          ) as T;
-                        }
-                        if (plannedItemId) {
-                          state = state.withJoin(
-                            currentTable: table,
-                            currentColumn: table.plannedItemId,
-                            referencedTable: $$PurchaseLinesTableReferences
-                                ._plannedItemIdTable(db),
-                            referencedColumn: $$PurchaseLinesTableReferences
-                                ._plannedItemIdTable(db)
-                                .id,
-                          ) as T;
-                        }
-
-                        return state;
-                      },
-                  getPrefetchedDataCallback: (items) async {
-                    return [];
-                  },
-                );
-              },
+          prefetchHooksCallback: null,
         ),
       );
 }
@@ -10677,9 +8208,12 @@ typedef $$PurchaseLinesTableProcessedTableManager =
       $$PurchaseLinesTableAnnotationComposer,
       $$PurchaseLinesTableCreateCompanionBuilder,
       $$PurchaseLinesTableUpdateCompanionBuilder,
-      (PurchaseLine, $$PurchaseLinesTableReferences),
+      (
+        PurchaseLine,
+        BaseReferences<_$AppDatabase, $PurchaseLinesTable, PurchaseLine>,
+      ),
       PurchaseLine,
-      PrefetchHooks Function({bool tripId, bool productId, bool plannedItemId})
+      PrefetchHooks Function()
     >;
 typedef $$AppPreferencesTableCreateCompanionBuilder =
     AppPreferencesCompanion Function({Value<int> id, Value<bool> isDarkMode});
@@ -10784,16 +8318,7 @@ class $$AppPreferencesTableTableManager
             Value<bool> isDarkMode = const Value.absent(),
           }) => AppPreferencesCompanion.insert(id: id, isDarkMode: isDarkMode),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable<$AppPreferencesTable, AppPreference>(table),
-                  BaseReferences<
-                    _$AppDatabase,
-                    $AppPreferencesTable,
-                    AppPreference
-                  >(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -10983,16 +8508,7 @@ class $$CloudSyncSettingsTableTableManager
                 lastSyncedHash: lastSyncedHash,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable<$CloudSyncSettingsTable, CloudSyncSetting>(table),
-                  BaseReferences<
-                    _$AppDatabase,
-                    $CloudSyncSettingsTable,
-                    CloudSyncSetting
-                  >(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -11036,10 +8552,10 @@ class $AppDatabaseManager {
       $$ImportEntriesTableTableManager(_db, _db.importEntries);
   $$ShoppingPlansTableTableManager get shoppingPlans =>
       $$ShoppingPlansTableTableManager(_db, _db.shoppingPlans);
-  $$ShoppingTripsTableTableManager get shoppingTrips =>
-      $$ShoppingTripsTableTableManager(_db, _db.shoppingTrips);
   $$PlannedItemsTableTableManager get plannedItems =>
       $$PlannedItemsTableTableManager(_db, _db.plannedItems);
+  $$ShoppingTripsTableTableManager get shoppingTrips =>
+      $$ShoppingTripsTableTableManager(_db, _db.shoppingTrips);
   $$PurchaseLinesTableTableManager get purchaseLines =>
       $$PurchaseLinesTableTableManager(_db, _db.purchaseLines);
   $$AppPreferencesTableTableManager get appPreferences =>

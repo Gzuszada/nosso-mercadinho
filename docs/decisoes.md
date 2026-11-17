@@ -1,8 +1,6 @@
 # Decisões técnicas e funcionais
 
-Atualizado em 16/11/2026. Este registro documenta decisões aprovadas para a Etapa 4; não autoriza funcionalidades extras.
-
-## Estado atual da entrega
+Atualizado em 17/11/2026. Este registro documenta decisões aprovadas para a Etapa 4; não autoriza funcionalidades extras. A PWA usa Dart2JS para a interface e SQLite WebAssembly no worker do Drift (`flutter build web --release --no-pub`), preservando compatibilidade com Safari sem WasmGC e evitando bindings FFI nativos no navegador. O `sqlite3.wasm` é compatível com a versão resolvida do pacote e o Hosting usa cache `no-cache` para entrypoints e WASM.
 
 - O schema Drift 6 adiciona `purchase_lines.is_label_total`. O valor pago de uma linha é sempre `total_cents`; quando o total vem da etiqueta, `unit_price_cents` guarda apenas o preço por base derivado necessário para a interface e para a conversão de unidade.
 - O backup usa formato 6 e aceita formatos 1 a 6. `formatVersion` é encaminhado à restauração para que esquema do banco e versão do formato sejam validados de modo independente.
@@ -11,7 +9,7 @@ Atualizado em 16/11/2026. Este registro documenta decisões aprovadas para a Eta
 - A criação da lista restante preserva a forma de compra e o snapshot de estimativa do item de origem. A inserção é feita diretamente no banco, sem depender do modo atual do cadastro do produto.
 - “Último pago” usa a linha válida mais recente da compra concluída mais recente: `total_cents` dividido pela quantidade da própria linha e convertido para a unidade padrão da forma. Linhas de etiqueta não são combinadas com outras linhas do mesmo produto na viagem de referência.
 - O rodapé do carrinho limita a área expandida e oferece rolagem; a barra compacta permanece visível. Isso preserva as ações com fonte ampliada sem reduzir a escala da interface.
-- Versão atual `1.0.3+11` (build 11). APK release assinado gerado e verificado com assinatura v2 válida; tamanho `61.184.588` bytes e SHA-256 `1C59AA5CEE7222210C5C7FBEF5DB86F68EF68689A4DFF36A30A95EFC96118699`. A versão anterior `1.0.2+10` permanece disponível para atualização e consulta.
+- Versão atual `1.0.4+12` (build 12). APK release assinado gerado e verificado com assinatura v2 válida; tamanho `61.184.588` bytes e SHA-256 `1C59AA5CEE7222210C5C7FBEF5DB86F68EF68689A4DFF36A30A95EFC96118699`. A versão anterior `1.0.2+10` permanece disponível para atualização e consulta.
 - O nome de usuário é o campo nativo `displayName` do Firebase Auth; o e-mail continua sendo o identificador de login. O nome é validado, pode ser editado em **Ajustes → Conta e sincronização** e é espelhado de forma best-effort no campo `displayName` dos documentos `members`, sem alterar `uid` nem `role`.
 
 ## Stack e ambiente

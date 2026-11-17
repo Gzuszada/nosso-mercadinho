@@ -1,10 +1,10 @@
 # Nosso Mercadinho
 
-Aplicativo Android pessoal com dados locais, também publicado como PWA. Abra `app\` no VS Code. O identificador Android está definido como `br.com.nocorre.mercado`; a versão atual é `1.0.3+11`. A entrada no mercado exige uma conta autorizada; depois do login, o banco local continua disponível para operação offline. O app também descobre as casas vinculadas à conta, restaura o nome da casa selecionada e permite trocar a casa em **Ajustes → Conta e sincronização**.
+Aplicativo Android pessoal com dados locais, também publicado como PWA. Abra `app\` no VS Code. O identificador Android está definido como `br.com.nocorre.mercado`; a versão atual é `1.0.4+12`. A entrada no mercado exige uma conta autorizada; depois do login, o banco local continua disponível para operação offline. O app também descobre as casas vinculadas à conta, restaura o nome da casa selecionada e permite trocar a casa em **Ajustes → Conta e sincronização**.
 
 ## Download do APK
 
-A release assinada está disponível em [nosso-mercadinho-1.0.3.apk](https://github.com/Gzuszada/nosso-mercadinho/releases/download/v1.0.3/nosso-mercadinho-1.0.3.apk). SHA-256: `1C59AA5CEE7222210C5C7FBEF5DB86F68EF68689A4DFF36A30A95EFC96118699`.
+A release assinada está disponível em [nosso-mercadinho-1.0.4.apk](https://github.com/Gzuszada/nosso-mercadinho/releases/download/v1.0.4/nosso-mercadinho-1.0.4.apk). SHA-256: `E3BA094D346F302E9A8B9C8D76B643AB73DE03BA3B9F5355941BA46C75FCC196`.
 
 ## O que já funciona
 
@@ -98,6 +98,20 @@ O banco está no schema 5. A migração 3→4 adiciona a fotografia da origem da
 
 Não edite `lib\data\app_database.g.dart` manualmente. Verificações e decisões estão em [docs/progresso.md](../docs/progresso.md) e [docs/decisoes.md](../docs/decisoes.md).
 
+## Nosso Mercado na Web (PWA)
+
+A versão Web é publicada em `https://nosso-mercado-casa.web.app`. No iPhone (Safari), abra esse endereço, toque em **Compartilhar** e depois em **Adicionar à Tela de Início**. O app instalado abre em tela cheia. A tela de entrada exige uma conta autorizada; após autenticar, o app continua usando o Drift local quando a internet está indisponível.
+
+A build web oficial usa Dart2JS para a interface e mantém o Drift em SQLite WebAssembly dentro de `drift_worker.js`:
+
+```powershell
+Set-Location app
+flutter build web --release --no-pub
+firebase deploy --only hosting --project nosso-mercado-casa
+```
+
+Essa combinação permite que o app inicialize em navegadores sem WasmGC, como Safari mais antigo no iPhone 11, sem resolver bindings FFI nativos no navegador. A pasta `web/` deve conter `sqlite3.wasm` e `drift_worker.js`; o `sqlite3.wasm` deve ser o asset oficial da versão resolvida em `pubspec.lock` (`sqlite3 3.5.2` para o asset Web, SHA-256 `13D3F11D05B39BA0618A7115FB41640A5D48B6300F5D3F325F554B42BD6688A4`). Não substitua esse arquivo por uma build SQLite diferente sem validar o smoke test no navegador. O Hosting usa `Cache-Control: no-cache` para que atualizações do PWA não fiquem presas em um WASM ou bundle antigo.
+
 ## Nosso Mercado na Web e sincronização da casa
 
 A versão Web é publicada em `https://nosso-mercado-casa.web.app`. No iPhone (Safari), abra esse endereço, toque em **Compartilhar** e depois em **Adicionar à Tela de Início**. O app instalado abre em tela cheia. A tela de entrada exige uma conta autorizada; após autenticar, o app continua usando o Drift local quando a internet está indisponível.
@@ -141,7 +155,7 @@ firebase emulators:exec --only firestore,auth --project demo-nosso-mercado "node
 
 Este aplicativo não será publicado na Google Play. O Android passou a exigir registro de pacotes para instalações em dispositivos certificados no Brasil a partir de 30/09/2026. A rota escolhida é a conta gratuita **Limited distribution** do Android Developer Console, fora da Play Store, para registrar o pacote e autorizar o telefone. Ela exige uma conta Google com verificação em duas etapas e perfil de pagamentos com nome/endereço; não exige documento oficial de identidade conforme a documentação atual. O usuário precisa concluir esse cadastro diretamente com Google; não compartilhe credenciais com o assistente. Consulte [Android developer verification](https://developer.android.com/developer-verification) e [Limited distribution](https://developer.android.com/developer-verification/guides/limited-distribution).
 
-O ID foi alterado de `com.example.mercado` para `br.com.nocorre.mercado`, com versão atual `1.0.3+11`. A release usa uma chave própria e pode atualizar a instalação release anterior do mesmo pacote, preservando os dados locais. Builds debug e release têm assinaturas diferentes e não podem substituir um ao outro como atualização; por isso, a primeira instalação da release deve ser feita sem desinstalar a versão anterior.
+O ID foi alterado de `com.example.mercado` para `br.com.nocorre.mercado`, com versão atual `1.0.4+12`. A release usa uma chave própria e pode atualizar a instalação release anterior do mesmo pacote, preservando os dados locais. Builds debug e release têm assinaturas diferentes e não podem substituir um ao outro como atualização; por isso, a primeira instalação da release deve ser feita sem desinstalar a versão anterior.
 
 ### Política de backup Android
 
