@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "682431670498",
+    "project_id": "nosso-mercado-casa",
+    "storage_bucket": "nosso-mercado-casa.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:682431670498:android:fd4f7d3e86b74a846756bb",
+        "android_client_info": {
+          "package_name": "br.com.nocorre.mercado"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD9rPprIksHNrrA4uNpG-LwQCN0m7_f764"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

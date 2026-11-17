@@ -1,0 +1,1258 @@
+{
+  "source": "Mercado.xlsx",
+  "import_mode": "catalog_only",
+  "warning": "Unidades e categorias pendentes exigem revisão. Não contém histórico comprovado.",
+  "items": [
+    {
+      "source_sheet": "112026",
+      "source_row": 3,
+      "source_number": 1,
+      "name": "Fraldinha",
+      "suggested_category": "Carnes e Frios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 4,
+      "source_number": 2,
+      "name": "Filé de frango",
+      "suggested_category": "Carnes e Frios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 5,
+      "source_number": 3,
+      "name": "Frango sassami",
+      "suggested_category": "Carnes e Frios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 6,
+      "source_number": 4,
+      "name": "Maminha",
+      "suggested_category": "Carnes e Frios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 7,
+      "source_number": 5,
+      "name": "Peixe",
+      "suggested_category": "Carnes e Frios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 8,
+      "source_number": 6,
+      "name": "Contra filé",
+      "suggested_category": "Carnes e Frios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 9,
+      "source_number": 7,
+      "name": "Bacon",
+      "suggested_category": "Carnes e Frios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 10,
+      "source_number": 8,
+      "name": "Bisteca suína",
+      "suggested_category": "Carnes e Frios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 11,
+      "source_number": 9,
+      "name": "Linguiça fina",
+      "suggested_category": "Carnes e Frios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 12,
+      "source_number": 10,
+      "name": "Linguiça toscana",
+      "suggested_category": "Carnes e Frios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 13,
+      "source_number": 11,
+      "name": "Calabresa",
+      "suggested_category": "Carnes e Frios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 14,
+      "source_number": 12,
+      "name": "Salsicha",
+      "suggested_category": "Carnes e Frios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 15,
+      "source_number": 13,
+      "name": "Carne de hambúrguer",
+      "suggested_category": "Carnes e Frios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 16,
+      "source_number": 14,
+      "name": "Coxão mole",
+      "suggested_category": "Carnes e Frios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 17,
+      "source_number": 15,
+      "name": "Coxão mole filé",
+      "suggested_category": "Carnes e Frios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 18,
+      "source_number": 16,
+      "name": "Coxão mole picado",
+      "suggested_category": "Carnes e Frios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 19,
+      "source_number": 17,
+      "name": "Carne músculo",
+      "suggested_category": "Carnes e Frios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 20,
+      "source_number": 18,
+      "name": "Carne patinho",
+      "suggested_category": "Carnes e Frios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 21,
+      "source_number": 19,
+      "name": "Carne alcatra",
+      "suggested_category": "Carnes e Frios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 22,
+      "source_number": 20,
+      "name": "Picanha",
+      "suggested_category": "Carnes e Frios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 23,
+      "source_number": 21,
+      "name": "Salame",
+      "suggested_category": "Carnes e Frios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 24,
+      "source_number": 22,
+      "name": "Presunto",
+      "suggested_category": "Carnes e Frios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 25,
+      "source_number": 23,
+      "name": "Queijo mussarela",
+      "suggested_category": "Carnes e Frios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 26,
+      "source_number": 24,
+      "name": "Queijo provolone",
+      "suggested_category": "Carnes e Frios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 27,
+      "source_number": 25,
+      "name": "Queijo ralado",
+      "suggested_category": "Carnes e Frios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 31,
+      "source_number": 26,
+      "name": "Cenoura",
+      "suggested_category": "Hortifruti",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 32,
+      "source_number": 27,
+      "name": "Tomate",
+      "suggested_category": "Hortifruti",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 33,
+      "source_number": 28,
+      "name": "Batata",
+      "suggested_category": "Hortifruti",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 34,
+      "source_number": 29,
+      "name": "Batata palha",
+      "suggested_category": "Hortifruti",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 35,
+      "source_number": 30,
+      "name": "Brócolis",
+      "suggested_category": "Hortifruti",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 36,
+      "source_number": 31,
+      "name": "Milho",
+      "suggested_category": "Hortifruti",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 37,
+      "source_number": 32,
+      "name": "Milho (enlatado ou em conserva)",
+      "suggested_category": "Hortifruti",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 38,
+      "source_number": 33,
+      "name": "Alface / rúcula / couve",
+      "suggested_category": "Hortifruti",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 39,
+      "source_number": 34,
+      "name": "Cebola",
+      "suggested_category": "Hortifruti",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 40,
+      "source_number": 35,
+      "name": "Alho",
+      "suggested_category": "Hortifruti",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 41,
+      "source_number": 36,
+      "name": "Abacaxi",
+      "suggested_category": "Hortifruti",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 42,
+      "source_number": 37,
+      "name": "Manga",
+      "suggested_category": "Hortifruti",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 43,
+      "source_number": 38,
+      "name": "Laranja",
+      "suggested_category": "Hortifruti",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 44,
+      "source_number": 39,
+      "name": "Limão",
+      "suggested_category": "Hortifruti",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 45,
+      "source_number": 40,
+      "name": "Maracujá",
+      "suggested_category": "Hortifruti",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 46,
+      "source_number": 41,
+      "name": "Banana da terra",
+      "suggested_category": "Hortifruti",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 47,
+      "source_number": 42,
+      "name": "Maçã",
+      "suggested_category": "Hortifruti",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 48,
+      "source_number": 43,
+      "name": "Gengibre",
+      "suggested_category": "Hortifruti",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 49,
+      "source_number": 44,
+      "name": "Batata doce",
+      "suggested_category": "Hortifruti",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 50,
+      "source_number": 45,
+      "name": "Goiaba",
+      "suggested_category": "Hortifruti",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 51,
+      "source_number": 46,
+      "name": "Morango",
+      "suggested_category": "Hortifruti",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 52,
+      "source_number": 47,
+      "name": "Abacate",
+      "suggested_category": "Hortifruti",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 53,
+      "source_number": 48,
+      "name": "Beterraba",
+      "suggested_category": "Hortifruti",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 54,
+      "source_number": 49,
+      "name": "Uva",
+      "suggested_category": "Hortifruti",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 55,
+      "source_number": 50,
+      "name": "Quiabo",
+      "suggested_category": "Hortifruti",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 56,
+      "source_number": 51,
+      "name": "Banana",
+      "suggested_category": "Hortifruti",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 60,
+      "source_number": 52,
+      "name": "Sal",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 61,
+      "source_number": 53,
+      "name": "Açúcar",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 62,
+      "source_number": 54,
+      "name": "Arroz",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 63,
+      "source_number": 55,
+      "name": "Feijão",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 64,
+      "source_number": 56,
+      "name": "Macarrão",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 65,
+      "source_number": 57,
+      "name": "Farinha de trigo",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 66,
+      "source_number": 58,
+      "name": "Farofa",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 67,
+      "source_number": 59,
+      "name": "Granola",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 68,
+      "source_number": 60,
+      "name": "Salgadinho",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 69,
+      "source_number": 61,
+      "name": "Biscoito",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 70,
+      "source_number": 62,
+      "name": "Biscoito recheado",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 71,
+      "source_number": 63,
+      "name": "Waffer",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 72,
+      "source_number": 64,
+      "name": "Chocolate",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 73,
+      "source_number": 65,
+      "name": "Toddy",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 74,
+      "source_number": 66,
+      "name": "Café",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 75,
+      "source_number": 67,
+      "name": "Ovo",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 76,
+      "source_number": 68,
+      "name": "Creme de leite",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 77,
+      "source_number": 69,
+      "name": "Leite condensado",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 78,
+      "source_number": 70,
+      "name": "Iogurte",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 79,
+      "source_number": 71,
+      "name": "Manteiga ou margarina",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 80,
+      "source_number": 72,
+      "name": "Goiabada",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 81,
+      "source_number": 73,
+      "name": "Massa de bolo",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 82,
+      "source_number": 74,
+      "name": "Amido de milho",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 83,
+      "source_number": 75,
+      "name": "Temperos secos (pimenta-do-reino, páprica defumada)",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 84,
+      "source_number": 76,
+      "name": "Alecrim",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 85,
+      "source_number": 77,
+      "name": "Tapioca",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 86,
+      "source_number": 78,
+      "name": "Fermento para bolo",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 87,
+      "source_number": 79,
+      "name": "Flocão",
+      "suggested_category": "Mercearia e Laticínios",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 91,
+      "source_number": 80,
+      "name": "Pão de forma",
+      "suggested_category": "Padaria",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 92,
+      "source_number": 81,
+      "name": "Pão francês",
+      "suggested_category": "Padaria",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 93,
+      "source_number": 82,
+      "name": "Pão de queijo",
+      "suggested_category": "Padaria",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 94,
+      "source_number": 83,
+      "name": "Pão de forma integral",
+      "suggested_category": "Padaria",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 95,
+      "source_number": 84,
+      "name": "Miojo",
+      "suggested_category": "Padaria",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 96,
+      "source_number": 85,
+      "name": "Pipoca",
+      "suggested_category": "Padaria",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 97,
+      "source_number": 86,
+      "name": "Pão de parmesão (Hambúrguer)",
+      "suggested_category": "Padaria",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 101,
+      "source_number": 87,
+      "name": "Água",
+      "suggested_category": "Bebidas",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 102,
+      "source_number": 88,
+      "name": "Água com gás",
+      "suggested_category": "Bebidas",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 103,
+      "source_number": 89,
+      "name": "Leite",
+      "suggested_category": "Bebidas",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 104,
+      "source_number": 90,
+      "name": "Refrigerante",
+      "suggested_category": "Bebidas",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 105,
+      "source_number": 91,
+      "name": "Suco de caixinha",
+      "suggested_category": "Bebidas",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 106,
+      "source_number": 92,
+      "name": "Suco de polpa",
+      "suggested_category": "Bebidas",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 107,
+      "source_number": 93,
+      "name": "Sucrilhos",
+      "suggested_category": "Bebidas",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 108,
+      "source_number": 94,
+      "name": "Suco em pó",
+      "suggested_category": "Bebidas",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 109,
+      "source_number": 95,
+      "name": "Chá",
+      "suggested_category": "Bebidas",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 113,
+      "source_number": 96,
+      "name": "Ketchup",
+      "suggested_category": "Temperos e Condimentos",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 114,
+      "source_number": 97,
+      "name": "Sazon",
+      "suggested_category": "Temperos e Condimentos",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 115,
+      "source_number": 98,
+      "name": "Vinagre",
+      "suggested_category": "Temperos e Condimentos",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 116,
+      "source_number": 99,
+      "name": "Óleo",
+      "suggested_category": "Temperos e Condimentos",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 117,
+      "source_number": 100,
+      "name": "Maionese",
+      "suggested_category": "Temperos e Condimentos",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 118,
+      "source_number": 101,
+      "name": "Molho de tomate",
+      "suggested_category": "Temperos e Condimentos",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 122,
+      "source_number": 102,
+      "name": "Papel higiênico",
+      "suggested_category": "Limpeza",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 123,
+      "source_number": 103,
+      "name": "Detergente",
+      "suggested_category": "Limpeza",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 124,
+      "source_number": 103,
+      "name": "Sabão em pó",
+      "suggested_category": "Limpeza",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 125,
+      "source_number": 104,
+      "name": "Sabão líquido",
+      "suggested_category": "Limpeza",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 126,
+      "source_number": 105,
+      "name": "Desinfetante",
+      "suggested_category": "Limpeza",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 127,
+      "source_number": 106,
+      "name": "Água sanitária",
+      "suggested_category": "Limpeza",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 128,
+      "source_number": 107,
+      "name": "Veja",
+      "suggested_category": "Limpeza",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 129,
+      "source_number": 108,
+      "name": "Vassoura",
+      "suggested_category": "Limpeza",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 130,
+      "source_number": 109,
+      "name": "Refil de mata insetos",
+      "suggested_category": "Limpeza",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 131,
+      "source_number": 110,
+      "name": "Esponja",
+      "suggested_category": "Limpeza",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 132,
+      "source_number": 111,
+      "name": "Saco de lixo (Grande)",
+      "suggested_category": "Limpeza",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 133,
+      "source_number": 112,
+      "name": "Lustra Móveis",
+      "suggested_category": "Limpeza",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 134,
+      "source_number": 113,
+      "name": "Amaciante",
+      "suggested_category": "Limpeza",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 138,
+      "source_number": 114,
+      "name": "Shampoo",
+      "suggested_category": "Higiene",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 139,
+      "source_number": 115,
+      "name": "Condicionador",
+      "suggested_category": "Higiene",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 140,
+      "source_number": 116,
+      "name": "Sabonete",
+      "suggested_category": "Higiene",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 141,
+      "source_number": 117,
+      "name": "Sabonete íntimo líquido",
+      "suggested_category": "Higiene",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 142,
+      "source_number": 118,
+      "name": "Pasta de dente",
+      "suggested_category": "Higiene",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 143,
+      "source_number": 119,
+      "name": "Escova de dente",
+      "suggested_category": "Higiene",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 144,
+      "source_number": 120,
+      "name": "Lenço umedecido",
+      "suggested_category": "Higiene",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 145,
+      "source_number": 121,
+      "name": "Absorvente",
+      "suggested_category": "Higiene",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 146,
+      "source_number": 122,
+      "name": "Desodorizador",
+      "suggested_category": "Higiene",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 151,
+      "source_number": 123,
+      "name": "Difusor",
+      "suggested_category": "Úteis",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 152,
+      "source_number": 124,
+      "name": "Papel alumínio",
+      "suggested_category": "Úteis",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 153,
+      "source_number": 125,
+      "name": "Saco para congelar",
+      "suggested_category": "Úteis",
+      "needs_category_review": false,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 159,
+      "source_number": 126,
+      "name": "Gillete",
+      "suggested_category": null,
+      "needs_category_review": true,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 160,
+      "source_number": 127,
+      "name": "Tempero Maggi",
+      "suggested_category": null,
+      "needs_category_review": true,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 161,
+      "source_number": 128,
+      "name": "Páprica defumada",
+      "suggested_category": null,
+      "needs_category_review": true,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 162,
+      "source_number": 129,
+      "name": "Molho inglês",
+      "suggested_category": null,
+      "needs_category_review": true,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 163,
+      "source_number": 130,
+      "name": "Doce Iasmim",
+      "suggested_category": null,
+      "needs_category_review": true,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 164,
+      "source_number": 131,
+      "name": "Massa pizza",
+      "suggested_category": null,
+      "needs_category_review": true,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 165,
+      "source_number": 132,
+      "name": "Álcool",
+      "suggested_category": null,
+      "needs_category_review": true,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 166,
+      "source_number": 133,
+      "name": "Gelatina",
+      "suggested_category": null,
+      "needs_category_review": true,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 167,
+      "source_number": 134,
+      "name": "Azeite",
+      "suggested_category": null,
+      "needs_category_review": true,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 168,
+      "source_number": 135,
+      "name": "Palha de aço",
+      "suggested_category": null,
+      "needs_category_review": true,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 169,
+      "source_number": 136,
+      "name": "Shoyu",
+      "suggested_category": null,
+      "needs_category_review": true,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 170,
+      "source_number": 137,
+      "name": "Vanish",
+      "suggested_category": null,
+      "needs_category_review": true,
+      "measurement_mode": null
+    },
+    {
+      "source_sheet": "112026",
+      "source_row": 171,
+      "source_number": 138,
+      "name": "Mostarda",
+      "suggested_category": null,
+      "needs_category_review": true,
+      "measurement_mode": null
+    }
+  ]
+}
