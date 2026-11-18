@@ -29,7 +29,7 @@ class CloudSyncStatusPanel extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Estado da sincronização',
+          'Estado da sincronização · $cloudSyncBuildLabel',
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 8),

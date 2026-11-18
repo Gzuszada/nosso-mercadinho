@@ -38,7 +38,10 @@ void main() {
         ),
       ),
     );
-    expect(find.text('Estado da sincronização'), findsOneWidget);
+    expect(
+      find.text('Estado da sincronização · 2026-11-18-sync-v2'),
+      findsOneWidget,
+    );
     expect(
       find.text('Este dispositivo não está igual ao Firebase'),
       findsOneWidget,

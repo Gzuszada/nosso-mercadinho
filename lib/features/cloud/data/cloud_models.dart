@@ -39,6 +39,9 @@ class CloudSyncAreaStatus {
   bool get needsSynchronization => state != CloudSyncAreaState.inSync;
 }
 
+/// Identifies the deployed synchronization build in diagnostics.
+const cloudSyncBuildLabel = '2026-11-18-sync-v2';
+
 class CloudSyncStatus {
   const CloudSyncStatus({
     required this.householdId,
