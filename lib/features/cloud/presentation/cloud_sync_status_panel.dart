@@ -85,7 +85,10 @@ class CloudSyncStatusPanel extends StatelessWidget {
             icon: const Icon(Icons.refresh),
             label: const Text('Verificar agora'),
           ),
-          if (status!.needsSynchronization) ...[
+          if (status!.needsSynchronization ||
+              status!.areas.values.any(
+                (area) => area.state == CloudSyncAreaState.localOnly,
+              )) ...[
             const SizedBox(height: 8),
             FilledButton.icon(
               onPressed: busy ? null : onSendAll,
