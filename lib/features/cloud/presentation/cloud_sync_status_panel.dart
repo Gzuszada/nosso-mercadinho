@@ -120,10 +120,10 @@ class CloudSyncStatusPanel extends StatelessWidget {
   }
 
   static IconData _stateIcon(CloudSyncAreaState state) => switch (state) {
-        CloudSyncAreaState.inSync => Icons.check_circle_outline,
-        CloudSyncAreaState.localOnly => Icons.phone_android_outlined,
-        CloudSyncAreaState.remoteOnly => Icons.cloud_outlined,
-        CloudSyncAreaState.divergent => Icons.compare_arrows_outlined,
-        CloudSyncAreaState.invalid => Icons.error_outline,
-      };
+    CloudSyncAreaState.inSync => Icons.check_circle_outline,
+    CloudSyncAreaState.localOnly => Icons.phone_android_outlined,
+    CloudSyncAreaState.remoteOnly => Icons.cloud_outlined,
+    CloudSyncAreaState.divergent => Icons.compare_arrows_outlined,
+    CloudSyncAreaState.invalid => Icons.error_outline,
+  };
 }
