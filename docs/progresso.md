@@ -83,6 +83,8 @@ Correção adicional durante o teste manual: na seleção de produtos de uma com
 Para a limpeza de listas, compras concluídas e suas linhas históricas são preservadas, com a lista desvinculada e o nome de origem mantido. A limpeza de carrinhos remove compras em andamento/canceladas; a limpeza de histórico remove compras concluídas. Produtos com vínculos são arquivados em vez de apagados. Limpar tudo mantém a preferência de tema.
 
 - Release 1.0.4 (1.0.4) publicada no GitHub com APK release assinado e source zip. O APK tem 66.132.844 bytes, assinatura APK v2 válida, SHA-256 E3BA094D346F302E9A8B9C8D76B643AB73DE03BA3B9F5355941BA46C75FCC196, pplicationId r.com.nocorre.mercado, ersionName 1.0.4 e ersionCode 12. A correção do SQLite Android foi validada em build debug e release no emulador: o banco mercado.sqlite foi criado e o logcat não continha sqlite3_temp_directory, DynamicLibrary, Invalid argument ou FATAL EXCEPTION. Os assets baixados da própria release foram verificados e coincidiram por hash com os arquivos locais.
+- Índice Firestore corrigido: a descoberta de casas consulta o collection group members por uid. O índice single-field members.uid com escopo COLLECTION_GROUP e ordem ASCENDING foi publicado no banco (default) do projeto 
+osso-mercado-casa e está READY. A mesma query em produção passou a retornar as três casas do proprietário, eliminando o FAILED_PRECONDITION exibido na tela Android.
 ## Entregue
 
 - Projeto Flutter em `app\`: Material 3, pt-BR, Riverpod e SQLite/Drift; execução principal offline.
