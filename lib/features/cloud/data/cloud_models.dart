@@ -135,11 +135,9 @@ class CloudSyncResult {
     required this.pulled,
     required this.pushed,
     required this.revision,
-    this.conflict,
   });
 
   final bool pulled;
   final bool pushed;
   final int revision;
-  final CloudSyncConflict? conflict;
 }
