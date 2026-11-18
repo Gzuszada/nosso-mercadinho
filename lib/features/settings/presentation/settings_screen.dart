@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../cloud/data/cloud_models.dart';
+
 import '../../../app_providers.dart';
 import '../../cloud/presentation/cloud_sync_screen.dart';
 import '../data/reset_service.dart';
@@ -314,12 +316,33 @@ class _ResetDatabaseScreenState extends ConsumerState<ResetDatabaseScreen> {
 
     setState(() => _isClearing = true);
     try {
+      final settings = await ref
+          .read(settingsRepositoryProvider)
+          .getCloudSyncSettings();
+      final householdId = settings?.householdId;
+      final propagate = householdId == null
+          ? false
+          : await _confirmConnectedReset(selection, householdId);
       await ref.read(resetServiceProvider).clear(selection);
+      if (propagate) {
+        for (final area in _affectedSyncAreas(selection)) {
+          await ref
+              .read(cloudSyncServiceProvider)
+              .publishLocalArea(householdId: householdId, area: area);
+        }
+      }
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Limpeza concluída.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            propagate
+                ? 'Limpeza concluída e propagada para a casa.'
+                : 'Limpeza concluída.',
+          ),
+        ),
+      );
       Navigator.of(context).pop();
     } on Object catch (error) {
       if (mounted) {
@@ -332,6 +355,44 @@ class _ResetDatabaseScreenState extends ConsumerState<ResetDatabaseScreen> {
         setState(() => _isClearing = false);
       }
     }
+  }
+
+  Future<bool> _confirmConnectedReset(
+    ResetSelection selection,
+    String householdId,
+  ) async {
+    final areas = _affectedSyncAreas(selection);
+    final labels = areas.map((area) => area.label).join(', ');
+    return await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: const Text('Limpar também nos outros dispositivos?'),
+            content: Text(
+              'Esta casa está conectada ao Firebase. A limpeza de $labels será publicada para que os outros celulares e o PWA da casa recebam a mesma exclusão na próxima sincronização.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('Limpar somente aqui'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: const Text('Limpar em todos'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
+
+  Set<CloudSyncConflictArea> _affectedSyncAreas(ResetSelection selection) {
+    if (selection.all) return CloudSyncConflictArea.values.toSet();
+    return {
+      if (selection.lists || selection.unfinishedPurchases || selection.history)
+        CloudSyncConflictArea.shopping,
+      if (selection.products || selection.categories)
+        CloudSyncConflictArea.catalog,
+    };
   }
 
   List<String> _confirmationDetails(

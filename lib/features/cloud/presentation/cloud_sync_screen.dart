@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app_providers.dart';
 import '../data/cloud_models.dart';
 import '../data/cloud_sync_service.dart';
+import 'cloud_sync_status_panel.dart';
 
 class _SignedOutMessage extends StatelessWidget {
   const _SignedOutMessage();
@@ -36,6 +37,7 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
   String? _householdId;
   String? _inviteCode;
   List<CloudHousehold> _households = const [];
+  CloudSyncStatus? _syncStatus;
 
   @override
   void initState() {
@@ -168,13 +170,158 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
     ),
     if (_householdId != null) ...[
       const Divider(height: 32),
-      FilledButton.icon(
-        onPressed: _busy ? null : _synchronize,
-        icon: const Icon(Icons.sync),
-        label: const Text('Sincronizar agora'),
+      CloudSyncStatusPanel(
+        status: _syncStatus,
+        busy: _busy,
+        onCheck: _checkSyncStatus,
+        onSendAll: _sendAllLocalData,
+        onUseAll: _useAllRemoteData,
+        onSynchronize: _synchronize,
+        onDeleteHousehold: _deleteHousehold,
       ),
     ],
   ];
+
+  Future<void> _checkSyncStatus() => _run(() async {
+    final id = _householdId;
+    if (id == null) return;
+    final status = await ref.read(cloudSyncServiceProvider).inspectStatus(id);
+    if (mounted) setState(() => _syncStatus = status);
+  });
+
+  Future<void> _sendAllLocalData() async {
+    final id = _householdId;
+    if (id == null) return;
+    final approved = await _confirmWholeHouse(
+      title: 'Enviar todos os dados deste dispositivo?',
+      message: 'Os dados locais substituirão no Firebase o catálogo, importações, listas, compras e histórico desta casa. Todos os outros dispositivos conectados verão a alteração na próxima sincronização.',
+    );
+    if (!approved || !mounted) return;
+    await _run(() async {
+      await ref
+          .read(cloudSyncServiceProvider)
+          .publishAllLocalAreas(householdId: id);
+      await _refreshSyncStatus(id);
+    });
+  }
+
+  Future<void> _useAllRemoteData() async {
+    final id = _householdId;
+    if (id == null) return;
+    final approved = await _confirmWholeHouse(
+      title: 'Usar todos os dados da casa?',
+      message: 'Os dados do Firebase substituirão localmente o catálogo, importações, listas, compras e histórico deste dispositivo.',
+    );
+    if (!approved || !mounted) return;
+    await _run(() async {
+      final remoteCatalog = await ref
+          .read(cloudSyncServiceProvider)
+          .readRemoteArea(householdId: id, area: CloudSyncConflictArea.catalog);
+      await ref
+          .read(cloudSyncServiceProvider)
+          .synchronize(
+            householdId: id,
+            resolutions: {
+              CloudSyncConflictArea.catalog: CloudSyncResolution(
+                payload: remoteCatalog,
+                source: CloudSyncResolutionSource.remote,
+              ),
+            },
+          );
+      await _refreshSyncStatus(id);
+    });
+  }
+
+  Future<bool> _confirmWholeHouse({
+    required String title,
+    required String message,
+  }) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: Text(title),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: const Text('Confirmar'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
+
+  Future<void> _refreshSyncStatus(String householdId) async {
+    final status = await ref
+        .read(cloudSyncServiceProvider)
+        .inspectStatus(householdId);
+    if (mounted) setState(() => _syncStatus = status);
+  }
+
+  Future<void> _deleteHousehold() async {
+    final id = _householdId;
+    if (id == null) return;
+    final typed = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) {
+        var confirmation = '';
+        return StatefulBuilder(
+          builder: (context, setDialogState) => AlertDialog(
+            title: const Text('Excluir esta casa do Firebase?'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Todos os dados compartilhados da casa serão removidos para todos os dispositivos. Exporte um backup antes se houver dúvida.',
+                ),
+                const SizedBox(height: 12),
+                const Text('Digite exatamente: EXCLUIR CASA'),
+                TextField(
+                  autofocus: true,
+                  onChanged: (value) =>
+                      setDialogState(() => confirmation = value.trim()),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton(
+                onPressed: confirmation == 'EXCLUIR CASA'
+                    ? () => Navigator.pop(dialogContext, confirmation)
+                    : null,
+                child: const Text('Excluir casa'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+    if (typed != 'EXCLUIR CASA' || !mounted) return;
+    await _run(() async {
+      await ref.read(cloudAuthServiceProvider).deleteHousehold(householdId: id);
+      await ref
+          .read(settingsRepositoryProvider)
+          .saveCloudSyncSettings(
+            householdId: null,
+            remoteRevision: 0,
+            lastSyncedHash: null,
+          );
+      ref.invalidate(selectedCloudHouseholdProvider);
+      setState(() {
+        _householdId = null;
+        _syncStatus = null;
+      });
+      await _loadHouseholds();
+    });
+  }
 
   Future<void> _loadHouseholds() async {
     if (!mounted) {
@@ -210,6 +357,9 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
             .read(settingsRepositoryProvider)
             .selectCloudHousehold(selectedId);
       }
+      if (selectedId != null) {
+        await _refreshSyncStatus(selectedId);
+      }
     } on Object catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -227,11 +377,15 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
     if (householdId == null || householdId == _householdId) {
       return;
     }
-    setState(() => _householdId = householdId);
+    setState(() {
+      _householdId = householdId;
+      _syncStatus = null;
+    });
     await ref
         .read(settingsRepositoryProvider)
         .selectCloudHousehold(householdId);
     ref.invalidate(selectedCloudHouseholdProvider);
+    await _refreshSyncStatus(householdId);
   }
 
   Future<void> _run(Future<void> Function() action) async {
@@ -358,6 +512,7 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
       throw StateError('Nenhuma casa selecionada.');
     }
     final result = await _synchronizeResolvingConflicts(id, {});
+    await _refreshSyncStatus(id);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

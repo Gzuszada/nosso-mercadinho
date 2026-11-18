@@ -4,6 +4,56 @@ import 'package:crypto/crypto.dart';
 
 enum CloudSyncConflictArea { catalog, imports, shopping }
 
+enum CloudSyncAreaState { inSync, localOnly, remoteOnly, divergent, invalid }
+
+class CloudAreaCounts {
+  const CloudAreaCounts(this.values);
+
+  final Map<String, int> values;
+
+  int get total => values.values.fold(0, (sum, count) => sum + count);
+
+  String get summary =>
+      values.entries.map((entry) => '${entry.value} ${entry.key}').join(', ');
+}
+
+class CloudSyncAreaStatus {
+  const CloudSyncAreaStatus({
+    required this.area,
+    required this.state,
+    required this.localCounts,
+    required this.remoteCounts,
+    required this.localHash,
+    required this.remoteHash,
+    this.message,
+  });
+
+  final CloudSyncConflictArea area;
+  final CloudSyncAreaState state;
+  final CloudAreaCounts localCounts;
+  final CloudAreaCounts remoteCounts;
+  final String? localHash;
+  final String? remoteHash;
+  final String? message;
+
+  bool get needsSynchronization => state != CloudSyncAreaState.inSync;
+}
+
+class CloudSyncStatus {
+  const CloudSyncStatus({
+    required this.householdId,
+    required this.remoteRevision,
+    required this.areas,
+  });
+
+  final String householdId;
+  final int remoteRevision;
+  final Map<CloudSyncConflictArea, CloudSyncAreaStatus> areas;
+
+  bool get needsSynchronization =>
+      areas.values.any((area) => area.needsSynchronization);
+}
+
 class CloudHousehold {
   const CloudHousehold({required this.id, required this.name});
 
@@ -25,6 +75,16 @@ extension CloudSyncConflictAreaLabel on CloudSyncConflictArea {
     CloudSyncConflictArea.catalog => 'catálogo',
     CloudSyncConflictArea.imports => 'importações',
     CloudSyncConflictArea.shopping => 'listas, compras e histórico',
+  };
+}
+
+extension CloudSyncAreaStateLabel on CloudSyncAreaState {
+  String get label => switch (this) {
+    CloudSyncAreaState.inSync => 'Em dia',
+    CloudSyncAreaState.localOnly => 'Somente neste dispositivo',
+    CloudSyncAreaState.remoteOnly => 'Somente no Firebase',
+    CloudSyncAreaState.divergent => 'Divergente',
+    CloudSyncAreaState.invalid => 'Dados remotos inválidos',
   };
 }
 

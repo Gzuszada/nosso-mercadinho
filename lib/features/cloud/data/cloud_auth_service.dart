@@ -218,6 +218,36 @@ class CloudAuthService {
     return householdRef.id;
   }
 
+  /// Deletes the household and all of its shared data from Firestore.
+  ///
+  /// Only the owner can call this operation according to the Firestore rules.
+  Future<void> deleteHousehold({required String householdId}) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw StateError('Entre na sua conta antes de excluir a casa.');
+    }
+    final household = _firestore.collection('households').doc(householdId);
+    final snapshot = await household.get();
+    if (!snapshot.exists) {
+      return;
+    }
+    if (snapshot.data()?['ownerUid'] != user.uid) {
+      throw StateError('Somente o dono da casa pode excluí-la.');
+    }
+
+    for (final collectionName in const ['tables', 'metadata', 'inviteClaims']) {
+      final documents = await household.collection(collectionName).get();
+      for (final document in documents.docs) {
+        await document.reference.delete();
+      }
+    }
+    await household.delete();
+    final members = await household.collection('members').get();
+    for (final member in members.docs) {
+      await member.reference.delete();
+    }
+  }
+
   Future<String> createInvite({
     required String householdId,
     required String invitedEmail,
