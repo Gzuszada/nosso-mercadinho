@@ -402,7 +402,9 @@ class CloudSyncService {
   ) {
     for (final key in _areas[area]!) {
       if (!payload.containsKey(key) || payload[key] is! List) {
-        throw FormatException('A área "${area.label}" está incompleta: $key.');
+        throw FormatException(
+          'A área "${area.label}" está incompleta: ${cloudTableLabel(key)}.',
+        );
       }
     }
     final formatVersion = payload['formatVersion'];

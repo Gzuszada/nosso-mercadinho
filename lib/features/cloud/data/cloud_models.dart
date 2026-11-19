@@ -6,6 +6,19 @@ enum CloudSyncConflictArea { catalog, imports, shopping }
 
 enum CloudSyncAreaState { inSync, localOnly, remoteOnly, divergent, invalid }
 
+String cloudTableLabel(String table, {int? count}) => switch (table) {
+  'categories' => count == 1 ? 'categoria' : 'categorias',
+  'subcategories' => count == 1 ? 'subcategoria' : 'subcategorias',
+  'products' => count == 1 ? 'produto' : 'produtos',
+  'importBatches' => count == 1 ? 'importação' : 'importações',
+  'importEntries' => count == 1 ? 'item importado' : 'itens importados',
+  'shoppingPlans' => count == 1 ? 'lista' : 'listas',
+  'plannedItems' => count == 1 ? 'item da lista' : 'itens das listas',
+  'shoppingTrips' => count == 1 ? 'compra' : 'compras',
+  'purchaseLines' => count == 1 ? 'item da compra' : 'itens das compras',
+  _ => 'dados',
+};
+
 class CloudAreaCounts {
   const CloudAreaCounts(this.values);
 
@@ -13,8 +26,12 @@ class CloudAreaCounts {
 
   int get total => values.values.fold(0, (sum, count) => sum + count);
 
-  String get summary =>
-      values.entries.map((entry) => '${entry.value} ${entry.key}').join(', ');
+  String get summary => values.entries
+      .map(
+        (entry) =>
+            '${entry.value} ${cloudTableLabel(entry.key, count: entry.value)}',
+      )
+      .join(', ');
 }
 
 class CloudSyncAreaStatus {

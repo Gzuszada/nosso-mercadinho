@@ -1,10 +1,10 @@
 # Nosso Mercadinho
 
-Aplicativo Android pessoal com dados locais, também publicado como PWA. Abra `app\` no VS Code. O identificador Android está definido como `br.com.nocorre.mercado`; a versão atual é `1.0.6+14`. A entrada no mercado exige uma conta autorizada; depois do login, o banco local continua disponível para operação offline. O app também descobre as casas vinculadas à conta, restaura o nome da casa selecionada e permite trocar a casa em **Ajustes → Conta e sincronização**.
+Aplicativo Android pessoal com dados locais, também publicado como PWA. Abra `app\` no VS Code. O identificador Android está definido como `br.com.nocorre.mercado`; a versão atual é `1.0.7+15`. A entrada no mercado exige uma conta autorizada; depois do login, o banco local continua disponível para operação offline. O app também descobre as casas vinculadas à conta, restaura o nome da casa selecionada e permite trocar a casa em **Ajustes → Conta e sincronização**.
 
 ## Download do APK
 
-A release assinada está disponível em [nosso-mercadinho-1.0.6.apk](https://github.com/Gzuszada/nosso-mercadinho/releases/download/v1.0.6/nosso-mercadinho-1.0.6.apk). SHA-256: `421B2E7E7118188CF95367EC863FADADF021C3B6239892A0A0007B8CB63BED57`.
+A release assinada está disponível em [nosso-mercadinho-1.0.7.apk](https://github.com/Gzuszada/nosso-mercadinho/releases/download/v1.0.7/nosso-mercadinho-1.0.7.apk). SHA-256: `7B43417F77CB74288DA73020C0E07EDF05524B71571B8DC79448C392E4311DB7`.
 
 ## O que já funciona
 
@@ -126,7 +126,7 @@ As duas pessoas da casa podem:
 4. entrar com o código no segundo dispositivo;
 5. tocar em **Sincronizar agora**.
 
-A primeira sincronização publica os dados locais da casa. Se os dois dispositivos já tiverem alterações divergentes, o app mostra o conflito por área (catálogo, importações ou listas/compras) e permite manter a versão local ou aplicar a remota. Firestore é o espelho compartilhado; o banco Drift local continua sendo a fonte imediata e offline.
+A primeira sincronização publica os dados locais da casa. Se os dois dispositivos já tiverem alterações divergentes, o app mostra o conflito por área (catálogo, importações ou listas/compras) e permite manter a versão local ou aplicar a remota. O estado mostra os contadores com os mesmos termos usados no aplicativo: **categorias**, **subcategorias**, **produtos**, **importações**, **itens importados**, **listas**, **itens das listas**, **compras** e **itens das compras**. Firestore é o espelho compartilhado; o banco Drift local continua sendo a fonte imediata e offline.
 
 O projeto Firebase `nosso-mercado-casa` (nome de exibição **Nosso Mercado**) usa o banco `(default)` em `southamerica-east1`. O Identity Platform está inicializado, o provedor **Authentication → Email/Password** está habilitado e a blocking function `beforeCreateUser` está publicada em `us-central1`. O Firestore, as regras e a operação offline permanecem disponíveis mesmo se o cadastro em nuvem estiver indisponível.
 
