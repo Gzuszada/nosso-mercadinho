@@ -1,10 +1,10 @@
 # Nosso Mercadinho
 
-Aplicativo Android pessoal com dados locais, também publicado como PWA. Abra `app\` no VS Code. O identificador Android está definido como `br.com.nocorre.mercado`; a versão atual é `1.0.4+12`. A entrada no mercado exige uma conta autorizada; depois do login, o banco local continua disponível para operação offline. O app também descobre as casas vinculadas à conta, restaura o nome da casa selecionada e permite trocar a casa em **Ajustes → Conta e sincronização**.
+Aplicativo Android pessoal com dados locais, também publicado como PWA. Abra `app\` no VS Code. O identificador Android está definido como `br.com.nocorre.mercado`; a versão atual é `1.0.6+14`. A entrada no mercado exige uma conta autorizada; depois do login, o banco local continua disponível para operação offline. O app também descobre as casas vinculadas à conta, restaura o nome da casa selecionada e permite trocar a casa em **Ajustes → Conta e sincronização**.
 
 ## Download do APK
 
-A release assinada está disponível em [nosso-mercadinho-1.0.4.apk](https://github.com/Gzuszada/nosso-mercadinho/releases/download/v1.0.4/nosso-mercadinho-1.0.4.apk). SHA-256: `E3BA094D346F302E9A8B9C8D76B643AB73DE03BA3B9F5355941BA46C75FCC196`.
+A release assinada está disponível em [nosso-mercadinho-1.0.6.apk](https://github.com/Gzuszada/nosso-mercadinho/releases/download/v1.0.6/nosso-mercadinho-1.0.6.apk). SHA-256: `421B2E7E7118188CF95367EC863FADADF021C3B6239892A0A0007B8CB63BED57`.
 
 ## O que já funciona
 
@@ -102,7 +102,7 @@ Não edite `lib\data\app_database.g.dart` manualmente. Verificações e decisõe
 
 A versão Web é publicada em `https://nosso-mercado-casa.web.app`. No iPhone (Safari), abra esse endereço, toque em **Compartilhar** e depois em **Adicionar à Tela de Início**. O app instalado abre em tela cheia. A tela de entrada exige uma conta autorizada; após autenticar, o app continua usando o Drift local quando a internet está indisponível.
 
-Na versão Web, a tela de entrada oferece **Esqueci minha senha**. O envio usa o template de redefinição de senha do Firebase Authentication e o link retorna ao site após a troca. O aplicativo Android informa que a recuperação está disponível no site, mas ainda não oferece a ação; nenhuma nova versão do APK é necessária para usar a redefinição pela Web.
+A tela de entrada oferece **Esqueci minha senha** na versão Web e no aplicativo Android. O envio usa o template de redefinição de senha do Firebase Authentication. No APK, o link é aberto no navegador para a troca segura e retorna ao site depois que a nova senha for salva.
 
 A build web oficial usa Dart2JS para a interface e mantém o Drift em SQLite WebAssembly dentro de `drift_worker.js`:
 

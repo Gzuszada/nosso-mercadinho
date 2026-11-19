@@ -1,6 +1,10 @@
 # Progresso
 
-## Estado atual — 17/11/2026
+## Estado atual — 19/11/2026
+
+- Recuperação de senha no APK: a tela de entrada agora oferece **Esqueci minha senha** na Web e no Android. O serviço usa `sendPasswordResetEmail`, o template padrão do Firebase Authentication e a URL autorizada `https://nosso-mercado-casa.web.app`; a troca é concluída no navegador e retorna ao site. A resposta de sucesso é genérica, sem revelar se o e-mail possui conta. `flutter analyze --no-pub` passou sem problemas; a suíte completa passou com 96 testes; o build release assinado `1.0.6+14` (`br.com.nocorre.mercado`, versionCode 14) foi gerado com assinatura APK v2 válida, 66.232.360 bytes e SHA-256 `421B2E7E7118188CF95367EC863FADADF021C3B6239892A0A0007B8CB63BED57`. O certificado é idêntico ao das releases anteriores, permitindo atualização sem desinstalação. Não havia aparelho Android conectado para instalação e teste físico.
+
+## Estado anterior — 17/11/2026
 
 - Correção da PWA travada: a build JavaScript padrão acionava bindings FFI nativos incompatíveis com WebAssembly. A build oficial agora é `flutter build web --release --no-pub`: a interface usa Dart2JS, sem exigir WasmGC, e o Drift é executado em `drift_worker.js` com o `sqlite3.wasm` oficial do `sqlite3 3.5.2` (SHA-256 `13D3F11D05B39BA0618A7115FB41640A5D48B6300F5D3F325F554B42BD6688A4`). O bundle não contém ``sqlite3_temp_directory`` nem ``DynamicLibrary``; smoke test no Chrome confirmou abertura do worker e criação do banco IndexedDB sem exceções. Essa combinação cobre o erro do Android e a página branca do iPhone 11/Safari sem WasmGC. `flutter analyze` passou sem problemas e os 86 testes foram aprovados. O APK `1.0.4+12` não foi alterado.
 

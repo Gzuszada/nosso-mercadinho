@@ -81,7 +81,7 @@ void main() {
     });
   });
 
-  testWidgets('site oferece recuperação de senha e confirma o envio', (
+  testWidgets('aplicativo oferece recuperação de senha e confirma o envio', (
     tester,
   ) async {
     final auth = _RecordingFirebaseAuth();
@@ -93,11 +93,15 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [cloudAuthServiceProvider.overrideWithValue(service)],
-        child: const MaterialApp(home: AuthScreen(isWeb: true)),
+        child: const MaterialApp(home: AuthScreen()),
       ),
     );
 
     expect(find.text('Esqueci minha senha'), findsOneWidget);
+    expect(
+      find.text('A redefinição será concluída com segurança no navegador.'),
+      findsOneWidget,
+    );
     expect(
       find.byKey(const Key('auth-forgot-password-unavailable')),
       findsNothing,
@@ -115,21 +119,6 @@ void main() {
       find.text(
         'Se o e-mail tiver uma conta, enviaremos as instruções para '
         'redefinir a senha.',
-      ),
-      findsOneWidget,
-    );
-  });
-
-  testWidgets('aplicativo informa que a recuperação está no site', (
-    tester,
-  ) async {
-    await tester.pumpWidget(const MaterialApp(home: AuthScreen(isWeb: false)));
-
-    expect(find.byKey(const Key('auth-forgot-password')), findsNothing);
-    expect(
-      find.text(
-        'Para redefinir a senha, use o site do Nosso Mercado. '
-        'Essa opção ainda não está disponível neste aplicativo.',
       ),
       findsOneWidget,
     );

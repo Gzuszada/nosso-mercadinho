@@ -1,13 +1,10 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app_providers.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
-  const AuthScreen({super.key, this.isWeb = kIsWeb});
-
-  final bool isWeb;
+  const AuthScreen({super.key});
 
   @override
   ConsumerState<AuthScreen> createState() => _AuthScreenState();
@@ -117,20 +114,18 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     child: const Text('Criar conta autorizada'),
                   ),
                   const SizedBox(height: 4),
-                  if (widget.isWeb)
-                    TextButton(
-                      key: const Key('auth-forgot-password'),
-                      onPressed: _busy ? null : _sendPasswordResetEmail,
-                      child: const Text('Esqueci minha senha'),
-                    )
-                  else
-                    Text(
-                      'Para redefinir a senha, use o site do Nosso Mercado. '
-                      'Essa opção ainda não está disponível neste aplicativo.',
-                      key: const Key('auth-forgot-password-unavailable'),
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
+                  TextButton(
+                    key: const Key('auth-forgot-password'),
+                    onPressed: _busy ? null : _sendPasswordResetEmail,
+                    child: const Text('Esqueci minha senha'),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'A redefinição será concluída com segurança no navegador.',
+                    key: const Key('auth-forgot-password-info'),
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                   if (_busy) ...[
                     const SizedBox(height: 16),
                     const Center(child: CircularProgressIndicator()),

@@ -78,11 +78,12 @@ Atualizado em 17/11/2026. Este registro documenta decisões aprovadas para a Eta
 ## Etapa 4: confiabilidade e APK pessoal
 
 - Distribuição aprovada: Android Developer Console **Limited distribution**, fora da Google Play, com autorização do dispositivo pessoal. Requer conta Google, autenticação em duas etapas e perfil de pagamentos; o usuário fará cadastro e verificação diretamente com Google, sem compartilhar credenciais.
-- O `applicationId` aprovado é `br.com.nocorre.mercado`; versão atual `1.0.0+7` (build 7).
+- O `applicationId` aprovado é `br.com.nocorre.mercado`; versão atual `1.0.6+14` (build 14).
 - Backup automático Android/Google Drive e regras de transferência de dispositivo foram explicitamente desativados. A recuperação depende do JSON manual do app, que contém dados pessoais; documentado no README.
 - Release só pode usar uma chave própria carregada de `android/key.properties`; build release falha se a chave ou propriedades não estiverem disponíveis. O arquivo de chave permanece fora do projeto e nunca deve ser compartilhado.
 - APK release e debug usam assinaturas diferentes. A release usa `MercadoRelease.jks`, cuja assinatura é compatível com a instalação release anterior; atualizações futuras do mesmo pacote devem usar essa mesma chave. Dados pessoais devem continuar protegidos por backup JSON manual e não versionados.
 - Android exige registro de pacotes em dispositivos certificados no Brasil desde 30/09/2026. A rota escolhida é distribuição limitada, sem publicação ou listagem na Play Store. O limite de dispositivos publicado nas páginas oficiais não é necessário para o uso individual.
+- A recuperação de senha está disponível na Web e no APK desde a versão `1.0.6+14`. O botão **Esqueci minha senha** envia o template do Firebase Authentication; o link de redefinição usa `https://nosso-mercado-casa.web.app`, com `handleCodeInApp: false`, para concluir a troca no navegador e retornar ao site. A confirmação de sucesso é genérica e não revela se o e-mail possui conta.
 
 ## PWA, sincronização compartilhada e estado publicado
 
