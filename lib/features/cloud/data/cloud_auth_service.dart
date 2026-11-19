@@ -75,6 +75,54 @@ class CloudAuthService {
 
   Future<void> signOut() => _auth.signOut();
 
+  /// Envia o e-mail de redefinição de senha usando o template do Firebase.
+  ///
+  /// A URL permite que a página de ação do Firebase conclua a troca e
+  /// devolva a pessoa ao site depois que a nova senha for salva.
+  Future<void> sendPasswordResetEmail({required String email}) async {
+    final normalizedEmail = email.trim();
+    if (normalizedEmail.isEmpty || !normalizedEmail.contains('@')) {
+      throw StateError('Informe um e-mail válido.');
+    }
+
+    try {
+      await _auth.sendPasswordResetEmail(
+        email: normalizedEmail,
+        actionCodeSettings: ActionCodeSettings(
+          url: 'https://nosso-mercado-casa.web.app',
+          handleCodeInApp: false,
+        ),
+      );
+    } on FirebaseAuthException catch (error) {
+      switch (error.code) {
+        case 'invalid-email':
+          throw StateError('Informe um e-mail válido.');
+        case 'user-not-found':
+          // Não revela se o e-mail pertence a uma conta. O chamador mostra
+          // a mesma confirmação usada quando o envio é realizado com sucesso.
+          return;
+        case 'too-many-requests':
+          throw StateError(
+            'Muitas tentativas foram enviadas. Aguarde alguns minutos e '
+            'tente novamente.',
+          );
+        case 'operation-not-allowed':
+        case 'internal-error':
+          throw StateError(
+            'A recuperação de senha está temporariamente indisponível. '
+            'Tente novamente mais tarde.',
+          );
+        case 'network-request-failed':
+          throw StateError(
+            'Não foi possível conectar à internet. Verifique sua conexão e '
+            'tente novamente.',
+          );
+        default:
+          rethrow;
+      }
+    }
+  }
+
   /// Garante que contas criadas antes da criação do nome de usuário tenham um
   /// nome utilizável, sem precisar apagar ou recriar a conta.
   Future<void> ensureDisplayName() async {

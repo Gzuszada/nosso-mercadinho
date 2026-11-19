@@ -102,6 +102,8 @@ Não edite `lib\data\app_database.g.dart` manualmente. Verificações e decisõe
 
 A versão Web é publicada em `https://nosso-mercado-casa.web.app`. No iPhone (Safari), abra esse endereço, toque em **Compartilhar** e depois em **Adicionar à Tela de Início**. O app instalado abre em tela cheia. A tela de entrada exige uma conta autorizada; após autenticar, o app continua usando o Drift local quando a internet está indisponível.
 
+Na versão Web, a tela de entrada oferece **Esqueci minha senha**. O envio usa o template de redefinição de senha do Firebase Authentication e o link retorna ao site após a troca. O aplicativo Android informa que a recuperação está disponível no site, mas ainda não oferece a ação; nenhuma nova versão do APK é necessária para usar a redefinição pela Web.
+
 A build web oficial usa Dart2JS para a interface e mantém o Drift em SQLite WebAssembly dentro de `drift_worker.js`:
 
 ```powershell
