@@ -33,7 +33,7 @@ class CloudSnapshotService {
   Future<void> restoreRemotePayload(Map<String, dynamic> payload) async {
     await BackupService(_database).restoreValidatedPayload({
       ...payload,
-      'formatVersion': payload['formatVersion'] ?? 6,
+      'formatVersion': payload['formatVersion'] ?? 7,
     });
   }
 }

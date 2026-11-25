@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../data/app_database.dart';
 import '../../settings/data/settings_repository.dart';
+import '../domain/collaboration.dart';
 import 'cloud_models.dart';
 import 'cloud_snapshot_service.dart';
 import 'sync_v2_candidate.dart';
@@ -380,6 +381,7 @@ class CloudSyncService {
     final client = syncV2Client!;
     final settings = await settingsRepository.getCloudSyncSettings();
     var localPayload = await CloudSnapshotService(database).readLocalPayload();
+    final originalLocalPayload = Map<String, dynamic>.from(localPayload);
     final baseHashes = _decodeHashes(settings?.lastSyncedHash);
     final remote = await client.readCurrentState(householdId);
     final remoteAreas = <String, Map<String, dynamic>>{};
@@ -423,14 +425,24 @@ class CloudSyncService {
           requiresOwnerModeration = true;
         }
       } else if (localChanged && remoteChanged && remoteHash != localHash) {
-        throw CloudSyncConflictException(
-          CloudSyncConflict(
-            area: area,
-            localPayload: localArea,
-            remotePayload: remoteArea ?? const {},
-            remoteRevision: remote?.generation ?? 0,
-          ),
+        final merged = const CollaborativeAreaMerger().merge(
+          localArea,
+          remoteArea ?? const {},
         );
+        if (merged.hasConflicts) {
+          throw CloudSyncConflictException(
+            CloudSyncConflict(
+              area: area,
+              localPayload: localArea,
+              remotePayload: remoteArea ?? const {},
+              remoteRevision: remote?.generation ?? 0,
+            ),
+          );
+        }
+        localPayload = mergeArea(localPayload, area, merged.payload);
+        remoteAreas[area.name] = merged.payload;
+        pulled = true;
+        pushed = true;
       } else if (remoteChanged && !localChanged) {
         localPayload = mergeArea(localPayload, area, remoteAreas[area.name]!);
         pulled = true;
@@ -440,6 +452,14 @@ class CloudSyncService {
       } else if (remoteHash == localHash) {
         remoteAreas[area.name] = localArea;
       }
+    }
+
+    localPayload = CollaborativeIdentityNormalizer.normalize(
+      originalLocalPayload,
+      localPayload,
+    );
+    for (final area in _areas.keys) {
+      remoteAreas[area.name] = selectArea(localPayload, area);
     }
 
     if (pulled) {
@@ -672,7 +692,7 @@ class CloudSyncService {
       }
     }
     final formatVersion = payload['formatVersion'];
-    if (formatVersion is! int || formatVersion < 1 || formatVersion > 6) {
+    if (formatVersion is! int || formatVersion < 1 || formatVersion > 7) {
       throw const FormatException(
         'A área remota usa uma versão de backup inválida.',
       );

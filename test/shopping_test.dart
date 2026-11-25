@@ -864,7 +864,7 @@ void main() {
       ),
       ['Arroz', 'Arroz', 'Arroz'],
     );
-    expect((jsonDecode(backup) as Map<String, dynamic>)['formatVersion'], 6);
+    expect((jsonDecode(backup) as Map<String, dynamic>)['formatVersion'], 7);
   });
 
   test(

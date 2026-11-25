@@ -29,12 +29,19 @@ APKs gerados:
 - `build/app/outputs/flutter-apk/app-production-release.apk`
 - `build/app/outputs/flutter-apk/app-pilot-release.apk`
 
-O APK piloto release validado em 25/11/2026 usa o package
+O APK piloto release anterior, validado em 25/11/2026, usava o package
 `br.com.nocorre.mercado.pilot`, versionCode `16`, versionName `1.0.8-pilot`,
 assinatura APK v2 válida e SHA-256
 `E23086D99E94B5EBD7B861AA17C3D6C3580CAE2BEF171886BC6D45E870A26E27`.
 Ele instala lado a lado com a produção e não pode substituir uma instalação
 piloto debug, pois as chaves de assinatura são diferentes.
+
+O APK piloto release collaboration gerado após a implementação do schema 8/backup 7
+usa o package `br.com.nocorre.mercado.pilot`, versionCode `17`, versionName
+`1.0.9-pilot`, assinatura APK v2 válida e SHA-256
+`A1134A7B258B599D0A50BEC9846FD6A00296DAA51E38D9157CF39253F65274C5`.
+Ele pode atualizar a release piloto `1.0.8-pilot+16` por `adb install -r`
+quando ambas usarem a mesma chave de assinatura.
 
 ## Deploy exclusivo do piloto
 
@@ -47,6 +54,14 @@ As regras de produção continuam em `firestore.rules` e são publicadas com `fi
 
 ## Protocolo v2 implementado
 
+- O schema persistente é Drift 8. Produtos, listas e itens planejados possuem `syncId`, `logicalKey`, autoria, estado de revisão, `deletedAt` e `syncRevision`.
+- A migração 7 → 8 preenche IDs e chaves legadas de forma determinística e tolera bancos com layout parcial.
+- O backup atual é formato 7, serializa os metadados de colaboração e preserva tombstones. Backups 1–6 continuam aceitos e recebem defaults legadas durante o restore.
+- Itens criados por membro entram como `pending_review`; o owner pode aprovar ou rejeitar explicitamente. O owner cria itens já aprovados.
+- A identidade cross-device usa `syncId`; `logicalKey` é a chave semântica e pode permanecer duplicada para permitir detecção e decisão do owner.
+- A exclusão lógica preserva linhas como tombstone. O tombstone vence um item vivo durante o merge e impede ressurreição por publicação antiga.
+- O merge por área é atômico para tabelas não colaboráveis e por item para as tabelas colaboráveis. Uniões sem sobreposição são republicadas; conflitos reais permanecem em `CloudSyncConflictException`.
+- A restauração normaliza colisões de PK inteira entre dispositivos usando os `syncId` dos pais e remapeia as referências de itens planejados, importações e compras.
 - Cada área é dividida em chunks imutáveis de até 700 KiB.
 - Cada chunk possui hash SHA-256 canônico e contagem de linhas.
 - O manifesto aponta para todos os chunks e informa hashes e contagens por tabela.
@@ -103,30 +118,28 @@ coberto por teste; a validação final com dois dispositivos continua pendente.
 | Cenário | Estado | Comportamento atual |
 | --- | --- | --- |
 | 1 — uso normal | Parcial | Criação da casa, convite, pull e push de snapshots completos existem; falta o teste real com dois dispositivos. |
-| 2 — autoria e revisão | Ausente | O manifesto identifica o autor da publication, não de cada item. Não há nome do autor no item, revisão nem confirmação pelo owner. |
-| 3 — remoção | Parcial | A remoção pode ser propagada por snapshot completo; não há tombstone de sincronização. |
-| 4 — publicação concorrente sem sobreposição | Ausente | O perdedor é preservado como candidate, mas não há merge por item. |
-| 5 — publicação concorrente com sobreposição | Parcial | O conflito de generation é detectado e preservado, mas o owner não recebe uma tela de comparação/decisão das duas versões. |
-| 6 — duplicata por `logicalKey` | Ausente | Não existe `logicalKey` nem revisão de duplicatas. |
+| 2 — autoria e revisão | Parcial | Autoria e revisão por item existem no schema, backup e serviço de colaboração; falta expor a decisão do owner em uma UI central. |
+| 3 — remoção | Pronto | Remoções preservam tombstone e o item desaparece das consultas normais. |
+| 4 — publicação concorrente sem sobreposição | Pronto | Alterações em `logicalKey` diferentes são unidas por item e republicadas. |
+| 5 — publicação concorrente com sobreposição | Parcial | O conflito é detectado e o banco local não é alterado; falta uma tela central de comparação/decisão. |
+| 6 — duplicata por `logicalKey` | Parcial | Duplicatas são detectadas no merge e preservadas para decisão; falta a UI de resolução pelo owner. |
 | 7 — falha de rede | Parcial | Chunks imutáveis e retry da mesma publication são idempotentes, mas o `publicationId` não é persistido para retomar automaticamente a mesma publication após nova tentativa. |
-| 8 — owner remove durante publication antiga | Ausente | Não existe tombstone que impeça a ressurreição do item removido. |
+| 8 — owner remove durante publication antiga | Pronto | O tombstone vence o item vivo e impede ressurreição por publicação antiga. |
 
-O schema real do piloto continua Drift 7 e o backup real é formato 6. O schema
-8/backup 7, IDs estáveis entre dispositivos, autoria por item, `logicalKey`,
-tombstones e fluxo de moderação do owner pertencem à próxima camada e ainda
-não são parte do APK `1.0.8-pilot+16`.
+O schema persistente implementado é Drift 8 e o backup é formato 7. O APK
+`1.0.8-pilot+16` foi construído antes desta camada e, portanto, não contém
+IDs estáveis entre dispositivos, autoria/revisão por item, `logicalKey`,
+tombstones nem o merge por item.
 
 A correção que permite a um membro usar "Enviar todos os dados deste
-dispositivo" sem ser tratado como publicação exclusiva do owner foi aplicada
-no código após a tag `v1.0.8-pilot`. Ela ainda precisa entrar em um próximo
-APK piloto; a release `1.0.8-pilot+16` não deve ser considerada atualizada com
-essa correção.
+dispositivo" sem ser tratado como publicação exclusiva do owner também ainda
+precisa entrar em um próximo APK piloto.
 
 
-## Próxima camada
+## Limitações e próxima camada
 
-- IDs estáveis e autoria por item no Drift/backup.
-- Merge por `logicalKey` entre itens não sobrepostos.
-- Tombstones e proteção contra remoção remota.
-- Revisão de duplicatas e moderação pelo owner.
-- Comparação visual das publications concorrentes.
+- O cliente persiste apenas o hash da base, não o payload-base. Alterações concorrentes do mesmo item são, por isso, tratadas conservadoramente como conflito.
+- Não existe UI central de conflitos/publicação consolidada; a decisão de duplicatas e o fluxo visual de moderação pelo owner continuam pendentes.
+- A migração do Firestore piloto para `southamerica-east1` exige uma operação destrutiva coordenada; o projeto permanece em `nam5`.
+- A collaborative key (`syncId`) é validada como única por tabela no payload, mas não há índice UNIQUE físico no schema 8 já publicado.
+- Falta o teste cooperativo real com dois dispositivos e contas autorizadas.

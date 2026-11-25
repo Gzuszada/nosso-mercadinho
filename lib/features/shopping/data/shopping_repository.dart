@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 import '../../../data/app_database.dart';
 import '../../catalog/data/catalog_import.dart';
+import '../../cloud/domain/collaboration.dart';
 import '../domain/shopping_calculations.dart';
 import '../domain/shopping_history.dart';
 
@@ -203,9 +204,13 @@ class _ProductLineAggregate {
 }
 
 class ShoppingRepository {
-  const ShoppingRepository(this._database);
+  const ShoppingRepository(this._database, {this.actorResolver});
 
   final AppDatabase _database;
+  final CollaborationActorResolver? actorResolver;
+
+  Future<CollaborationActor> _actor() async =>
+      await actorResolver?.call() ?? const CollaborationActor.local();
 
   Stream<List<ShoppingPlan>> watchPlans() {
     return (_database.select(_database.shoppingPlans)..orderBy([
@@ -286,12 +291,27 @@ class ShoppingRepository {
         'O nome da lista pode ter até 120 caracteres.',
       );
     }
+    final actor = await _actor();
     return _database
         .into(_database.shoppingPlans)
         .insert(
           ShoppingPlansCompanion.insert(
             monthKey: monthKey,
             name: normalizedName,
+            syncId: Value(CollaborationMetadata.newSyncId('plan')),
+            logicalKey: Value(
+              CollaborationMetadata.planLogicalKey(
+                monthKey: monthKey,
+                name: normalizedName,
+              ),
+            ),
+            authorUid: Value(actor.uid),
+            authorName: Value(actor.displayName),
+            reviewState: Value(
+              actor.role == CollaborationRole.member
+                  ? CollaborationMetadata.pendingReview
+                  : CollaborationMetadata.approved,
+            ),
           ),
         );
   }
@@ -355,6 +375,16 @@ class ShoppingRepository {
         mode: currentMode,
         beforeDate: ShoppingHistoryCalculations.firstDayOfMonth(plan.monthKey),
       );
+      final actor = await _actor();
+      final planSyncId = plan.syncId ?? 'legacy:plan:${plan.id}';
+      final productSyncId = product.syncId ?? 'legacy:product:${product.id}';
+      final logicalKey = CollaborationMetadata.plannedItemLogicalKey(
+        planSyncId: planSyncId,
+        productSyncId: productSyncId,
+      );
+      final reviewState = actor.role == CollaborationRole.member
+          ? CollaborationMetadata.pendingReview
+          : CollaborationMetadata.approved;
 
       final existing =
           await (_database.select(_database.plannedItems)..where(
@@ -377,6 +407,11 @@ class ShoppingRepository {
             measurementMode: Value(currentMode.name),
             quantity: Value(quantity),
             isRemoved: const Value(false),
+            deletedAt: const Value(null),
+            authorUid: Value(actor.uid),
+            authorName: Value(actor.displayName),
+            reviewState: Value(reviewState),
+            syncRevision: Value(item.syncRevision + 1),
             estimatePriceNumeratorCents: Value(estimate?.priceNumeratorCents),
             estimateQuantityDenominator: Value(estimate?.quantityDenominator),
             estimateSource: Value(estimate?.source),
@@ -396,6 +431,11 @@ class ShoppingRepository {
               productId: productId,
               measurementMode: currentMode.name,
               quantity: quantity,
+              syncId: Value(CollaborationMetadata.newSyncId('planned-item')),
+              logicalKey: Value(logicalKey),
+              authorUid: Value(actor.uid),
+              authorName: Value(actor.displayName),
+              reviewState: Value(reviewState),
               estimatePriceNumeratorCents: Value(estimate?.priceNumeratorCents),
               estimateQuantityDenominator: Value(estimate?.quantityDenominator),
               estimateSource: Value(estimate?.source),
@@ -508,6 +548,7 @@ class ShoppingRepository {
     )..where((row) => row.id.equals(itemId))).write(
       PlannedItemsCompanion(
         quantity: Value(quantity),
+        syncRevision: Value(item.syncRevision + 1),
         updatedAt: Value(DateTime.now()),
       ),
     );
@@ -531,6 +572,8 @@ class ShoppingRepository {
         )..where((row) => row.id.equals(itemId))).write(
           PlannedItemsCompanion(
             isRemoved: const Value(true),
+            deletedAt: Value(DateTime.now()),
+            syncRevision: Value(item.syncRevision + 1),
             updatedAt: Value(DateTime.now()),
           ),
         );
@@ -682,25 +725,15 @@ class ShoppingRepository {
         final purchased = purchasedMap[item.id] ?? 0;
         final remaining = item.quantity - purchased;
         if (remaining > 0) {
-          await _database
-              .into(_database.plannedItems)
-              .insert(
-                PlannedItemsCompanion.insert(
-                  planId: newPlanId,
-                  productId: item.productId,
-                  measurementMode: item.measurementMode,
-                  quantity: remaining,
-                  estimatePriceNumeratorCents: Value(
-                    item.estimatePriceNumeratorCents,
-                  ),
-                  estimateQuantityDenominator: Value(
-                    item.estimateQuantityDenominator,
-                  ),
-                  estimateSource: Value(item.estimateSource),
-                  estimateReferenceDate: Value(item.estimateReferenceDate),
-                  estimateReferenceTripId: Value(item.estimateReferenceTripId),
-                ),
-              );
+          await addPlannedItem(
+            planId: newPlanId,
+            productId: item.productId,
+            mode: MeasurementMode.values.firstWhere(
+              (mode) => mode.name == item.measurementMode,
+              orElse: () => MeasurementMode.unit,
+            ),
+            quantity: remaining,
+          );
         }
       }
       return newPlanId;

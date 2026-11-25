@@ -7,9 +7,42 @@ import 'features/cloud/data/cloud_auth_service.dart';
 import 'features/cloud/data/cloud_models.dart';
 import 'features/cloud/data/cloud_sync_service.dart';
 import 'features/cloud/data/sync_v2_client.dart';
+import 'features/cloud/domain/collaboration.dart';
+import 'features/cloud/domain/collaboration_service.dart';
 import 'features/settings/data/reset_service.dart';
 import 'features/settings/data/settings_repository.dart';
 import 'features/shopping/data/shopping_repository.dart';
+
+Future<CollaborationActor?> _resolveCollaborationActor(Ref ref) async {
+  try {
+    final user = ref.read(cloudAuthServiceProvider).currentUser;
+    if (user == null) {
+      return null;
+    }
+    final settings = await ref
+        .read(settingsRepositoryProvider)
+        .getCloudSyncSettings();
+    final householdId = settings?.householdId;
+    if (householdId == null) {
+      return null;
+    }
+    final isOwner = await ref
+        .read(cloudAuthServiceProvider)
+        .isHouseholdOwner(householdId);
+    return CollaborationActor(
+      uid: user.uid,
+      displayName: user.displayName?.trim().isNotEmpty == true
+          ? user.displayName!.trim()
+          : CloudAuthService.defaultDisplayName(user.email),
+      role: isOwner ? CollaborationRole.owner : CollaborationRole.member,
+    );
+  } on Object {
+    // Collaboration metadata must never block an offline/local write. Firebase
+    // may not be initialized in tests, the account may have disappeared, or
+    // the owner lookup may fail while the device is offline.
+    return null;
+  }
+}
 
 final databaseProvider = Provider<AppDatabase>((ref) {
   final database = AppDatabase();
@@ -18,11 +51,24 @@ final databaseProvider = Provider<AppDatabase>((ref) {
 });
 
 final catalogRepositoryProvider = Provider<CatalogRepository>(
-  (ref) => CatalogRepository(ref.watch(databaseProvider)),
+  (ref) => CatalogRepository(
+    ref.watch(databaseProvider),
+    actorResolver: () => _resolveCollaborationActor(ref),
+  ),
 );
 
 final shoppingRepositoryProvider = Provider<ShoppingRepository>(
-  (ref) => ShoppingRepository(ref.watch(databaseProvider)),
+  (ref) => ShoppingRepository(
+    ref.watch(databaseProvider),
+    actorResolver: () => _resolveCollaborationActor(ref),
+  ),
+);
+
+final collaborationServiceProvider = Provider<CollaborationService>(
+  (ref) => CollaborationService(
+    ref.watch(databaseProvider),
+    actorResolver: () => _resolveCollaborationActor(ref),
+  ),
 );
 
 final settingsRepositoryProvider = Provider<SettingsRepository>(

@@ -42,6 +42,17 @@ class Products extends Table {
       boolean().withDefault(const Constant(false))();
   TextColumn get description => text().nullable()();
   BoolColumn get isArchived => boolean().withDefault(const Constant(false))();
+  TextColumn get syncId => text().nullable()();
+  TextColumn get logicalKey => text().nullable()();
+  TextColumn get authorUid => text().nullable()();
+  TextColumn get authorName => text().nullable()();
+  TextColumn get reviewState =>
+      text().withDefault(const Constant('approved'))();
+  TextColumn get reviewedByUid => text().nullable()();
+  TextColumn get reviewedByName => text().nullable()();
+  DateTimeColumn get reviewedAt => dateTime().nullable()();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
+  IntColumn get syncRevision => integer().withDefault(const Constant(0))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
@@ -84,6 +95,17 @@ class ShoppingPlans extends Table {
   TextColumn get monthKey => text().withLength(min: 7, max: 7)();
   TextColumn get name => text().withLength(min: 1, max: 120)();
   TextColumn get status => text().withDefault(const Constant('active'))();
+  TextColumn get syncId => text().nullable()();
+  TextColumn get logicalKey => text().nullable()();
+  TextColumn get authorUid => text().nullable()();
+  TextColumn get authorName => text().nullable()();
+  TextColumn get reviewState =>
+      text().withDefault(const Constant('approved'))();
+  TextColumn get reviewedByUid => text().nullable()();
+  TextColumn get reviewedByName => text().nullable()();
+  DateTimeColumn get reviewedAt => dateTime().nullable()();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
+  IntColumn get syncRevision => integer().withDefault(const Constant(0))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
@@ -106,6 +128,17 @@ class PlannedItems extends Table {
     #id,
     onDelete: KeyAction.restrict,
   )();
+  TextColumn get syncId => text().nullable()();
+  TextColumn get logicalKey => text().nullable()();
+  TextColumn get authorUid => text().nullable()();
+  TextColumn get authorName => text().nullable()();
+  TextColumn get reviewState =>
+      text().withDefault(const Constant('approved'))();
+  TextColumn get reviewedByUid => text().nullable()();
+  TextColumn get reviewedByName => text().nullable()();
+  DateTimeColumn get reviewedAt => dateTime().nullable()();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
+  IntColumn get syncRevision => integer().withDefault(const Constant(0))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
@@ -188,7 +221,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? openAppDatabase());
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -244,8 +277,98 @@ class AppDatabase extends _$AppDatabase {
       if (from < 7) {
         await migrator.createTable(cloudSyncSettings);
       }
+      if (from < 8) {
+        await _ensureCollaborationColumns();
+
+        // Existing rows receive deterministic IDs so an upgrade does not
+        // manufacture a different identity on every device.
+        await customStatement(
+          "UPDATE products SET sync_id = 'legacy:product:' || id "
+          'WHERE sync_id IS NULL',
+        );
+        await customStatement(
+          "UPDATE products SET logical_key = 'product:' || lower(trim(name)) || ':' || lower(measurement_mode) "
+          'WHERE logical_key IS NULL',
+        );
+        await customStatement(
+          "UPDATE shopping_plans SET sync_id = 'legacy:plan:' || id "
+          'WHERE sync_id IS NULL',
+        );
+        await customStatement(
+          "UPDATE shopping_plans SET logical_key = 'plan:' || month_key || ':' || lower(trim(name)) "
+          'WHERE logical_key IS NULL',
+        );
+        await customStatement(
+          "UPDATE planned_items SET sync_id = 'legacy:planned-item:' || id "
+          'WHERE sync_id IS NULL',
+        );
+        await customStatement('''UPDATE planned_items SET logical_key =
+            'planned-item:' || (
+              SELECT sync_id FROM shopping_plans
+              WHERE shopping_plans.id = planned_items.plan_id
+            ) || ':' || (
+              SELECT sync_id FROM products
+              WHERE products.id = planned_items.product_id
+            )
+            WHERE logical_key IS NULL''');
+      }
     },
   );
+
+  Future<void> _ensureCollaborationColumns() async {
+    const definitions = <String, List<String>>{
+      'products': [
+        'sync_id TEXT',
+        'logical_key TEXT',
+        'author_uid TEXT',
+        'author_name TEXT',
+        "review_state TEXT NOT NULL DEFAULT 'approved'",
+        'reviewed_by_uid TEXT',
+        'reviewed_by_name TEXT',
+        'reviewed_at INTEGER',
+        'deleted_at INTEGER',
+        'sync_revision INTEGER NOT NULL DEFAULT 0',
+      ],
+      'shopping_plans': [
+        'sync_id TEXT',
+        'logical_key TEXT',
+        'author_uid TEXT',
+        'author_name TEXT',
+        "review_state TEXT NOT NULL DEFAULT 'approved'",
+        'reviewed_by_uid TEXT',
+        'reviewed_by_name TEXT',
+        'reviewed_at INTEGER',
+        'deleted_at INTEGER',
+        'sync_revision INTEGER NOT NULL DEFAULT 0',
+      ],
+      'planned_items': [
+        'sync_id TEXT',
+        'logical_key TEXT',
+        'author_uid TEXT',
+        'author_name TEXT',
+        "review_state TEXT NOT NULL DEFAULT 'approved'",
+        'reviewed_by_uid TEXT',
+        'reviewed_by_name TEXT',
+        'reviewed_at INTEGER',
+        'deleted_at INTEGER',
+        'sync_revision INTEGER NOT NULL DEFAULT 0',
+      ],
+    };
+    for (final entry in definitions.entries) {
+      final rows = await customSelect(
+        'PRAGMA table_info(${entry.key})',
+        readsFrom: {},
+      ).get();
+      final existing = rows.map((row) => row.read<String>('name')).toSet();
+      for (final definition in entry.value) {
+        final name = definition.split(' ').first;
+        if (existing.contains(name)) continue;
+        await customStatement(
+          'ALTER TABLE ${entry.key} ADD COLUMN $definition',
+        );
+      }
+    }
+  }
 
   Stream<List<Category>> watchCategories() {
     return (select(categories)..orderBy([
@@ -264,8 +387,9 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Stream<List<Product>> watchProducts() {
-    return (select(
-      products,
-    )..orderBy([(table) => OrderingTerm.asc(table.name)])).watch();
+    return (select(products)
+          ..where((table) => table.deletedAt.isNull())
+          ..orderBy([(table) => OrderingTerm.asc(table.name)]))
+        .watch();
   }
 }

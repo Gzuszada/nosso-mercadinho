@@ -535,7 +535,10 @@ void main() {
       await repository.deleteProductIfUnused(productId),
       ProductDeletionResult.deleted,
     );
-    expect(await database.select(database.products).get(), isEmpty);
+    final tombstone = await database.select(database.products).getSingle();
+    expect(tombstone.deletedAt, isNotNull);
+    expect(tombstone.isArchived, isTrue);
+    expect(await database.watchProducts().first, isEmpty);
     expect(
       await repository.deleteProductIfUnused(productId),
       ProductDeletionResult.notFound,
@@ -626,7 +629,16 @@ void main() {
         ProductDeletionResult.hasCanceledPurchases,
       );
       expect(await database.select(database.purchaseLines).get(), hasLength(1));
-      expect(await database.select(database.products).get(), hasLength(1));
+      final products = await database.select(database.products).get();
+      expect(products, hasLength(2));
+      expect(
+        products.where((product) => product.deletedAt != null),
+        hasLength(1),
+      );
+      expect(
+        products.where((product) => product.deletedAt == null),
+        hasLength(1),
+      );
     },
   );
 
@@ -660,8 +672,13 @@ void main() {
       await catalog.deleteProductIfUnused(productId),
       ProductDeletionResult.deleted,
     );
-    expect(await database.select(database.products).get(), isEmpty);
-    expect(await database.select(database.plannedItems).get(), isEmpty);
+    final products = await database.select(database.products).get();
+    expect(products, hasLength(1));
+    expect(products.single.deletedAt, isNotNull);
+    final items = await database.select(database.plannedItems).get();
+    expect(items, hasLength(1));
+    expect(items.single.deletedAt, isNotNull);
+    expect(items.single.isRemoved, isTrue);
   });
 
   testWidgets('avisa se produto ainda está na lista e depois permite apagar', (
@@ -723,7 +740,9 @@ void main() {
     expect(find.text('Apagar produto?'), findsOneWidget);
     await tester.tap(find.text('Apagar').last);
     await tester.pumpAndSettle();
-    expect(await database.select(database.products).get(), isEmpty);
+    final deletedProducts = await database.select(database.products).get();
+    expect(deletedProducts, hasLength(1));
+    expect(deletedProducts.single.deletedAt, isNotNull);
     expect(find.text('Produto apagado.'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(milliseconds: 1));
@@ -768,7 +787,7 @@ void main() {
 
       await expectLater(
         BackupService(restoredDatabase).restoreBackup(
-          backup.replaceFirst('"formatVersion": 6', '"formatVersion": 99'),
+          backup.replaceFirst('"formatVersion": 7', '"formatVersion": 99'),
         ),
         throwsA(isA<FormatException>()),
       );

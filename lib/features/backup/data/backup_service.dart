@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 
 import '../../../data/app_database.dart';
 import '../../catalog/data/catalog_import.dart';
+import '../../cloud/domain/collaboration.dart';
 import '../../shopping/domain/shopping_calculations.dart';
 
 const _backupAppVersion = '1.0.0+7';
@@ -32,9 +33,20 @@ class BackupService {
       final purchaseLines = await _database
           .select(_database.purchaseLines)
           .get();
+      final productSyncIds = {
+        for (final row in products)
+          row.id: row.syncId ?? 'legacy:product:${row.id}',
+      };
+      final planSyncIds = {
+        for (final row in plans) row.id: row.syncId ?? 'legacy:plan:${row.id}',
+      };
+      final plannedItemSyncIds = {
+        for (final row in plannedItems)
+          row.id: row.syncId ?? 'legacy:planned-item:${row.id}',
+      };
 
       return const JsonEncoder.withIndent('  ').convert({
-        'formatVersion': 6,
+        'formatVersion': 7,
         'appVersion': _backupAppVersion,
         'schemaVersion': _database.schemaVersion,
         'exportedAt': (exportedAt ?? DateTime.now()).toUtc().toIso8601String(),
@@ -43,11 +55,31 @@ class BackupService {
         'subcategories': subcategories.map(_subcategoryToJson).toList(),
         'products': products.map(_productToJson).toList(),
         'importBatches': batches.map(_batchToJson).toList(),
-        'importEntries': entries.map(_entryToJson).toList(),
+        'importEntries': entries
+            .map((row) => _entryToJson(row, productSyncIds[row.productId]))
+            .toList(),
         'shoppingPlans': plans.map(_planToJson).toList(),
-        'plannedItems': plannedItems.map(_plannedItemToJson).toList(),
+        'plannedItems': plannedItems
+            .map(
+              (row) => _plannedItemToJson(
+                row,
+                planSyncIds[row.planId],
+                productSyncIds[row.productId],
+              ),
+            )
+            .toList(),
         'shoppingTrips': trips.map(_tripToJson).toList(),
-        'purchaseLines': purchaseLines.map(_purchaseLineToJson).toList(),
+        'purchaseLines': purchaseLines
+            .map(
+              (row) => _purchaseLineToJson(
+                row,
+                productSyncIds[row.productId],
+                row.plannedItemId == null
+                    ? null
+                    : plannedItemSyncIds[row.plannedItemId],
+              ),
+            )
+            .toList(),
       });
     });
   }
@@ -124,6 +156,51 @@ class BackupService {
                 ),
                 description: Value(_nullableString(row, 'description')),
                 isArchived: Value(_boolean(row, 'isArchived')),
+                syncId: Value(
+                  formatVersion >= 7
+                      ? _nullableString(row, 'syncId')
+                      : 'legacy:product:${_integer(row, 'id')}',
+                ),
+                logicalKey: Value(
+                  formatVersion >= 7
+                      ? _nullableString(row, 'logicalKey')
+                      : CollaborationMetadata.productLogicalKey(
+                          name: _string(row, 'name'),
+                          measurementMode: _string(row, 'measurementMode'),
+                        ),
+                ),
+                authorUid: Value(
+                  formatVersion >= 7 ? _nullableString(row, 'authorUid') : null,
+                ),
+                authorName: Value(
+                  formatVersion >= 7
+                      ? _nullableString(row, 'authorName')
+                      : null,
+                ),
+                reviewState: Value(
+                  formatVersion >= 7
+                      ? _string(row, 'reviewState')
+                      : CollaborationMetadata.approved,
+                ),
+                reviewedByUid: Value(
+                  formatVersion >= 7
+                      ? _nullableString(row, 'reviewedByUid')
+                      : null,
+                ),
+                reviewedByName: Value(
+                  formatVersion >= 7
+                      ? _nullableString(row, 'reviewedByName')
+                      : null,
+                ),
+                reviewedAt: Value(
+                  formatVersion >= 7 ? _nullableDate(row, 'reviewedAt') : null,
+                ),
+                deletedAt: Value(
+                  formatVersion >= 7 ? _nullableDate(row, 'deletedAt') : null,
+                ),
+                syncRevision: Value(
+                  formatVersion >= 7 ? _integer(row, 'syncRevision') : 0,
+                ),
                 createdAt: Value(_date(row, 'createdAt')),
                 updatedAt: Value(_date(row, 'updatedAt')),
               ),
@@ -173,6 +250,51 @@ class BackupService {
                 monthKey: _string(row, 'monthKey'),
                 name: _string(row, 'name'),
                 status: Value(_string(row, 'status')),
+                syncId: Value(
+                  formatVersion >= 7
+                      ? _nullableString(row, 'syncId')
+                      : 'legacy:plan:${_integer(row, 'id')}',
+                ),
+                logicalKey: Value(
+                  formatVersion >= 7
+                      ? _nullableString(row, 'logicalKey')
+                      : CollaborationMetadata.planLogicalKey(
+                          monthKey: _string(row, 'monthKey'),
+                          name: _string(row, 'name'),
+                        ),
+                ),
+                authorUid: Value(
+                  formatVersion >= 7 ? _nullableString(row, 'authorUid') : null,
+                ),
+                authorName: Value(
+                  formatVersion >= 7
+                      ? _nullableString(row, 'authorName')
+                      : null,
+                ),
+                reviewState: Value(
+                  formatVersion >= 7
+                      ? _string(row, 'reviewState')
+                      : CollaborationMetadata.approved,
+                ),
+                reviewedByUid: Value(
+                  formatVersion >= 7
+                      ? _nullableString(row, 'reviewedByUid')
+                      : null,
+                ),
+                reviewedByName: Value(
+                  formatVersion >= 7
+                      ? _nullableString(row, 'reviewedByName')
+                      : null,
+                ),
+                reviewedAt: Value(
+                  formatVersion >= 7 ? _nullableDate(row, 'reviewedAt') : null,
+                ),
+                deletedAt: Value(
+                  formatVersion >= 7 ? _nullableDate(row, 'deletedAt') : null,
+                ),
+                syncRevision: Value(
+                  formatVersion >= 7 ? _integer(row, 'syncRevision') : 0,
+                ),
                 createdAt: Value(_date(row, 'createdAt')),
                 updatedAt: Value(_date(row, 'updatedAt')),
               ),
@@ -225,6 +347,49 @@ class BackupService {
                 ),
                 estimateReferenceTripId: Value(
                   _nullableInteger(row, 'estimateReferenceTripId'),
+                ),
+                syncId: Value(
+                  formatVersion >= 7
+                      ? _nullableString(row, 'syncId')
+                      : 'legacy:planned-item:${_integer(row, 'id')}',
+                ),
+                logicalKey: Value(
+                  formatVersion >= 7
+                      ? _nullableString(row, 'logicalKey')
+                      : 'planned-item:legacy:${_integer(row, 'planId')}:'
+                            '${_integer(row, 'productId')}',
+                ),
+                authorUid: Value(
+                  formatVersion >= 7 ? _nullableString(row, 'authorUid') : null,
+                ),
+                authorName: Value(
+                  formatVersion >= 7
+                      ? _nullableString(row, 'authorName')
+                      : null,
+                ),
+                reviewState: Value(
+                  formatVersion >= 7
+                      ? _string(row, 'reviewState')
+                      : CollaborationMetadata.approved,
+                ),
+                reviewedByUid: Value(
+                  formatVersion >= 7
+                      ? _nullableString(row, 'reviewedByUid')
+                      : null,
+                ),
+                reviewedByName: Value(
+                  formatVersion >= 7
+                      ? _nullableString(row, 'reviewedByName')
+                      : null,
+                ),
+                reviewedAt: Value(
+                  formatVersion >= 7 ? _nullableDate(row, 'reviewedAt') : null,
+                ),
+                deletedAt: Value(
+                  formatVersion >= 7 ? _nullableDate(row, 'deletedAt') : null,
+                ),
+                syncRevision: Value(
+                  formatVersion >= 7 ? _integer(row, 'syncRevision') : 0,
                 ),
                 createdAt: Value(_date(row, 'createdAt')),
                 updatedAt: Value(_date(row, 'updatedAt')),
@@ -297,6 +462,21 @@ class BackupService {
     'needsCategoryReview': row.needsCategoryReview,
     'description': row.description,
     'isArchived': row.isArchived,
+    'syncId': row.syncId ?? 'legacy:product:${row.id}',
+    'logicalKey':
+        row.logicalKey ??
+        CollaborationMetadata.productLogicalKey(
+          name: row.name,
+          measurementMode: row.measurementMode,
+        ),
+    'authorUid': row.authorUid,
+    'authorName': row.authorName,
+    'reviewState': row.reviewState,
+    'reviewedByUid': row.reviewedByUid,
+    'reviewedByName': row.reviewedByName,
+    'reviewedAt': row.reviewedAt?.toIso8601String(),
+    'deletedAt': row.deletedAt?.toIso8601String(),
+    'syncRevision': row.syncRevision,
     'createdAt': row.createdAt.toIso8601String(),
     'updatedAt': row.updatedAt.toIso8601String(),
   };
@@ -309,7 +489,10 @@ class BackupService {
     'importedAt': row.importedAt.toIso8601String(),
   };
 
-  static Map<String, Object?> _entryToJson(ImportEntry row) => {
+  static Map<String, Object?> _entryToJson(
+    ImportEntry row,
+    String? productSyncId,
+  ) => {
     'id': row.id,
     'batchId': row.batchId,
     'sourceSheet': row.sourceSheet,
@@ -320,6 +503,7 @@ class BackupService {
     'needsCategoryReview': row.needsCategoryReview,
     'status': row.status,
     'productId': row.productId,
+    'productSyncId': productSyncId,
   };
 
   static Map<String, Object?> _planToJson(ShoppingPlan row) => {
@@ -327,11 +511,30 @@ class BackupService {
     'monthKey': row.monthKey,
     'name': row.name,
     'status': row.status,
+    'syncId': row.syncId ?? 'legacy:plan:${row.id}',
+    'logicalKey':
+        row.logicalKey ??
+        CollaborationMetadata.planLogicalKey(
+          monthKey: row.monthKey,
+          name: row.name,
+        ),
+    'authorUid': row.authorUid,
+    'authorName': row.authorName,
+    'reviewState': row.reviewState,
+    'reviewedByUid': row.reviewedByUid,
+    'reviewedByName': row.reviewedByName,
+    'reviewedAt': row.reviewedAt?.toIso8601String(),
+    'deletedAt': row.deletedAt?.toIso8601String(),
+    'syncRevision': row.syncRevision,
     'createdAt': row.createdAt.toIso8601String(),
     'updatedAt': row.updatedAt.toIso8601String(),
   };
 
-  static Map<String, Object?> _plannedItemToJson(PlannedItem row) => {
+  static Map<String, Object?> _plannedItemToJson(
+    PlannedItem row,
+    String? planSyncId,
+    String? productSyncId,
+  ) => {
     'id': row.id,
     'planId': row.planId,
     'productId': row.productId,
@@ -343,6 +546,19 @@ class BackupService {
     'estimateSource': row.estimateSource,
     'estimateReferenceDate': row.estimateReferenceDate,
     'estimateReferenceTripId': row.estimateReferenceTripId,
+    'planSyncId': planSyncId,
+    'productSyncId': productSyncId,
+    'syncId': row.syncId ?? 'legacy:planned-item:${row.id}',
+    'logicalKey':
+        row.logicalKey ?? 'planned-item:legacy:${row.planId}:${row.productId}',
+    'authorUid': row.authorUid,
+    'authorName': row.authorName,
+    'reviewState': row.reviewState,
+    'reviewedByUid': row.reviewedByUid,
+    'reviewedByName': row.reviewedByName,
+    'reviewedAt': row.reviewedAt?.toIso8601String(),
+    'deletedAt': row.deletedAt?.toIso8601String(),
+    'syncRevision': row.syncRevision,
     'createdAt': row.createdAt.toIso8601String(),
     'updatedAt': row.updatedAt.toIso8601String(),
   };
@@ -359,11 +575,17 @@ class BackupService {
     'completedAt': row.completedAt?.toIso8601String(),
   };
 
-  static Map<String, Object?> _purchaseLineToJson(PurchaseLine row) => {
+  static Map<String, Object?> _purchaseLineToJson(
+    PurchaseLine row,
+    String? productSyncId,
+    String? plannedItemSyncId,
+  ) => {
     'id': row.id,
     'tripId': row.tripId,
     'productId': row.productId,
     'plannedItemId': row.plannedItemId,
+    'productSyncId': productSyncId,
+    'plannedItemSyncId': plannedItemSyncId,
     'measurementMode': row.measurementMode,
     'quantity': row.quantity,
     'unitPriceCents': row.unitPriceCents,
@@ -395,8 +617,8 @@ class BackupService {
     final root = _asMap(decoded, 'backup');
     final formatVersion = _integer(root, 'formatVersion');
     final schemaVersion = _integer(root, 'schemaVersion');
-    if (!const {1, 2, 3, 4, 5, 6}.contains(formatVersion) ||
-        !const {1, 2, 3, 4, 5, 6, 7}.contains(schemaVersion)) {
+    if (!const {1, 2, 3, 4, 5, 6, 7}.contains(formatVersion) ||
+        !const {1, 2, 3, 4, 5, 6, 7, 8}.contains(schemaVersion)) {
       throw const FormatException(
         'Versão de backup não compatível com esta versão do aplicativo.',
       );
@@ -430,6 +652,12 @@ class BackupService {
     final productIds = _validateIds(products, 'products');
     final batchIds = _validateIds(batches, 'importBatches');
     _validateIds(entries, 'importEntries');
+
+    if (formatVersion >= 7) {
+      _validateUniqueSyncIds(products, 'products');
+      _validateUniqueSyncIds(plans, 'shoppingPlans');
+      _validateUniqueSyncIds(plannedItems, 'plannedItems');
+    }
 
     for (final row in categories) {
       _string(row, 'name');
@@ -487,6 +715,9 @@ class BackupService {
       _boolean(row, 'isArchived');
       _date(row, 'createdAt');
       _date(row, 'updatedAt');
+      if (formatVersion >= 7) {
+        _validateCollaborationMetadata(row);
+      }
     }
     for (final row in batches) {
       _string(row, 'sourceKey');
@@ -546,6 +777,22 @@ class BackupService {
     };
   }
 
+  static void _validateUniqueSyncIds(
+    List<Map<String, Object?>> rows,
+    String table,
+  ) {
+    final seen = <String>{};
+    for (final row in rows) {
+      final syncId = _nullableString(row, 'syncId');
+      if (syncId == null) continue;
+      if (!seen.add(syncId)) {
+        throw FormatException(
+          'A tabela "$table" contém o identificador sincronizado duplicado "$syncId".',
+        );
+      }
+    }
+  }
+
   static void _validateShoppingData({
     required List<Map<String, Object?>> plans,
     required List<Map<String, Object?>> plannedItems,
@@ -583,6 +830,9 @@ class BackupService {
       }
       _date(row, 'createdAt');
       _date(row, 'updatedAt');
+      if (formatVersion >= 7) {
+        _validateCollaborationMetadata(row);
+      }
     }
 
     for (final row in plannedItems) {
@@ -672,6 +922,9 @@ class BackupService {
       }
       _date(row, 'createdAt');
       _date(row, 'updatedAt');
+      if (formatVersion >= 7) {
+        _validateCollaborationMetadata(row);
+      }
     }
 
     for (final row in trips) {
@@ -854,6 +1107,29 @@ class BackupService {
           );
         }
       }
+    }
+  }
+
+  static void _validateCollaborationMetadata(Map<String, Object?> row) {
+    _string(row, 'syncId');
+    _string(row, 'logicalKey');
+    _nullableString(row, 'authorUid');
+    _nullableString(row, 'authorName');
+    if (!const {
+      CollaborationMetadata.pendingReview,
+      CollaborationMetadata.approved,
+      CollaborationMetadata.rejected,
+    }.contains(_string(row, 'reviewState'))) {
+      throw const FormatException('Estado de revisão inválido no backup.');
+    }
+    _nullableString(row, 'reviewedByUid');
+    _nullableString(row, 'reviewedByName');
+    _nullableDate(row, 'reviewedAt');
+    _nullableDate(row, 'deletedAt');
+    if (_integer(row, 'syncRevision') < 0) {
+      throw const FormatException(
+        'Revisão de sincronização inválida no backup.',
+      );
     }
   }
 

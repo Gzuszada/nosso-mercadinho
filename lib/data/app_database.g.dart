@@ -962,6 +962,116 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _syncIdMeta = const VerificationMeta('syncId');
+  @override
+  late final GeneratedColumn<String> syncId = GeneratedColumn<String>(
+    'sync_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _logicalKeyMeta = const VerificationMeta(
+    'logicalKey',
+  );
+  @override
+  late final GeneratedColumn<String> logicalKey = GeneratedColumn<String>(
+    'logical_key',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _authorUidMeta = const VerificationMeta(
+    'authorUid',
+  );
+  @override
+  late final GeneratedColumn<String> authorUid = GeneratedColumn<String>(
+    'author_uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _authorNameMeta = const VerificationMeta(
+    'authorName',
+  );
+  @override
+  late final GeneratedColumn<String> authorName = GeneratedColumn<String>(
+    'author_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _reviewStateMeta = const VerificationMeta(
+    'reviewState',
+  );
+  @override
+  late final GeneratedColumn<String> reviewState = GeneratedColumn<String>(
+    'review_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('approved'),
+  );
+  static const VerificationMeta _reviewedByUidMeta = const VerificationMeta(
+    'reviewedByUid',
+  );
+  @override
+  late final GeneratedColumn<String> reviewedByUid = GeneratedColumn<String>(
+    'reviewed_by_uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _reviewedByNameMeta = const VerificationMeta(
+    'reviewedByName',
+  );
+  @override
+  late final GeneratedColumn<String> reviewedByName = GeneratedColumn<String>(
+    'reviewed_by_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _reviewedAtMeta = const VerificationMeta(
+    'reviewedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> reviewedAt = GeneratedColumn<DateTime>(
+    'reviewed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _syncRevisionMeta = const VerificationMeta(
+    'syncRevision',
+  );
+  @override
+  late final GeneratedColumn<int> syncRevision = GeneratedColumn<int>(
+    'sync_revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -996,6 +1106,16 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
     needsCategoryReview,
     description,
     isArchived,
+    syncId,
+    logicalKey,
+    authorUid,
+    authorName,
+    reviewState,
+    reviewedByUid,
+    reviewedByName,
+    reviewedAt,
+    deletedAt,
+    syncRevision,
     createdAt,
     updatedAt,
   ];
@@ -1070,6 +1190,78 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
         isArchived.isAcceptableOrUnknown(data['is_archived']!, _isArchivedMeta),
       );
     }
+    if (data.containsKey('sync_id')) {
+      context.handle(
+        _syncIdMeta,
+        syncId.isAcceptableOrUnknown(data['sync_id']!, _syncIdMeta),
+      );
+    }
+    if (data.containsKey('logical_key')) {
+      context.handle(
+        _logicalKeyMeta,
+        logicalKey.isAcceptableOrUnknown(data['logical_key']!, _logicalKeyMeta),
+      );
+    }
+    if (data.containsKey('author_uid')) {
+      context.handle(
+        _authorUidMeta,
+        authorUid.isAcceptableOrUnknown(data['author_uid']!, _authorUidMeta),
+      );
+    }
+    if (data.containsKey('author_name')) {
+      context.handle(
+        _authorNameMeta,
+        authorName.isAcceptableOrUnknown(data['author_name']!, _authorNameMeta),
+      );
+    }
+    if (data.containsKey('review_state')) {
+      context.handle(
+        _reviewStateMeta,
+        reviewState.isAcceptableOrUnknown(
+          data['review_state']!,
+          _reviewStateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('reviewed_by_uid')) {
+      context.handle(
+        _reviewedByUidMeta,
+        reviewedByUid.isAcceptableOrUnknown(
+          data['reviewed_by_uid']!,
+          _reviewedByUidMeta,
+        ),
+      );
+    }
+    if (data.containsKey('reviewed_by_name')) {
+      context.handle(
+        _reviewedByNameMeta,
+        reviewedByName.isAcceptableOrUnknown(
+          data['reviewed_by_name']!,
+          _reviewedByNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('reviewed_at')) {
+      context.handle(
+        _reviewedAtMeta,
+        reviewedAt.isAcceptableOrUnknown(data['reviewed_at']!, _reviewedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('sync_revision')) {
+      context.handle(
+        _syncRevisionMeta,
+        syncRevision.isAcceptableOrUnknown(
+          data['sync_revision']!,
+          _syncRevisionMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -1123,6 +1315,46 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
         DriftSqlType.bool,
         data['${effectivePrefix}is_archived'],
       )!,
+      syncId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_id'],
+      ),
+      logicalKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}logical_key'],
+      ),
+      authorUid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}author_uid'],
+      ),
+      authorName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}author_name'],
+      ),
+      reviewState: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}review_state'],
+      )!,
+      reviewedByUid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reviewed_by_uid'],
+      ),
+      reviewedByName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reviewed_by_name'],
+      ),
+      reviewedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}reviewed_at'],
+      ),
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      syncRevision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sync_revision'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -1149,6 +1381,16 @@ class Product extends DataClass implements Insertable<Product> {
   final bool needsCategoryReview;
   final String? description;
   final bool isArchived;
+  final String? syncId;
+  final String? logicalKey;
+  final String? authorUid;
+  final String? authorName;
+  final String reviewState;
+  final String? reviewedByUid;
+  final String? reviewedByName;
+  final DateTime? reviewedAt;
+  final DateTime? deletedAt;
+  final int syncRevision;
   final DateTime createdAt;
   final DateTime updatedAt;
   const Product({
@@ -1160,6 +1402,16 @@ class Product extends DataClass implements Insertable<Product> {
     required this.needsCategoryReview,
     this.description,
     required this.isArchived,
+    this.syncId,
+    this.logicalKey,
+    this.authorUid,
+    this.authorName,
+    required this.reviewState,
+    this.reviewedByUid,
+    this.reviewedByName,
+    this.reviewedAt,
+    this.deletedAt,
+    required this.syncRevision,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -1180,6 +1432,32 @@ class Product extends DataClass implements Insertable<Product> {
       map['description'] = Variable<String>(description);
     }
     map['is_archived'] = Variable<bool>(isArchived);
+    if (!nullToAbsent || syncId != null) {
+      map['sync_id'] = Variable<String>(syncId);
+    }
+    if (!nullToAbsent || logicalKey != null) {
+      map['logical_key'] = Variable<String>(logicalKey);
+    }
+    if (!nullToAbsent || authorUid != null) {
+      map['author_uid'] = Variable<String>(authorUid);
+    }
+    if (!nullToAbsent || authorName != null) {
+      map['author_name'] = Variable<String>(authorName);
+    }
+    map['review_state'] = Variable<String>(reviewState);
+    if (!nullToAbsent || reviewedByUid != null) {
+      map['reviewed_by_uid'] = Variable<String>(reviewedByUid);
+    }
+    if (!nullToAbsent || reviewedByName != null) {
+      map['reviewed_by_name'] = Variable<String>(reviewedByName);
+    }
+    if (!nullToAbsent || reviewedAt != null) {
+      map['reviewed_at'] = Variable<DateTime>(reviewedAt);
+    }
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['sync_revision'] = Variable<int>(syncRevision);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -1201,6 +1479,32 @@ class Product extends DataClass implements Insertable<Product> {
           ? const Value.absent()
           : Value(description),
       isArchived: Value(isArchived),
+      syncId: syncId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(syncId),
+      logicalKey: logicalKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(logicalKey),
+      authorUid: authorUid == null && nullToAbsent
+          ? const Value.absent()
+          : Value(authorUid),
+      authorName: authorName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(authorName),
+      reviewState: Value(reviewState),
+      reviewedByUid: reviewedByUid == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reviewedByUid),
+      reviewedByName: reviewedByName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reviewedByName),
+      reviewedAt: reviewedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reviewedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      syncRevision: Value(syncRevision),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -1222,6 +1526,16 @@ class Product extends DataClass implements Insertable<Product> {
       ),
       description: serializer.fromJson<String?>(json['description']),
       isArchived: serializer.fromJson<bool>(json['isArchived']),
+      syncId: serializer.fromJson<String?>(json['syncId']),
+      logicalKey: serializer.fromJson<String?>(json['logicalKey']),
+      authorUid: serializer.fromJson<String?>(json['authorUid']),
+      authorName: serializer.fromJson<String?>(json['authorName']),
+      reviewState: serializer.fromJson<String>(json['reviewState']),
+      reviewedByUid: serializer.fromJson<String?>(json['reviewedByUid']),
+      reviewedByName: serializer.fromJson<String?>(json['reviewedByName']),
+      reviewedAt: serializer.fromJson<DateTime?>(json['reviewedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      syncRevision: serializer.fromJson<int>(json['syncRevision']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -1238,6 +1552,16 @@ class Product extends DataClass implements Insertable<Product> {
       'needsCategoryReview': serializer.toJson<bool>(needsCategoryReview),
       'description': serializer.toJson<String?>(description),
       'isArchived': serializer.toJson<bool>(isArchived),
+      'syncId': serializer.toJson<String?>(syncId),
+      'logicalKey': serializer.toJson<String?>(logicalKey),
+      'authorUid': serializer.toJson<String?>(authorUid),
+      'authorName': serializer.toJson<String?>(authorName),
+      'reviewState': serializer.toJson<String>(reviewState),
+      'reviewedByUid': serializer.toJson<String?>(reviewedByUid),
+      'reviewedByName': serializer.toJson<String?>(reviewedByName),
+      'reviewedAt': serializer.toJson<DateTime?>(reviewedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'syncRevision': serializer.toJson<int>(syncRevision),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -1252,6 +1576,16 @@ class Product extends DataClass implements Insertable<Product> {
     bool? needsCategoryReview,
     Value<String?> description = const Value.absent(),
     bool? isArchived,
+    Value<String?> syncId = const Value.absent(),
+    Value<String?> logicalKey = const Value.absent(),
+    Value<String?> authorUid = const Value.absent(),
+    Value<String?> authorName = const Value.absent(),
+    String? reviewState,
+    Value<String?> reviewedByUid = const Value.absent(),
+    Value<String?> reviewedByName = const Value.absent(),
+    Value<DateTime?> reviewedAt = const Value.absent(),
+    Value<DateTime?> deletedAt = const Value.absent(),
+    int? syncRevision,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => Product(
@@ -1265,6 +1599,20 @@ class Product extends DataClass implements Insertable<Product> {
     needsCategoryReview: needsCategoryReview ?? this.needsCategoryReview,
     description: description.present ? description.value : this.description,
     isArchived: isArchived ?? this.isArchived,
+    syncId: syncId.present ? syncId.value : this.syncId,
+    logicalKey: logicalKey.present ? logicalKey.value : this.logicalKey,
+    authorUid: authorUid.present ? authorUid.value : this.authorUid,
+    authorName: authorName.present ? authorName.value : this.authorName,
+    reviewState: reviewState ?? this.reviewState,
+    reviewedByUid: reviewedByUid.present
+        ? reviewedByUid.value
+        : this.reviewedByUid,
+    reviewedByName: reviewedByName.present
+        ? reviewedByName.value
+        : this.reviewedByName,
+    reviewedAt: reviewedAt.present ? reviewedAt.value : this.reviewedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    syncRevision: syncRevision ?? this.syncRevision,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -1290,6 +1638,30 @@ class Product extends DataClass implements Insertable<Product> {
       isArchived: data.isArchived.present
           ? data.isArchived.value
           : this.isArchived,
+      syncId: data.syncId.present ? data.syncId.value : this.syncId,
+      logicalKey: data.logicalKey.present
+          ? data.logicalKey.value
+          : this.logicalKey,
+      authorUid: data.authorUid.present ? data.authorUid.value : this.authorUid,
+      authorName: data.authorName.present
+          ? data.authorName.value
+          : this.authorName,
+      reviewState: data.reviewState.present
+          ? data.reviewState.value
+          : this.reviewState,
+      reviewedByUid: data.reviewedByUid.present
+          ? data.reviewedByUid.value
+          : this.reviewedByUid,
+      reviewedByName: data.reviewedByName.present
+          ? data.reviewedByName.value
+          : this.reviewedByName,
+      reviewedAt: data.reviewedAt.present
+          ? data.reviewedAt.value
+          : this.reviewedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      syncRevision: data.syncRevision.present
+          ? data.syncRevision.value
+          : this.syncRevision,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -1306,6 +1678,16 @@ class Product extends DataClass implements Insertable<Product> {
           ..write('needsCategoryReview: $needsCategoryReview, ')
           ..write('description: $description, ')
           ..write('isArchived: $isArchived, ')
+          ..write('syncId: $syncId, ')
+          ..write('logicalKey: $logicalKey, ')
+          ..write('authorUid: $authorUid, ')
+          ..write('authorName: $authorName, ')
+          ..write('reviewState: $reviewState, ')
+          ..write('reviewedByUid: $reviewedByUid, ')
+          ..write('reviewedByName: $reviewedByName, ')
+          ..write('reviewedAt: $reviewedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('syncRevision: $syncRevision, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -1322,6 +1704,16 @@ class Product extends DataClass implements Insertable<Product> {
     needsCategoryReview,
     description,
     isArchived,
+    syncId,
+    logicalKey,
+    authorUid,
+    authorName,
+    reviewState,
+    reviewedByUid,
+    reviewedByName,
+    reviewedAt,
+    deletedAt,
+    syncRevision,
     createdAt,
     updatedAt,
   );
@@ -1337,6 +1729,16 @@ class Product extends DataClass implements Insertable<Product> {
           other.needsCategoryReview == this.needsCategoryReview &&
           other.description == this.description &&
           other.isArchived == this.isArchived &&
+          other.syncId == this.syncId &&
+          other.logicalKey == this.logicalKey &&
+          other.authorUid == this.authorUid &&
+          other.authorName == this.authorName &&
+          other.reviewState == this.reviewState &&
+          other.reviewedByUid == this.reviewedByUid &&
+          other.reviewedByName == this.reviewedByName &&
+          other.reviewedAt == this.reviewedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.syncRevision == this.syncRevision &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -1350,6 +1752,16 @@ class ProductsCompanion extends UpdateCompanion<Product> {
   final Value<bool> needsCategoryReview;
   final Value<String?> description;
   final Value<bool> isArchived;
+  final Value<String?> syncId;
+  final Value<String?> logicalKey;
+  final Value<String?> authorUid;
+  final Value<String?> authorName;
+  final Value<String> reviewState;
+  final Value<String?> reviewedByUid;
+  final Value<String?> reviewedByName;
+  final Value<DateTime?> reviewedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> syncRevision;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   const ProductsCompanion({
@@ -1361,6 +1773,16 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     this.needsCategoryReview = const Value.absent(),
     this.description = const Value.absent(),
     this.isArchived = const Value.absent(),
+    this.syncId = const Value.absent(),
+    this.logicalKey = const Value.absent(),
+    this.authorUid = const Value.absent(),
+    this.authorName = const Value.absent(),
+    this.reviewState = const Value.absent(),
+    this.reviewedByUid = const Value.absent(),
+    this.reviewedByName = const Value.absent(),
+    this.reviewedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.syncRevision = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
@@ -1373,6 +1795,16 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     this.needsCategoryReview = const Value.absent(),
     this.description = const Value.absent(),
     this.isArchived = const Value.absent(),
+    this.syncId = const Value.absent(),
+    this.logicalKey = const Value.absent(),
+    this.authorUid = const Value.absent(),
+    this.authorName = const Value.absent(),
+    this.reviewState = const Value.absent(),
+    this.reviewedByUid = const Value.absent(),
+    this.reviewedByName = const Value.absent(),
+    this.reviewedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.syncRevision = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   }) : name = Value(name);
@@ -1385,6 +1817,16 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     Expression<bool>? needsCategoryReview,
     Expression<String>? description,
     Expression<bool>? isArchived,
+    Expression<String>? syncId,
+    Expression<String>? logicalKey,
+    Expression<String>? authorUid,
+    Expression<String>? authorName,
+    Expression<String>? reviewState,
+    Expression<String>? reviewedByUid,
+    Expression<String>? reviewedByName,
+    Expression<DateTime>? reviewedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? syncRevision,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
   }) {
@@ -1398,6 +1840,16 @@ class ProductsCompanion extends UpdateCompanion<Product> {
         'needs_category_review': needsCategoryReview,
       if (description != null) 'description': description,
       if (isArchived != null) 'is_archived': isArchived,
+      if (syncId != null) 'sync_id': syncId,
+      if (logicalKey != null) 'logical_key': logicalKey,
+      if (authorUid != null) 'author_uid': authorUid,
+      if (authorName != null) 'author_name': authorName,
+      if (reviewState != null) 'review_state': reviewState,
+      if (reviewedByUid != null) 'reviewed_by_uid': reviewedByUid,
+      if (reviewedByName != null) 'reviewed_by_name': reviewedByName,
+      if (reviewedAt != null) 'reviewed_at': reviewedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (syncRevision != null) 'sync_revision': syncRevision,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
@@ -1412,6 +1864,16 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     Value<bool>? needsCategoryReview,
     Value<String?>? description,
     Value<bool>? isArchived,
+    Value<String?>? syncId,
+    Value<String?>? logicalKey,
+    Value<String?>? authorUid,
+    Value<String?>? authorName,
+    Value<String>? reviewState,
+    Value<String?>? reviewedByUid,
+    Value<String?>? reviewedByName,
+    Value<DateTime?>? reviewedAt,
+    Value<DateTime?>? deletedAt,
+    Value<int>? syncRevision,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
   }) {
@@ -1424,6 +1886,16 @@ class ProductsCompanion extends UpdateCompanion<Product> {
       needsCategoryReview: needsCategoryReview ?? this.needsCategoryReview,
       description: description ?? this.description,
       isArchived: isArchived ?? this.isArchived,
+      syncId: syncId ?? this.syncId,
+      logicalKey: logicalKey ?? this.logicalKey,
+      authorUid: authorUid ?? this.authorUid,
+      authorName: authorName ?? this.authorName,
+      reviewState: reviewState ?? this.reviewState,
+      reviewedByUid: reviewedByUid ?? this.reviewedByUid,
+      reviewedByName: reviewedByName ?? this.reviewedByName,
+      reviewedAt: reviewedAt ?? this.reviewedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      syncRevision: syncRevision ?? this.syncRevision,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -1456,6 +1928,36 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     if (isArchived.present) {
       map['is_archived'] = Variable<bool>(isArchived.value);
     }
+    if (syncId.present) {
+      map['sync_id'] = Variable<String>(syncId.value);
+    }
+    if (logicalKey.present) {
+      map['logical_key'] = Variable<String>(logicalKey.value);
+    }
+    if (authorUid.present) {
+      map['author_uid'] = Variable<String>(authorUid.value);
+    }
+    if (authorName.present) {
+      map['author_name'] = Variable<String>(authorName.value);
+    }
+    if (reviewState.present) {
+      map['review_state'] = Variable<String>(reviewState.value);
+    }
+    if (reviewedByUid.present) {
+      map['reviewed_by_uid'] = Variable<String>(reviewedByUid.value);
+    }
+    if (reviewedByName.present) {
+      map['reviewed_by_name'] = Variable<String>(reviewedByName.value);
+    }
+    if (reviewedAt.present) {
+      map['reviewed_at'] = Variable<DateTime>(reviewedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (syncRevision.present) {
+      map['sync_revision'] = Variable<int>(syncRevision.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -1476,6 +1978,16 @@ class ProductsCompanion extends UpdateCompanion<Product> {
           ..write('needsCategoryReview: $needsCategoryReview, ')
           ..write('description: $description, ')
           ..write('isArchived: $isArchived, ')
+          ..write('syncId: $syncId, ')
+          ..write('logicalKey: $logicalKey, ')
+          ..write('authorUid: $authorUid, ')
+          ..write('authorName: $authorName, ')
+          ..write('reviewState: $reviewState, ')
+          ..write('reviewedByUid: $reviewedByUid, ')
+          ..write('reviewedByName: $reviewedByName, ')
+          ..write('reviewedAt: $reviewedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('syncRevision: $syncRevision, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -2530,6 +3042,116 @@ class $ShoppingPlansTable extends ShoppingPlans
     requiredDuringInsert: false,
     defaultValue: const Constant('active'),
   );
+  static const VerificationMeta _syncIdMeta = const VerificationMeta('syncId');
+  @override
+  late final GeneratedColumn<String> syncId = GeneratedColumn<String>(
+    'sync_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _logicalKeyMeta = const VerificationMeta(
+    'logicalKey',
+  );
+  @override
+  late final GeneratedColumn<String> logicalKey = GeneratedColumn<String>(
+    'logical_key',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _authorUidMeta = const VerificationMeta(
+    'authorUid',
+  );
+  @override
+  late final GeneratedColumn<String> authorUid = GeneratedColumn<String>(
+    'author_uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _authorNameMeta = const VerificationMeta(
+    'authorName',
+  );
+  @override
+  late final GeneratedColumn<String> authorName = GeneratedColumn<String>(
+    'author_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _reviewStateMeta = const VerificationMeta(
+    'reviewState',
+  );
+  @override
+  late final GeneratedColumn<String> reviewState = GeneratedColumn<String>(
+    'review_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('approved'),
+  );
+  static const VerificationMeta _reviewedByUidMeta = const VerificationMeta(
+    'reviewedByUid',
+  );
+  @override
+  late final GeneratedColumn<String> reviewedByUid = GeneratedColumn<String>(
+    'reviewed_by_uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _reviewedByNameMeta = const VerificationMeta(
+    'reviewedByName',
+  );
+  @override
+  late final GeneratedColumn<String> reviewedByName = GeneratedColumn<String>(
+    'reviewed_by_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _reviewedAtMeta = const VerificationMeta(
+    'reviewedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> reviewedAt = GeneratedColumn<DateTime>(
+    'reviewed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _syncRevisionMeta = const VerificationMeta(
+    'syncRevision',
+  );
+  @override
+  late final GeneratedColumn<int> syncRevision = GeneratedColumn<int>(
+    'sync_revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -2560,6 +3182,16 @@ class $ShoppingPlansTable extends ShoppingPlans
     monthKey,
     name,
     status,
+    syncId,
+    logicalKey,
+    authorUid,
+    authorName,
+    reviewState,
+    reviewedByUid,
+    reviewedByName,
+    reviewedAt,
+    deletedAt,
+    syncRevision,
     createdAt,
     updatedAt,
   ];
@@ -2600,6 +3232,78 @@ class $ShoppingPlansTable extends ShoppingPlans
         status.isAcceptableOrUnknown(data['status']!, _statusMeta),
       );
     }
+    if (data.containsKey('sync_id')) {
+      context.handle(
+        _syncIdMeta,
+        syncId.isAcceptableOrUnknown(data['sync_id']!, _syncIdMeta),
+      );
+    }
+    if (data.containsKey('logical_key')) {
+      context.handle(
+        _logicalKeyMeta,
+        logicalKey.isAcceptableOrUnknown(data['logical_key']!, _logicalKeyMeta),
+      );
+    }
+    if (data.containsKey('author_uid')) {
+      context.handle(
+        _authorUidMeta,
+        authorUid.isAcceptableOrUnknown(data['author_uid']!, _authorUidMeta),
+      );
+    }
+    if (data.containsKey('author_name')) {
+      context.handle(
+        _authorNameMeta,
+        authorName.isAcceptableOrUnknown(data['author_name']!, _authorNameMeta),
+      );
+    }
+    if (data.containsKey('review_state')) {
+      context.handle(
+        _reviewStateMeta,
+        reviewState.isAcceptableOrUnknown(
+          data['review_state']!,
+          _reviewStateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('reviewed_by_uid')) {
+      context.handle(
+        _reviewedByUidMeta,
+        reviewedByUid.isAcceptableOrUnknown(
+          data['reviewed_by_uid']!,
+          _reviewedByUidMeta,
+        ),
+      );
+    }
+    if (data.containsKey('reviewed_by_name')) {
+      context.handle(
+        _reviewedByNameMeta,
+        reviewedByName.isAcceptableOrUnknown(
+          data['reviewed_by_name']!,
+          _reviewedByNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('reviewed_at')) {
+      context.handle(
+        _reviewedAtMeta,
+        reviewedAt.isAcceptableOrUnknown(data['reviewed_at']!, _reviewedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('sync_revision')) {
+      context.handle(
+        _syncRevisionMeta,
+        syncRevision.isAcceptableOrUnknown(
+          data['sync_revision']!,
+          _syncRevisionMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -2637,6 +3341,46 @@ class $ShoppingPlansTable extends ShoppingPlans
         DriftSqlType.string,
         data['${effectivePrefix}status'],
       )!,
+      syncId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_id'],
+      ),
+      logicalKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}logical_key'],
+      ),
+      authorUid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}author_uid'],
+      ),
+      authorName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}author_name'],
+      ),
+      reviewState: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}review_state'],
+      )!,
+      reviewedByUid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reviewed_by_uid'],
+      ),
+      reviewedByName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reviewed_by_name'],
+      ),
+      reviewedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}reviewed_at'],
+      ),
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      syncRevision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sync_revision'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -2659,6 +3403,16 @@ class ShoppingPlan extends DataClass implements Insertable<ShoppingPlan> {
   final String monthKey;
   final String name;
   final String status;
+  final String? syncId;
+  final String? logicalKey;
+  final String? authorUid;
+  final String? authorName;
+  final String reviewState;
+  final String? reviewedByUid;
+  final String? reviewedByName;
+  final DateTime? reviewedAt;
+  final DateTime? deletedAt;
+  final int syncRevision;
   final DateTime createdAt;
   final DateTime updatedAt;
   const ShoppingPlan({
@@ -2666,6 +3420,16 @@ class ShoppingPlan extends DataClass implements Insertable<ShoppingPlan> {
     required this.monthKey,
     required this.name,
     required this.status,
+    this.syncId,
+    this.logicalKey,
+    this.authorUid,
+    this.authorName,
+    required this.reviewState,
+    this.reviewedByUid,
+    this.reviewedByName,
+    this.reviewedAt,
+    this.deletedAt,
+    required this.syncRevision,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -2676,6 +3440,32 @@ class ShoppingPlan extends DataClass implements Insertable<ShoppingPlan> {
     map['month_key'] = Variable<String>(monthKey);
     map['name'] = Variable<String>(name);
     map['status'] = Variable<String>(status);
+    if (!nullToAbsent || syncId != null) {
+      map['sync_id'] = Variable<String>(syncId);
+    }
+    if (!nullToAbsent || logicalKey != null) {
+      map['logical_key'] = Variable<String>(logicalKey);
+    }
+    if (!nullToAbsent || authorUid != null) {
+      map['author_uid'] = Variable<String>(authorUid);
+    }
+    if (!nullToAbsent || authorName != null) {
+      map['author_name'] = Variable<String>(authorName);
+    }
+    map['review_state'] = Variable<String>(reviewState);
+    if (!nullToAbsent || reviewedByUid != null) {
+      map['reviewed_by_uid'] = Variable<String>(reviewedByUid);
+    }
+    if (!nullToAbsent || reviewedByName != null) {
+      map['reviewed_by_name'] = Variable<String>(reviewedByName);
+    }
+    if (!nullToAbsent || reviewedAt != null) {
+      map['reviewed_at'] = Variable<DateTime>(reviewedAt);
+    }
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['sync_revision'] = Variable<int>(syncRevision);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -2687,6 +3477,32 @@ class ShoppingPlan extends DataClass implements Insertable<ShoppingPlan> {
       monthKey: Value(monthKey),
       name: Value(name),
       status: Value(status),
+      syncId: syncId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(syncId),
+      logicalKey: logicalKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(logicalKey),
+      authorUid: authorUid == null && nullToAbsent
+          ? const Value.absent()
+          : Value(authorUid),
+      authorName: authorName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(authorName),
+      reviewState: Value(reviewState),
+      reviewedByUid: reviewedByUid == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reviewedByUid),
+      reviewedByName: reviewedByName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reviewedByName),
+      reviewedAt: reviewedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reviewedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      syncRevision: Value(syncRevision),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -2702,6 +3518,16 @@ class ShoppingPlan extends DataClass implements Insertable<ShoppingPlan> {
       monthKey: serializer.fromJson<String>(json['monthKey']),
       name: serializer.fromJson<String>(json['name']),
       status: serializer.fromJson<String>(json['status']),
+      syncId: serializer.fromJson<String?>(json['syncId']),
+      logicalKey: serializer.fromJson<String?>(json['logicalKey']),
+      authorUid: serializer.fromJson<String?>(json['authorUid']),
+      authorName: serializer.fromJson<String?>(json['authorName']),
+      reviewState: serializer.fromJson<String>(json['reviewState']),
+      reviewedByUid: serializer.fromJson<String?>(json['reviewedByUid']),
+      reviewedByName: serializer.fromJson<String?>(json['reviewedByName']),
+      reviewedAt: serializer.fromJson<DateTime?>(json['reviewedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      syncRevision: serializer.fromJson<int>(json['syncRevision']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -2714,6 +3540,16 @@ class ShoppingPlan extends DataClass implements Insertable<ShoppingPlan> {
       'monthKey': serializer.toJson<String>(monthKey),
       'name': serializer.toJson<String>(name),
       'status': serializer.toJson<String>(status),
+      'syncId': serializer.toJson<String?>(syncId),
+      'logicalKey': serializer.toJson<String?>(logicalKey),
+      'authorUid': serializer.toJson<String?>(authorUid),
+      'authorName': serializer.toJson<String?>(authorName),
+      'reviewState': serializer.toJson<String>(reviewState),
+      'reviewedByUid': serializer.toJson<String?>(reviewedByUid),
+      'reviewedByName': serializer.toJson<String?>(reviewedByName),
+      'reviewedAt': serializer.toJson<DateTime?>(reviewedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'syncRevision': serializer.toJson<int>(syncRevision),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -2724,6 +3560,16 @@ class ShoppingPlan extends DataClass implements Insertable<ShoppingPlan> {
     String? monthKey,
     String? name,
     String? status,
+    Value<String?> syncId = const Value.absent(),
+    Value<String?> logicalKey = const Value.absent(),
+    Value<String?> authorUid = const Value.absent(),
+    Value<String?> authorName = const Value.absent(),
+    String? reviewState,
+    Value<String?> reviewedByUid = const Value.absent(),
+    Value<String?> reviewedByName = const Value.absent(),
+    Value<DateTime?> reviewedAt = const Value.absent(),
+    Value<DateTime?> deletedAt = const Value.absent(),
+    int? syncRevision,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => ShoppingPlan(
@@ -2731,6 +3577,20 @@ class ShoppingPlan extends DataClass implements Insertable<ShoppingPlan> {
     monthKey: monthKey ?? this.monthKey,
     name: name ?? this.name,
     status: status ?? this.status,
+    syncId: syncId.present ? syncId.value : this.syncId,
+    logicalKey: logicalKey.present ? logicalKey.value : this.logicalKey,
+    authorUid: authorUid.present ? authorUid.value : this.authorUid,
+    authorName: authorName.present ? authorName.value : this.authorName,
+    reviewState: reviewState ?? this.reviewState,
+    reviewedByUid: reviewedByUid.present
+        ? reviewedByUid.value
+        : this.reviewedByUid,
+    reviewedByName: reviewedByName.present
+        ? reviewedByName.value
+        : this.reviewedByName,
+    reviewedAt: reviewedAt.present ? reviewedAt.value : this.reviewedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    syncRevision: syncRevision ?? this.syncRevision,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -2740,6 +3600,30 @@ class ShoppingPlan extends DataClass implements Insertable<ShoppingPlan> {
       monthKey: data.monthKey.present ? data.monthKey.value : this.monthKey,
       name: data.name.present ? data.name.value : this.name,
       status: data.status.present ? data.status.value : this.status,
+      syncId: data.syncId.present ? data.syncId.value : this.syncId,
+      logicalKey: data.logicalKey.present
+          ? data.logicalKey.value
+          : this.logicalKey,
+      authorUid: data.authorUid.present ? data.authorUid.value : this.authorUid,
+      authorName: data.authorName.present
+          ? data.authorName.value
+          : this.authorName,
+      reviewState: data.reviewState.present
+          ? data.reviewState.value
+          : this.reviewState,
+      reviewedByUid: data.reviewedByUid.present
+          ? data.reviewedByUid.value
+          : this.reviewedByUid,
+      reviewedByName: data.reviewedByName.present
+          ? data.reviewedByName.value
+          : this.reviewedByName,
+      reviewedAt: data.reviewedAt.present
+          ? data.reviewedAt.value
+          : this.reviewedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      syncRevision: data.syncRevision.present
+          ? data.syncRevision.value
+          : this.syncRevision,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -2752,6 +3636,16 @@ class ShoppingPlan extends DataClass implements Insertable<ShoppingPlan> {
           ..write('monthKey: $monthKey, ')
           ..write('name: $name, ')
           ..write('status: $status, ')
+          ..write('syncId: $syncId, ')
+          ..write('logicalKey: $logicalKey, ')
+          ..write('authorUid: $authorUid, ')
+          ..write('authorName: $authorName, ')
+          ..write('reviewState: $reviewState, ')
+          ..write('reviewedByUid: $reviewedByUid, ')
+          ..write('reviewedByName: $reviewedByName, ')
+          ..write('reviewedAt: $reviewedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('syncRevision: $syncRevision, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -2759,8 +3653,24 @@ class ShoppingPlan extends DataClass implements Insertable<ShoppingPlan> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, monthKey, name, status, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+    id,
+    monthKey,
+    name,
+    status,
+    syncId,
+    logicalKey,
+    authorUid,
+    authorName,
+    reviewState,
+    reviewedByUid,
+    reviewedByName,
+    reviewedAt,
+    deletedAt,
+    syncRevision,
+    createdAt,
+    updatedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2769,6 +3679,16 @@ class ShoppingPlan extends DataClass implements Insertable<ShoppingPlan> {
           other.monthKey == this.monthKey &&
           other.name == this.name &&
           other.status == this.status &&
+          other.syncId == this.syncId &&
+          other.logicalKey == this.logicalKey &&
+          other.authorUid == this.authorUid &&
+          other.authorName == this.authorName &&
+          other.reviewState == this.reviewState &&
+          other.reviewedByUid == this.reviewedByUid &&
+          other.reviewedByName == this.reviewedByName &&
+          other.reviewedAt == this.reviewedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.syncRevision == this.syncRevision &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -2778,6 +3698,16 @@ class ShoppingPlansCompanion extends UpdateCompanion<ShoppingPlan> {
   final Value<String> monthKey;
   final Value<String> name;
   final Value<String> status;
+  final Value<String?> syncId;
+  final Value<String?> logicalKey;
+  final Value<String?> authorUid;
+  final Value<String?> authorName;
+  final Value<String> reviewState;
+  final Value<String?> reviewedByUid;
+  final Value<String?> reviewedByName;
+  final Value<DateTime?> reviewedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> syncRevision;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   const ShoppingPlansCompanion({
@@ -2785,6 +3715,16 @@ class ShoppingPlansCompanion extends UpdateCompanion<ShoppingPlan> {
     this.monthKey = const Value.absent(),
     this.name = const Value.absent(),
     this.status = const Value.absent(),
+    this.syncId = const Value.absent(),
+    this.logicalKey = const Value.absent(),
+    this.authorUid = const Value.absent(),
+    this.authorName = const Value.absent(),
+    this.reviewState = const Value.absent(),
+    this.reviewedByUid = const Value.absent(),
+    this.reviewedByName = const Value.absent(),
+    this.reviewedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.syncRevision = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
@@ -2793,6 +3733,16 @@ class ShoppingPlansCompanion extends UpdateCompanion<ShoppingPlan> {
     required String monthKey,
     required String name,
     this.status = const Value.absent(),
+    this.syncId = const Value.absent(),
+    this.logicalKey = const Value.absent(),
+    this.authorUid = const Value.absent(),
+    this.authorName = const Value.absent(),
+    this.reviewState = const Value.absent(),
+    this.reviewedByUid = const Value.absent(),
+    this.reviewedByName = const Value.absent(),
+    this.reviewedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.syncRevision = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   }) : monthKey = Value(monthKey),
@@ -2802,6 +3752,16 @@ class ShoppingPlansCompanion extends UpdateCompanion<ShoppingPlan> {
     Expression<String>? monthKey,
     Expression<String>? name,
     Expression<String>? status,
+    Expression<String>? syncId,
+    Expression<String>? logicalKey,
+    Expression<String>? authorUid,
+    Expression<String>? authorName,
+    Expression<String>? reviewState,
+    Expression<String>? reviewedByUid,
+    Expression<String>? reviewedByName,
+    Expression<DateTime>? reviewedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? syncRevision,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
   }) {
@@ -2810,6 +3770,16 @@ class ShoppingPlansCompanion extends UpdateCompanion<ShoppingPlan> {
       if (monthKey != null) 'month_key': monthKey,
       if (name != null) 'name': name,
       if (status != null) 'status': status,
+      if (syncId != null) 'sync_id': syncId,
+      if (logicalKey != null) 'logical_key': logicalKey,
+      if (authorUid != null) 'author_uid': authorUid,
+      if (authorName != null) 'author_name': authorName,
+      if (reviewState != null) 'review_state': reviewState,
+      if (reviewedByUid != null) 'reviewed_by_uid': reviewedByUid,
+      if (reviewedByName != null) 'reviewed_by_name': reviewedByName,
+      if (reviewedAt != null) 'reviewed_at': reviewedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (syncRevision != null) 'sync_revision': syncRevision,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
@@ -2820,6 +3790,16 @@ class ShoppingPlansCompanion extends UpdateCompanion<ShoppingPlan> {
     Value<String>? monthKey,
     Value<String>? name,
     Value<String>? status,
+    Value<String?>? syncId,
+    Value<String?>? logicalKey,
+    Value<String?>? authorUid,
+    Value<String?>? authorName,
+    Value<String>? reviewState,
+    Value<String?>? reviewedByUid,
+    Value<String?>? reviewedByName,
+    Value<DateTime?>? reviewedAt,
+    Value<DateTime?>? deletedAt,
+    Value<int>? syncRevision,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
   }) {
@@ -2828,6 +3808,16 @@ class ShoppingPlansCompanion extends UpdateCompanion<ShoppingPlan> {
       monthKey: monthKey ?? this.monthKey,
       name: name ?? this.name,
       status: status ?? this.status,
+      syncId: syncId ?? this.syncId,
+      logicalKey: logicalKey ?? this.logicalKey,
+      authorUid: authorUid ?? this.authorUid,
+      authorName: authorName ?? this.authorName,
+      reviewState: reviewState ?? this.reviewState,
+      reviewedByUid: reviewedByUid ?? this.reviewedByUid,
+      reviewedByName: reviewedByName ?? this.reviewedByName,
+      reviewedAt: reviewedAt ?? this.reviewedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      syncRevision: syncRevision ?? this.syncRevision,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -2848,6 +3838,36 @@ class ShoppingPlansCompanion extends UpdateCompanion<ShoppingPlan> {
     if (status.present) {
       map['status'] = Variable<String>(status.value);
     }
+    if (syncId.present) {
+      map['sync_id'] = Variable<String>(syncId.value);
+    }
+    if (logicalKey.present) {
+      map['logical_key'] = Variable<String>(logicalKey.value);
+    }
+    if (authorUid.present) {
+      map['author_uid'] = Variable<String>(authorUid.value);
+    }
+    if (authorName.present) {
+      map['author_name'] = Variable<String>(authorName.value);
+    }
+    if (reviewState.present) {
+      map['review_state'] = Variable<String>(reviewState.value);
+    }
+    if (reviewedByUid.present) {
+      map['reviewed_by_uid'] = Variable<String>(reviewedByUid.value);
+    }
+    if (reviewedByName.present) {
+      map['reviewed_by_name'] = Variable<String>(reviewedByName.value);
+    }
+    if (reviewedAt.present) {
+      map['reviewed_at'] = Variable<DateTime>(reviewedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (syncRevision.present) {
+      map['sync_revision'] = Variable<int>(syncRevision.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -2864,6 +3884,16 @@ class ShoppingPlansCompanion extends UpdateCompanion<ShoppingPlan> {
           ..write('monthKey: $monthKey, ')
           ..write('name: $name, ')
           ..write('status: $status, ')
+          ..write('syncId: $syncId, ')
+          ..write('logicalKey: $logicalKey, ')
+          ..write('authorUid: $authorUid, ')
+          ..write('authorName: $authorName, ')
+          ..write('reviewState: $reviewState, ')
+          ..write('reviewedByUid: $reviewedByUid, ')
+          ..write('reviewedByName: $reviewedByName, ')
+          ..write('reviewedAt: $reviewedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('syncRevision: $syncRevision, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -3002,6 +4032,116 @@ class $PlannedItemsTable extends PlannedItems
         type: DriftSqlType.int,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _syncIdMeta = const VerificationMeta('syncId');
+  @override
+  late final GeneratedColumn<String> syncId = GeneratedColumn<String>(
+    'sync_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _logicalKeyMeta = const VerificationMeta(
+    'logicalKey',
+  );
+  @override
+  late final GeneratedColumn<String> logicalKey = GeneratedColumn<String>(
+    'logical_key',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _authorUidMeta = const VerificationMeta(
+    'authorUid',
+  );
+  @override
+  late final GeneratedColumn<String> authorUid = GeneratedColumn<String>(
+    'author_uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _authorNameMeta = const VerificationMeta(
+    'authorName',
+  );
+  @override
+  late final GeneratedColumn<String> authorName = GeneratedColumn<String>(
+    'author_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _reviewStateMeta = const VerificationMeta(
+    'reviewState',
+  );
+  @override
+  late final GeneratedColumn<String> reviewState = GeneratedColumn<String>(
+    'review_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('approved'),
+  );
+  static const VerificationMeta _reviewedByUidMeta = const VerificationMeta(
+    'reviewedByUid',
+  );
+  @override
+  late final GeneratedColumn<String> reviewedByUid = GeneratedColumn<String>(
+    'reviewed_by_uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _reviewedByNameMeta = const VerificationMeta(
+    'reviewedByName',
+  );
+  @override
+  late final GeneratedColumn<String> reviewedByName = GeneratedColumn<String>(
+    'reviewed_by_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _reviewedAtMeta = const VerificationMeta(
+    'reviewedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> reviewedAt = GeneratedColumn<DateTime>(
+    'reviewed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _syncRevisionMeta = const VerificationMeta(
+    'syncRevision',
+  );
+  @override
+  late final GeneratedColumn<int> syncRevision = GeneratedColumn<int>(
+    'sync_revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -3039,6 +4179,16 @@ class $PlannedItemsTable extends PlannedItems
     estimateSource,
     estimateReferenceDate,
     estimateReferenceTripId,
+    syncId,
+    logicalKey,
+    authorUid,
+    authorName,
+    reviewState,
+    reviewedByUid,
+    reviewedByName,
+    reviewedAt,
+    deletedAt,
+    syncRevision,
     createdAt,
     updatedAt,
   ];
@@ -3143,6 +4293,78 @@ class $PlannedItemsTable extends PlannedItems
         ),
       );
     }
+    if (data.containsKey('sync_id')) {
+      context.handle(
+        _syncIdMeta,
+        syncId.isAcceptableOrUnknown(data['sync_id']!, _syncIdMeta),
+      );
+    }
+    if (data.containsKey('logical_key')) {
+      context.handle(
+        _logicalKeyMeta,
+        logicalKey.isAcceptableOrUnknown(data['logical_key']!, _logicalKeyMeta),
+      );
+    }
+    if (data.containsKey('author_uid')) {
+      context.handle(
+        _authorUidMeta,
+        authorUid.isAcceptableOrUnknown(data['author_uid']!, _authorUidMeta),
+      );
+    }
+    if (data.containsKey('author_name')) {
+      context.handle(
+        _authorNameMeta,
+        authorName.isAcceptableOrUnknown(data['author_name']!, _authorNameMeta),
+      );
+    }
+    if (data.containsKey('review_state')) {
+      context.handle(
+        _reviewStateMeta,
+        reviewState.isAcceptableOrUnknown(
+          data['review_state']!,
+          _reviewStateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('reviewed_by_uid')) {
+      context.handle(
+        _reviewedByUidMeta,
+        reviewedByUid.isAcceptableOrUnknown(
+          data['reviewed_by_uid']!,
+          _reviewedByUidMeta,
+        ),
+      );
+    }
+    if (data.containsKey('reviewed_by_name')) {
+      context.handle(
+        _reviewedByNameMeta,
+        reviewedByName.isAcceptableOrUnknown(
+          data['reviewed_by_name']!,
+          _reviewedByNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('reviewed_at')) {
+      context.handle(
+        _reviewedAtMeta,
+        reviewedAt.isAcceptableOrUnknown(data['reviewed_at']!, _reviewedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('sync_revision')) {
+      context.handle(
+        _syncRevisionMeta,
+        syncRevision.isAcceptableOrUnknown(
+          data['sync_revision']!,
+          _syncRevisionMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -3208,6 +4430,46 @@ class $PlannedItemsTable extends PlannedItems
         DriftSqlType.int,
         data['${effectivePrefix}estimate_reference_trip_id'],
       ),
+      syncId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_id'],
+      ),
+      logicalKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}logical_key'],
+      ),
+      authorUid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}author_uid'],
+      ),
+      authorName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}author_name'],
+      ),
+      reviewState: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}review_state'],
+      )!,
+      reviewedByUid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reviewed_by_uid'],
+      ),
+      reviewedByName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reviewed_by_name'],
+      ),
+      reviewedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}reviewed_at'],
+      ),
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      syncRevision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sync_revision'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -3237,6 +4499,16 @@ class PlannedItem extends DataClass implements Insertable<PlannedItem> {
   final String? estimateSource;
   final String? estimateReferenceDate;
   final int? estimateReferenceTripId;
+  final String? syncId;
+  final String? logicalKey;
+  final String? authorUid;
+  final String? authorName;
+  final String reviewState;
+  final String? reviewedByUid;
+  final String? reviewedByName;
+  final DateTime? reviewedAt;
+  final DateTime? deletedAt;
+  final int syncRevision;
   final DateTime createdAt;
   final DateTime updatedAt;
   const PlannedItem({
@@ -3251,6 +4523,16 @@ class PlannedItem extends DataClass implements Insertable<PlannedItem> {
     this.estimateSource,
     this.estimateReferenceDate,
     this.estimateReferenceTripId,
+    this.syncId,
+    this.logicalKey,
+    this.authorUid,
+    this.authorName,
+    required this.reviewState,
+    this.reviewedByUid,
+    this.reviewedByName,
+    this.reviewedAt,
+    this.deletedAt,
+    required this.syncRevision,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -3284,6 +4566,32 @@ class PlannedItem extends DataClass implements Insertable<PlannedItem> {
         estimateReferenceTripId,
       );
     }
+    if (!nullToAbsent || syncId != null) {
+      map['sync_id'] = Variable<String>(syncId);
+    }
+    if (!nullToAbsent || logicalKey != null) {
+      map['logical_key'] = Variable<String>(logicalKey);
+    }
+    if (!nullToAbsent || authorUid != null) {
+      map['author_uid'] = Variable<String>(authorUid);
+    }
+    if (!nullToAbsent || authorName != null) {
+      map['author_name'] = Variable<String>(authorName);
+    }
+    map['review_state'] = Variable<String>(reviewState);
+    if (!nullToAbsent || reviewedByUid != null) {
+      map['reviewed_by_uid'] = Variable<String>(reviewedByUid);
+    }
+    if (!nullToAbsent || reviewedByName != null) {
+      map['reviewed_by_name'] = Variable<String>(reviewedByName);
+    }
+    if (!nullToAbsent || reviewedAt != null) {
+      map['reviewed_at'] = Variable<DateTime>(reviewedAt);
+    }
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['sync_revision'] = Variable<int>(syncRevision);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -3314,6 +4622,32 @@ class PlannedItem extends DataClass implements Insertable<PlannedItem> {
       estimateReferenceTripId: estimateReferenceTripId == null && nullToAbsent
           ? const Value.absent()
           : Value(estimateReferenceTripId),
+      syncId: syncId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(syncId),
+      logicalKey: logicalKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(logicalKey),
+      authorUid: authorUid == null && nullToAbsent
+          ? const Value.absent()
+          : Value(authorUid),
+      authorName: authorName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(authorName),
+      reviewState: Value(reviewState),
+      reviewedByUid: reviewedByUid == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reviewedByUid),
+      reviewedByName: reviewedByName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reviewedByName),
+      reviewedAt: reviewedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reviewedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      syncRevision: Value(syncRevision),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -3344,6 +4678,16 @@ class PlannedItem extends DataClass implements Insertable<PlannedItem> {
       estimateReferenceTripId: serializer.fromJson<int?>(
         json['estimateReferenceTripId'],
       ),
+      syncId: serializer.fromJson<String?>(json['syncId']),
+      logicalKey: serializer.fromJson<String?>(json['logicalKey']),
+      authorUid: serializer.fromJson<String?>(json['authorUid']),
+      authorName: serializer.fromJson<String?>(json['authorName']),
+      reviewState: serializer.fromJson<String>(json['reviewState']),
+      reviewedByUid: serializer.fromJson<String?>(json['reviewedByUid']),
+      reviewedByName: serializer.fromJson<String?>(json['reviewedByName']),
+      reviewedAt: serializer.fromJson<DateTime?>(json['reviewedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      syncRevision: serializer.fromJson<int>(json['syncRevision']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -3371,6 +4715,16 @@ class PlannedItem extends DataClass implements Insertable<PlannedItem> {
       'estimateReferenceTripId': serializer.toJson<int?>(
         estimateReferenceTripId,
       ),
+      'syncId': serializer.toJson<String?>(syncId),
+      'logicalKey': serializer.toJson<String?>(logicalKey),
+      'authorUid': serializer.toJson<String?>(authorUid),
+      'authorName': serializer.toJson<String?>(authorName),
+      'reviewState': serializer.toJson<String>(reviewState),
+      'reviewedByUid': serializer.toJson<String?>(reviewedByUid),
+      'reviewedByName': serializer.toJson<String?>(reviewedByName),
+      'reviewedAt': serializer.toJson<DateTime?>(reviewedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'syncRevision': serializer.toJson<int>(syncRevision),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -3388,6 +4742,16 @@ class PlannedItem extends DataClass implements Insertable<PlannedItem> {
     Value<String?> estimateSource = const Value.absent(),
     Value<String?> estimateReferenceDate = const Value.absent(),
     Value<int?> estimateReferenceTripId = const Value.absent(),
+    Value<String?> syncId = const Value.absent(),
+    Value<String?> logicalKey = const Value.absent(),
+    Value<String?> authorUid = const Value.absent(),
+    Value<String?> authorName = const Value.absent(),
+    String? reviewState,
+    Value<String?> reviewedByUid = const Value.absent(),
+    Value<String?> reviewedByName = const Value.absent(),
+    Value<DateTime?> reviewedAt = const Value.absent(),
+    Value<DateTime?> deletedAt = const Value.absent(),
+    int? syncRevision,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => PlannedItem(
@@ -3412,6 +4776,20 @@ class PlannedItem extends DataClass implements Insertable<PlannedItem> {
     estimateReferenceTripId: estimateReferenceTripId.present
         ? estimateReferenceTripId.value
         : this.estimateReferenceTripId,
+    syncId: syncId.present ? syncId.value : this.syncId,
+    logicalKey: logicalKey.present ? logicalKey.value : this.logicalKey,
+    authorUid: authorUid.present ? authorUid.value : this.authorUid,
+    authorName: authorName.present ? authorName.value : this.authorName,
+    reviewState: reviewState ?? this.reviewState,
+    reviewedByUid: reviewedByUid.present
+        ? reviewedByUid.value
+        : this.reviewedByUid,
+    reviewedByName: reviewedByName.present
+        ? reviewedByName.value
+        : this.reviewedByName,
+    reviewedAt: reviewedAt.present ? reviewedAt.value : this.reviewedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    syncRevision: syncRevision ?? this.syncRevision,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -3440,6 +4818,30 @@ class PlannedItem extends DataClass implements Insertable<PlannedItem> {
       estimateReferenceTripId: data.estimateReferenceTripId.present
           ? data.estimateReferenceTripId.value
           : this.estimateReferenceTripId,
+      syncId: data.syncId.present ? data.syncId.value : this.syncId,
+      logicalKey: data.logicalKey.present
+          ? data.logicalKey.value
+          : this.logicalKey,
+      authorUid: data.authorUid.present ? data.authorUid.value : this.authorUid,
+      authorName: data.authorName.present
+          ? data.authorName.value
+          : this.authorName,
+      reviewState: data.reviewState.present
+          ? data.reviewState.value
+          : this.reviewState,
+      reviewedByUid: data.reviewedByUid.present
+          ? data.reviewedByUid.value
+          : this.reviewedByUid,
+      reviewedByName: data.reviewedByName.present
+          ? data.reviewedByName.value
+          : this.reviewedByName,
+      reviewedAt: data.reviewedAt.present
+          ? data.reviewedAt.value
+          : this.reviewedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      syncRevision: data.syncRevision.present
+          ? data.syncRevision.value
+          : this.syncRevision,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -3459,6 +4861,16 @@ class PlannedItem extends DataClass implements Insertable<PlannedItem> {
           ..write('estimateSource: $estimateSource, ')
           ..write('estimateReferenceDate: $estimateReferenceDate, ')
           ..write('estimateReferenceTripId: $estimateReferenceTripId, ')
+          ..write('syncId: $syncId, ')
+          ..write('logicalKey: $logicalKey, ')
+          ..write('authorUid: $authorUid, ')
+          ..write('authorName: $authorName, ')
+          ..write('reviewState: $reviewState, ')
+          ..write('reviewedByUid: $reviewedByUid, ')
+          ..write('reviewedByName: $reviewedByName, ')
+          ..write('reviewedAt: $reviewedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('syncRevision: $syncRevision, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -3466,7 +4878,7 @@ class PlannedItem extends DataClass implements Insertable<PlannedItem> {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     planId,
     productId,
@@ -3478,9 +4890,19 @@ class PlannedItem extends DataClass implements Insertable<PlannedItem> {
     estimateSource,
     estimateReferenceDate,
     estimateReferenceTripId,
+    syncId,
+    logicalKey,
+    authorUid,
+    authorName,
+    reviewState,
+    reviewedByUid,
+    reviewedByName,
+    reviewedAt,
+    deletedAt,
+    syncRevision,
     createdAt,
     updatedAt,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3498,6 +4920,16 @@ class PlannedItem extends DataClass implements Insertable<PlannedItem> {
           other.estimateSource == this.estimateSource &&
           other.estimateReferenceDate == this.estimateReferenceDate &&
           other.estimateReferenceTripId == this.estimateReferenceTripId &&
+          other.syncId == this.syncId &&
+          other.logicalKey == this.logicalKey &&
+          other.authorUid == this.authorUid &&
+          other.authorName == this.authorName &&
+          other.reviewState == this.reviewState &&
+          other.reviewedByUid == this.reviewedByUid &&
+          other.reviewedByName == this.reviewedByName &&
+          other.reviewedAt == this.reviewedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.syncRevision == this.syncRevision &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -3514,6 +4946,16 @@ class PlannedItemsCompanion extends UpdateCompanion<PlannedItem> {
   final Value<String?> estimateSource;
   final Value<String?> estimateReferenceDate;
   final Value<int?> estimateReferenceTripId;
+  final Value<String?> syncId;
+  final Value<String?> logicalKey;
+  final Value<String?> authorUid;
+  final Value<String?> authorName;
+  final Value<String> reviewState;
+  final Value<String?> reviewedByUid;
+  final Value<String?> reviewedByName;
+  final Value<DateTime?> reviewedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> syncRevision;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   const PlannedItemsCompanion({
@@ -3528,6 +4970,16 @@ class PlannedItemsCompanion extends UpdateCompanion<PlannedItem> {
     this.estimateSource = const Value.absent(),
     this.estimateReferenceDate = const Value.absent(),
     this.estimateReferenceTripId = const Value.absent(),
+    this.syncId = const Value.absent(),
+    this.logicalKey = const Value.absent(),
+    this.authorUid = const Value.absent(),
+    this.authorName = const Value.absent(),
+    this.reviewState = const Value.absent(),
+    this.reviewedByUid = const Value.absent(),
+    this.reviewedByName = const Value.absent(),
+    this.reviewedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.syncRevision = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
@@ -3543,6 +4995,16 @@ class PlannedItemsCompanion extends UpdateCompanion<PlannedItem> {
     this.estimateSource = const Value.absent(),
     this.estimateReferenceDate = const Value.absent(),
     this.estimateReferenceTripId = const Value.absent(),
+    this.syncId = const Value.absent(),
+    this.logicalKey = const Value.absent(),
+    this.authorUid = const Value.absent(),
+    this.authorName = const Value.absent(),
+    this.reviewState = const Value.absent(),
+    this.reviewedByUid = const Value.absent(),
+    this.reviewedByName = const Value.absent(),
+    this.reviewedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.syncRevision = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   }) : planId = Value(planId),
@@ -3561,6 +5023,16 @@ class PlannedItemsCompanion extends UpdateCompanion<PlannedItem> {
     Expression<String>? estimateSource,
     Expression<String>? estimateReferenceDate,
     Expression<int>? estimateReferenceTripId,
+    Expression<String>? syncId,
+    Expression<String>? logicalKey,
+    Expression<String>? authorUid,
+    Expression<String>? authorName,
+    Expression<String>? reviewState,
+    Expression<String>? reviewedByUid,
+    Expression<String>? reviewedByName,
+    Expression<DateTime>? reviewedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? syncRevision,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
   }) {
@@ -3580,6 +5052,16 @@ class PlannedItemsCompanion extends UpdateCompanion<PlannedItem> {
         'estimate_reference_date': estimateReferenceDate,
       if (estimateReferenceTripId != null)
         'estimate_reference_trip_id': estimateReferenceTripId,
+      if (syncId != null) 'sync_id': syncId,
+      if (logicalKey != null) 'logical_key': logicalKey,
+      if (authorUid != null) 'author_uid': authorUid,
+      if (authorName != null) 'author_name': authorName,
+      if (reviewState != null) 'review_state': reviewState,
+      if (reviewedByUid != null) 'reviewed_by_uid': reviewedByUid,
+      if (reviewedByName != null) 'reviewed_by_name': reviewedByName,
+      if (reviewedAt != null) 'reviewed_at': reviewedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (syncRevision != null) 'sync_revision': syncRevision,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
@@ -3597,6 +5079,16 @@ class PlannedItemsCompanion extends UpdateCompanion<PlannedItem> {
     Value<String?>? estimateSource,
     Value<String?>? estimateReferenceDate,
     Value<int?>? estimateReferenceTripId,
+    Value<String?>? syncId,
+    Value<String?>? logicalKey,
+    Value<String?>? authorUid,
+    Value<String?>? authorName,
+    Value<String>? reviewState,
+    Value<String?>? reviewedByUid,
+    Value<String?>? reviewedByName,
+    Value<DateTime?>? reviewedAt,
+    Value<DateTime?>? deletedAt,
+    Value<int>? syncRevision,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
   }) {
@@ -3616,6 +5108,16 @@ class PlannedItemsCompanion extends UpdateCompanion<PlannedItem> {
           estimateReferenceDate ?? this.estimateReferenceDate,
       estimateReferenceTripId:
           estimateReferenceTripId ?? this.estimateReferenceTripId,
+      syncId: syncId ?? this.syncId,
+      logicalKey: logicalKey ?? this.logicalKey,
+      authorUid: authorUid ?? this.authorUid,
+      authorName: authorName ?? this.authorName,
+      reviewState: reviewState ?? this.reviewState,
+      reviewedByUid: reviewedByUid ?? this.reviewedByUid,
+      reviewedByName: reviewedByName ?? this.reviewedByName,
+      reviewedAt: reviewedAt ?? this.reviewedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      syncRevision: syncRevision ?? this.syncRevision,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -3665,6 +5167,36 @@ class PlannedItemsCompanion extends UpdateCompanion<PlannedItem> {
         estimateReferenceTripId.value,
       );
     }
+    if (syncId.present) {
+      map['sync_id'] = Variable<String>(syncId.value);
+    }
+    if (logicalKey.present) {
+      map['logical_key'] = Variable<String>(logicalKey.value);
+    }
+    if (authorUid.present) {
+      map['author_uid'] = Variable<String>(authorUid.value);
+    }
+    if (authorName.present) {
+      map['author_name'] = Variable<String>(authorName.value);
+    }
+    if (reviewState.present) {
+      map['review_state'] = Variable<String>(reviewState.value);
+    }
+    if (reviewedByUid.present) {
+      map['reviewed_by_uid'] = Variable<String>(reviewedByUid.value);
+    }
+    if (reviewedByName.present) {
+      map['reviewed_by_name'] = Variable<String>(reviewedByName.value);
+    }
+    if (reviewedAt.present) {
+      map['reviewed_at'] = Variable<DateTime>(reviewedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (syncRevision.present) {
+      map['sync_revision'] = Variable<int>(syncRevision.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -3688,6 +5220,16 @@ class PlannedItemsCompanion extends UpdateCompanion<PlannedItem> {
           ..write('estimateSource: $estimateSource, ')
           ..write('estimateReferenceDate: $estimateReferenceDate, ')
           ..write('estimateReferenceTripId: $estimateReferenceTripId, ')
+          ..write('syncId: $syncId, ')
+          ..write('logicalKey: $logicalKey, ')
+          ..write('authorUid: $authorUid, ')
+          ..write('authorName: $authorName, ')
+          ..write('reviewState: $reviewState, ')
+          ..write('reviewedByUid: $reviewedByUid, ')
+          ..write('reviewedByName: $reviewedByName, ')
+          ..write('reviewedAt: $reviewedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('syncRevision: $syncRevision, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -6183,6 +7725,16 @@ typedef $$ProductsTableCreateCompanionBuilder = ProductsCompanion Function({
   Value<bool> needsCategoryReview,
   Value<String?> description,
   Value<bool> isArchived,
+  Value<String?> syncId,
+  Value<String?> logicalKey,
+  Value<String?> authorUid,
+  Value<String?> authorName,
+  Value<String> reviewState,
+  Value<String?> reviewedByUid,
+  Value<String?> reviewedByName,
+  Value<DateTime?> reviewedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> syncRevision,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
 });
@@ -6195,6 +7747,16 @@ typedef $$ProductsTableUpdateCompanionBuilder = ProductsCompanion Function({
   Value<bool> needsCategoryReview,
   Value<String?> description,
   Value<bool> isArchived,
+  Value<String?> syncId,
+  Value<String?> logicalKey,
+  Value<String?> authorUid,
+  Value<String?> authorName,
+  Value<String> reviewState,
+  Value<String?> reviewedByUid,
+  Value<String?> reviewedByName,
+  Value<DateTime?> reviewedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> syncRevision,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
 });
@@ -6245,6 +7807,56 @@ class $$ProductsTableFilterComposer
 
   ColumnFilters<bool> get isArchived => $composableBuilder(
     column: $table.isArchived,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncId => $composableBuilder(
+    column: $table.syncId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get logicalKey => $composableBuilder(
+    column: $table.logicalKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get authorUid => $composableBuilder(
+    column: $table.authorUid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get authorName => $composableBuilder(
+    column: $table.authorName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reviewState => $composableBuilder(
+    column: $table.reviewState,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reviewedByUid => $composableBuilder(
+    column: $table.reviewedByUid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reviewedByName => $composableBuilder(
+    column: $table.reviewedByName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get reviewedAt => $composableBuilder(
+    column: $table.reviewedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get syncRevision => $composableBuilder(
+    column: $table.syncRevision,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6308,6 +7920,56 @@ class $$ProductsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get syncId => $composableBuilder(
+    column: $table.syncId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get logicalKey => $composableBuilder(
+    column: $table.logicalKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get authorUid => $composableBuilder(
+    column: $table.authorUid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get authorName => $composableBuilder(
+    column: $table.authorName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reviewState => $composableBuilder(
+    column: $table.reviewState,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reviewedByUid => $composableBuilder(
+    column: $table.reviewedByUid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reviewedByName => $composableBuilder(
+    column: $table.reviewedByName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get reviewedAt => $composableBuilder(
+    column: $table.reviewedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get syncRevision => $composableBuilder(
+    column: $table.syncRevision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -6364,6 +8026,50 @@ class $$ProductsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get syncId =>
+      $composableBuilder(column: $table.syncId, builder: (column) => column);
+
+  GeneratedColumn<String> get logicalKey => $composableBuilder(
+    column: $table.logicalKey,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get authorUid =>
+      $composableBuilder(column: $table.authorUid, builder: (column) => column);
+
+  GeneratedColumn<String> get authorName => $composableBuilder(
+    column: $table.authorName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reviewState => $composableBuilder(
+    column: $table.reviewState,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reviewedByUid => $composableBuilder(
+    column: $table.reviewedByUid,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reviewedByName => $composableBuilder(
+    column: $table.reviewedByName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get reviewedAt => $composableBuilder(
+    column: $table.reviewedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get syncRevision => $composableBuilder(
+    column: $table.syncRevision,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -6407,6 +8113,16 @@ class $$ProductsTableTableManager
                 Value<bool> needsCategoryReview = const Value.absent(),
                 Value<String?> description = const Value.absent(),
                 Value<bool> isArchived = const Value.absent(),
+                Value<String?> syncId = const Value.absent(),
+                Value<String?> logicalKey = const Value.absent(),
+                Value<String?> authorUid = const Value.absent(),
+                Value<String?> authorName = const Value.absent(),
+                Value<String> reviewState = const Value.absent(),
+                Value<String?> reviewedByUid = const Value.absent(),
+                Value<String?> reviewedByName = const Value.absent(),
+                Value<DateTime?> reviewedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> syncRevision = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => ProductsCompanion(
@@ -6418,6 +8134,16 @@ class $$ProductsTableTableManager
                 needsCategoryReview: needsCategoryReview,
                 description: description,
                 isArchived: isArchived,
+                syncId: syncId,
+                logicalKey: logicalKey,
+                authorUid: authorUid,
+                authorName: authorName,
+                reviewState: reviewState,
+                reviewedByUid: reviewedByUid,
+                reviewedByName: reviewedByName,
+                reviewedAt: reviewedAt,
+                deletedAt: deletedAt,
+                syncRevision: syncRevision,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
@@ -6431,6 +8157,16 @@ class $$ProductsTableTableManager
                 Value<bool> needsCategoryReview = const Value.absent(),
                 Value<String?> description = const Value.absent(),
                 Value<bool> isArchived = const Value.absent(),
+                Value<String?> syncId = const Value.absent(),
+                Value<String?> logicalKey = const Value.absent(),
+                Value<String?> authorUid = const Value.absent(),
+                Value<String?> authorName = const Value.absent(),
+                Value<String> reviewState = const Value.absent(),
+                Value<String?> reviewedByUid = const Value.absent(),
+                Value<String?> reviewedByName = const Value.absent(),
+                Value<DateTime?> reviewedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> syncRevision = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => ProductsCompanion.insert(
@@ -6442,6 +8178,16 @@ class $$ProductsTableTableManager
                 needsCategoryReview: needsCategoryReview,
                 description: description,
                 isArchived: isArchived,
+                syncId: syncId,
+                logicalKey: logicalKey,
+                authorUid: authorUid,
+                authorName: authorName,
+                reviewState: reviewState,
+                reviewedByUid: reviewedByUid,
+                reviewedByName: reviewedByName,
+                reviewedAt: reviewedAt,
+                deletedAt: deletedAt,
+                syncRevision: syncRevision,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
@@ -6972,6 +8718,16 @@ typedef $$ShoppingPlansTableCreateCompanionBuilder =
       required String monthKey,
       required String name,
       Value<String> status,
+      Value<String?> syncId,
+      Value<String?> logicalKey,
+      Value<String?> authorUid,
+      Value<String?> authorName,
+      Value<String> reviewState,
+      Value<String?> reviewedByUid,
+      Value<String?> reviewedByName,
+      Value<DateTime?> reviewedAt,
+      Value<DateTime?> deletedAt,
+      Value<int> syncRevision,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -6981,6 +8737,16 @@ typedef $$ShoppingPlansTableUpdateCompanionBuilder =
       Value<String> monthKey,
       Value<String> name,
       Value<String> status,
+      Value<String?> syncId,
+      Value<String?> logicalKey,
+      Value<String?> authorUid,
+      Value<String?> authorName,
+      Value<String> reviewState,
+      Value<String?> reviewedByUid,
+      Value<String?> reviewedByName,
+      Value<DateTime?> reviewedAt,
+      Value<DateTime?> deletedAt,
+      Value<int> syncRevision,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -7011,6 +8777,56 @@ class $$ShoppingPlansTableFilterComposer
 
   ColumnFilters<String> get status => $composableBuilder(
     column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncId => $composableBuilder(
+    column: $table.syncId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get logicalKey => $composableBuilder(
+    column: $table.logicalKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get authorUid => $composableBuilder(
+    column: $table.authorUid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get authorName => $composableBuilder(
+    column: $table.authorName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reviewState => $composableBuilder(
+    column: $table.reviewState,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reviewedByUid => $composableBuilder(
+    column: $table.reviewedByUid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reviewedByName => $composableBuilder(
+    column: $table.reviewedByName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get reviewedAt => $composableBuilder(
+    column: $table.reviewedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get syncRevision => $composableBuilder(
+    column: $table.syncRevision,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7054,6 +8870,56 @@ class $$ShoppingPlansTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get syncId => $composableBuilder(
+    column: $table.syncId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get logicalKey => $composableBuilder(
+    column: $table.logicalKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get authorUid => $composableBuilder(
+    column: $table.authorUid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get authorName => $composableBuilder(
+    column: $table.authorName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reviewState => $composableBuilder(
+    column: $table.reviewState,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reviewedByUid => $composableBuilder(
+    column: $table.reviewedByUid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reviewedByName => $composableBuilder(
+    column: $table.reviewedByName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get reviewedAt => $composableBuilder(
+    column: $table.reviewedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get syncRevision => $composableBuilder(
+    column: $table.syncRevision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -7085,6 +8951,50 @@ class $$ShoppingPlansTableAnnotationComposer
 
   GeneratedColumn<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get syncId =>
+      $composableBuilder(column: $table.syncId, builder: (column) => column);
+
+  GeneratedColumn<String> get logicalKey => $composableBuilder(
+    column: $table.logicalKey,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get authorUid =>
+      $composableBuilder(column: $table.authorUid, builder: (column) => column);
+
+  GeneratedColumn<String> get authorName => $composableBuilder(
+    column: $table.authorName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reviewState => $composableBuilder(
+    column: $table.reviewState,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reviewedByUid => $composableBuilder(
+    column: $table.reviewedByUid,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reviewedByName => $composableBuilder(
+    column: $table.reviewedByName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get reviewedAt => $composableBuilder(
+    column: $table.reviewedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get syncRevision => $composableBuilder(
+    column: $table.syncRevision,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -7128,6 +9038,16 @@ class $$ShoppingPlansTableTableManager
                 Value<String> monthKey = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String> status = const Value.absent(),
+                Value<String?> syncId = const Value.absent(),
+                Value<String?> logicalKey = const Value.absent(),
+                Value<String?> authorUid = const Value.absent(),
+                Value<String?> authorName = const Value.absent(),
+                Value<String> reviewState = const Value.absent(),
+                Value<String?> reviewedByUid = const Value.absent(),
+                Value<String?> reviewedByName = const Value.absent(),
+                Value<DateTime?> reviewedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> syncRevision = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => ShoppingPlansCompanion(
@@ -7135,6 +9055,16 @@ class $$ShoppingPlansTableTableManager
                 monthKey: monthKey,
                 name: name,
                 status: status,
+                syncId: syncId,
+                logicalKey: logicalKey,
+                authorUid: authorUid,
+                authorName: authorName,
+                reviewState: reviewState,
+                reviewedByUid: reviewedByUid,
+                reviewedByName: reviewedByName,
+                reviewedAt: reviewedAt,
+                deletedAt: deletedAt,
+                syncRevision: syncRevision,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
@@ -7144,6 +9074,16 @@ class $$ShoppingPlansTableTableManager
                 required String monthKey,
                 required String name,
                 Value<String> status = const Value.absent(),
+                Value<String?> syncId = const Value.absent(),
+                Value<String?> logicalKey = const Value.absent(),
+                Value<String?> authorUid = const Value.absent(),
+                Value<String?> authorName = const Value.absent(),
+                Value<String> reviewState = const Value.absent(),
+                Value<String?> reviewedByUid = const Value.absent(),
+                Value<String?> reviewedByName = const Value.absent(),
+                Value<DateTime?> reviewedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> syncRevision = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => ShoppingPlansCompanion.insert(
@@ -7151,6 +9091,16 @@ class $$ShoppingPlansTableTableManager
                 monthKey: monthKey,
                 name: name,
                 status: status,
+                syncId: syncId,
+                logicalKey: logicalKey,
+                authorUid: authorUid,
+                authorName: authorName,
+                reviewState: reviewState,
+                reviewedByUid: reviewedByUid,
+                reviewedByName: reviewedByName,
+                reviewedAt: reviewedAt,
+                deletedAt: deletedAt,
+                syncRevision: syncRevision,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
@@ -7192,6 +9142,16 @@ typedef $$PlannedItemsTableCreateCompanionBuilder =
       Value<String?> estimateSource,
       Value<String?> estimateReferenceDate,
       Value<int?> estimateReferenceTripId,
+      Value<String?> syncId,
+      Value<String?> logicalKey,
+      Value<String?> authorUid,
+      Value<String?> authorName,
+      Value<String> reviewState,
+      Value<String?> reviewedByUid,
+      Value<String?> reviewedByName,
+      Value<DateTime?> reviewedAt,
+      Value<DateTime?> deletedAt,
+      Value<int> syncRevision,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -7208,6 +9168,16 @@ typedef $$PlannedItemsTableUpdateCompanionBuilder =
       Value<String?> estimateSource,
       Value<String?> estimateReferenceDate,
       Value<int?> estimateReferenceTripId,
+      Value<String?> syncId,
+      Value<String?> logicalKey,
+      Value<String?> authorUid,
+      Value<String?> authorName,
+      Value<String> reviewState,
+      Value<String?> reviewedByUid,
+      Value<String?> reviewedByName,
+      Value<DateTime?> reviewedAt,
+      Value<DateTime?> deletedAt,
+      Value<int> syncRevision,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -7273,6 +9243,56 @@ class $$PlannedItemsTableFilterComposer
 
   ColumnFilters<int> get estimateReferenceTripId => $composableBuilder(
     column: $table.estimateReferenceTripId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncId => $composableBuilder(
+    column: $table.syncId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get logicalKey => $composableBuilder(
+    column: $table.logicalKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get authorUid => $composableBuilder(
+    column: $table.authorUid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get authorName => $composableBuilder(
+    column: $table.authorName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reviewState => $composableBuilder(
+    column: $table.reviewState,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reviewedByUid => $composableBuilder(
+    column: $table.reviewedByUid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reviewedByName => $composableBuilder(
+    column: $table.reviewedByName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get reviewedAt => $composableBuilder(
+    column: $table.reviewedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get syncRevision => $composableBuilder(
+    column: $table.syncRevision,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7351,6 +9371,56 @@ class $$PlannedItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get syncId => $composableBuilder(
+    column: $table.syncId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get logicalKey => $composableBuilder(
+    column: $table.logicalKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get authorUid => $composableBuilder(
+    column: $table.authorUid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get authorName => $composableBuilder(
+    column: $table.authorName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reviewState => $composableBuilder(
+    column: $table.reviewState,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reviewedByUid => $composableBuilder(
+    column: $table.reviewedByUid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reviewedByName => $composableBuilder(
+    column: $table.reviewedByName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get reviewedAt => $composableBuilder(
+    column: $table.reviewedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get syncRevision => $composableBuilder(
+    column: $table.syncRevision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -7416,6 +9486,50 @@ class $$PlannedItemsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get syncId =>
+      $composableBuilder(column: $table.syncId, builder: (column) => column);
+
+  GeneratedColumn<String> get logicalKey => $composableBuilder(
+    column: $table.logicalKey,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get authorUid =>
+      $composableBuilder(column: $table.authorUid, builder: (column) => column);
+
+  GeneratedColumn<String> get authorName => $composableBuilder(
+    column: $table.authorName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reviewState => $composableBuilder(
+    column: $table.reviewState,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reviewedByUid => $composableBuilder(
+    column: $table.reviewedByUid,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reviewedByName => $composableBuilder(
+    column: $table.reviewedByName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get reviewedAt => $composableBuilder(
+    column: $table.reviewedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get syncRevision => $composableBuilder(
+    column: $table.syncRevision,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -7465,6 +9579,16 @@ class $$PlannedItemsTableTableManager
                 Value<String?> estimateSource = const Value.absent(),
                 Value<String?> estimateReferenceDate = const Value.absent(),
                 Value<int?> estimateReferenceTripId = const Value.absent(),
+                Value<String?> syncId = const Value.absent(),
+                Value<String?> logicalKey = const Value.absent(),
+                Value<String?> authorUid = const Value.absent(),
+                Value<String?> authorName = const Value.absent(),
+                Value<String> reviewState = const Value.absent(),
+                Value<String?> reviewedByUid = const Value.absent(),
+                Value<String?> reviewedByName = const Value.absent(),
+                Value<DateTime?> reviewedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> syncRevision = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => PlannedItemsCompanion(
@@ -7479,6 +9603,16 @@ class $$PlannedItemsTableTableManager
                 estimateSource: estimateSource,
                 estimateReferenceDate: estimateReferenceDate,
                 estimateReferenceTripId: estimateReferenceTripId,
+                syncId: syncId,
+                logicalKey: logicalKey,
+                authorUid: authorUid,
+                authorName: authorName,
+                reviewState: reviewState,
+                reviewedByUid: reviewedByUid,
+                reviewedByName: reviewedByName,
+                reviewedAt: reviewedAt,
+                deletedAt: deletedAt,
+                syncRevision: syncRevision,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
@@ -7495,6 +9629,16 @@ class $$PlannedItemsTableTableManager
                 Value<String?> estimateSource = const Value.absent(),
                 Value<String?> estimateReferenceDate = const Value.absent(),
                 Value<int?> estimateReferenceTripId = const Value.absent(),
+                Value<String?> syncId = const Value.absent(),
+                Value<String?> logicalKey = const Value.absent(),
+                Value<String?> authorUid = const Value.absent(),
+                Value<String?> authorName = const Value.absent(),
+                Value<String> reviewState = const Value.absent(),
+                Value<String?> reviewedByUid = const Value.absent(),
+                Value<String?> reviewedByName = const Value.absent(),
+                Value<DateTime?> reviewedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> syncRevision = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => PlannedItemsCompanion.insert(
@@ -7509,6 +9653,16 @@ class $$PlannedItemsTableTableManager
                 estimateSource: estimateSource,
                 estimateReferenceDate: estimateReferenceDate,
                 estimateReferenceTripId: estimateReferenceTripId,
+                syncId: syncId,
+                logicalKey: logicalKey,
+                authorUid: authorUid,
+                authorName: authorName,
+                reviewState: reviewState,
+                reviewedByUid: reviewedByUid,
+                reviewedByName: reviewedByName,
+                reviewedAt: reviewedAt,
+                deletedAt: deletedAt,
+                syncRevision: syncRevision,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),

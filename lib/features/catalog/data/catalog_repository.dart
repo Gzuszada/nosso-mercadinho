@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../../data/app_database.dart';
+import '../../cloud/domain/collaboration.dart';
 import 'catalog_import.dart';
 
 enum CategoryDeletionResult { deleted, hasProducts, notFound }
@@ -16,9 +17,13 @@ enum ProductDeletionResult {
 }
 
 class CatalogRepository {
-  const CatalogRepository(this._database);
+  const CatalogRepository(this._database, {this.actorResolver});
 
   final AppDatabase _database;
+  final CollaborationActorResolver? actorResolver;
+
+  Future<CollaborationActor> _actor() async =>
+      await actorResolver?.call() ?? const CollaborationActor.local();
 
   Future<int> saveCategory({int? id, required String name}) async {
     final normalizedName = _requiredName(name, maxLength: 100);
@@ -262,11 +267,12 @@ class CatalogRepository {
     String? description,
   }) async {
     final normalizedName = _requiredName(name, maxLength: 160);
+    Product? existingProduct;
     if (id != null) {
-      final existing = await (_database.select(
+      existingProduct = await (_database.select(
         _database.products,
       )..where((row) => row.id.equals(id))).getSingleOrNull();
-      if (existing == null) {
+      if (existingProduct == null) {
         throw StateError('O produto não existe mais.');
       }
     }
@@ -294,15 +300,8 @@ class CatalogRepository {
       }
     }
 
-    final values = ProductsCompanion(
-      name: Value(normalizedName),
-      categoryId: Value(categoryId),
-      subcategoryId: Value(subcategoryId),
-      measurementMode: Value(measurementMode.name),
-      needsCategoryReview: Value(needsCategoryReview),
-      description: Value(_optionalText(description)),
-      updatedAt: Value(DateTime.now()),
-    );
+    final actor = await _actor();
+    final now = DateTime.now();
     if (id == null) {
       return _database
           .into(_database.products)
@@ -314,9 +313,46 @@ class CatalogRepository {
               measurementMode: Value(measurementMode.name),
               needsCategoryReview: Value(needsCategoryReview),
               description: Value(_optionalText(description)),
+              syncId: Value(CollaborationMetadata.newSyncId('product')),
+              logicalKey: Value(
+                CollaborationMetadata.productLogicalKey(
+                  name: normalizedName,
+                  measurementMode: measurementMode.name,
+                ),
+              ),
+              authorUid: Value(actor.uid),
+              authorName: Value(actor.displayName),
+              reviewState: Value(
+                actor.role == CollaborationRole.member
+                    ? CollaborationMetadata.pendingReview
+                    : CollaborationMetadata.approved,
+              ),
             ),
           );
     }
+
+    final existing = existingProduct!;
+    final values = ProductsCompanion(
+      name: Value(normalizedName),
+      categoryId: Value(categoryId),
+      subcategoryId: Value(subcategoryId),
+      measurementMode: Value(measurementMode.name),
+      needsCategoryReview: Value(needsCategoryReview),
+      description: Value(_optionalText(description)),
+      logicalKey: Value(
+        CollaborationMetadata.productLogicalKey(
+          name: normalizedName,
+          measurementMode: measurementMode.name,
+        ),
+      ),
+      reviewState: Value(
+        actor.role == CollaborationRole.member
+            ? CollaborationMetadata.pendingReview
+            : CollaborationMetadata.approved,
+      ),
+      syncRevision: Value(existing.syncRevision + 1),
+      updatedAt: Value(now),
+    );
 
     final updated = await (_database.update(
       _database.products,
@@ -353,13 +389,30 @@ class CatalogRepository {
         return status;
       }
 
-      await (_database.delete(_database.plannedItems)..where(
+      final now = DateTime.now();
+      await (_database.update(_database.plannedItems)..where(
             (row) => row.productId.equals(id) & row.isRemoved.equals(true),
           ))
-          .go();
-      await (_database.delete(
+          .write(
+            PlannedItemsCompanion(
+              deletedAt: Value(now),
+              syncRevision: const Value(1),
+              updatedAt: Value(now),
+            ),
+          );
+      final product = await (_database.select(
         _database.products,
-      )..where((row) => row.id.equals(id))).go();
+      )..where((row) => row.id.equals(id))).getSingle();
+      await (_database.update(
+        _database.products,
+      )..where((row) => row.id.equals(id))).write(
+        ProductsCompanion(
+          isArchived: const Value(true),
+          deletedAt: Value(now),
+          syncRevision: Value(product.syncRevision + 1),
+          updatedAt: Value(now),
+        ),
+      );
       return ProductDeletionResult.deleted;
     });
   }
@@ -368,7 +421,7 @@ class CatalogRepository {
     final product = await (_database.select(
       _database.products,
     )..where((row) => row.id.equals(id))).getSingleOrNull();
-    if (product == null) {
+    if (product == null || product.deletedAt != null) {
       return ProductDeletionResult.notFound;
     }
 
@@ -412,7 +465,8 @@ class CatalogRepository {
     return ProductDeletionResult.ready;
   }
 
-  Future<int> importCatalog(CatalogImport catalog) {
+  Future<int> importCatalog(CatalogImport catalog) async {
+    final actor = await _actor();
     return _database.transaction(() async {
       const sourceKey = 'catalogo-inicial-v1';
       final previousBatch = await (_database.select(
@@ -479,6 +533,20 @@ class CatalogRepository {
                 categoryId: Value(categoryId),
                 measurementMode: Value(item.measurementMode.name),
                 needsCategoryReview: Value(item.needsCategoryReview),
+                syncId: Value(CollaborationMetadata.newSyncId('product')),
+                logicalKey: Value(
+                  CollaborationMetadata.productLogicalKey(
+                    name: item.name,
+                    measurementMode: item.measurementMode.name,
+                  ),
+                ),
+                authorUid: Value(actor.uid),
+                authorName: Value(actor.displayName),
+                reviewState: Value(
+                  actor.role == CollaborationRole.member
+                      ? CollaborationMetadata.pendingReview
+                      : CollaborationMetadata.approved,
+                ),
               ),
             );
         await _database
