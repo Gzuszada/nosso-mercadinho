@@ -6,6 +6,7 @@
 - App Android: `1:1055183366543:android:8f96bffb2bc03b07cac3fa`
 - Package: `br.com.nocorre.mercado.pilot`
 - Firestore: `(default)`
+- Região efetiva do Firestore: `nam5` (o roteiro ainda exige `southamerica-east1`; a localização do banco padrão não pode ser corrigida apenas trocando uma configuração)
 - Região da Function callable: `us-central1`
 
 O app de produção (`br.com.nocorre.mercado`) e a PWA não usam o protocolo v2.
@@ -92,6 +93,35 @@ $env:JAVA_HOME = 'C:\Program Files\Android\Android Studio1\jbr'
 $env:Path = "$env:JAVA_HOME\bin;$env:Path"
 firebase emulators:exec --config firebase.pilot.json --only firestore,auth --project demo-mercado-casa 'node tools/emulator_pilot_rules_test.js'
 ```
+
+## Matriz de prontidão do roteiro cooperativo
+
+A auditoria do código em 25/11/2026 separa o que o protocolo v2 realmente
+implementa do roadmap ainda ausente. "Pronto" abaixo significa implementado e
+coberto por teste; a validação final com dois dispositivos continua pendente.
+
+| Cenário | Estado | Comportamento atual |
+| --- | --- | --- |
+| 1 — uso normal | Parcial | Criação da casa, convite, pull e push de snapshots completos existem; falta o teste real com dois dispositivos. |
+| 2 — autoria e revisão | Ausente | O manifesto identifica o autor da publication, não de cada item. Não há nome do autor no item, revisão nem confirmação pelo owner. |
+| 3 — remoção | Parcial | A remoção pode ser propagada por snapshot completo; não há tombstone de sincronização. |
+| 4 — publicação concorrente sem sobreposição | Ausente | O perdedor é preservado como candidate, mas não há merge por item. |
+| 5 — publicação concorrente com sobreposição | Parcial | O conflito de generation é detectado e preservado, mas o owner não recebe uma tela de comparação/decisão das duas versões. |
+| 6 — duplicata por `logicalKey` | Ausente | Não existe `logicalKey` nem revisão de duplicatas. |
+| 7 — falha de rede | Parcial | Chunks imutáveis e retry da mesma publication são idempotentes, mas o `publicationId` não é persistido para retomar automaticamente a mesma publication após nova tentativa. |
+| 8 — owner remove durante publication antiga | Ausente | Não existe tombstone que impeça a ressurreição do item removido. |
+
+O schema real do piloto continua Drift 7 e o backup real é formato 6. O schema
+8/backup 7, IDs estáveis entre dispositivos, autoria por item, `logicalKey`,
+tombstones e fluxo de moderação do owner pertencem à próxima camada e ainda
+não são parte do APK `1.0.8-pilot+16`.
+
+A correção que permite a um membro usar "Enviar todos os dados deste
+dispositivo" sem ser tratado como publicação exclusiva do owner foi aplicada
+no código após a tag `v1.0.8-pilot`. Ela ainda precisa entrar em um próximo
+APK piloto; a release `1.0.8-pilot+16` não deve ser considerada atualizada com
+essa correção.
+
 
 ## Próxima camada
 

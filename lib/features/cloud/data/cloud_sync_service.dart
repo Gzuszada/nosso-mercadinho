@@ -530,7 +530,10 @@ class CloudSyncService {
       deviceId: 'android-pilot',
       baseGeneration: remote?.generation ?? 0,
       expectedManifestHash: remote?.manifestHash,
-      requiresOwnerModeration: true,
+      // Publishing is allowed to every household member. Owner moderation is
+      // a future workflow over the preserved candidate; it must not prevent a
+      // member from publishing a normal change.
+      requiresOwnerModeration: false,
     );
     if (result.status == SyncV2PublishStatus.conflict) {
       throw CloudSyncConflictException(
