@@ -29,9 +29,9 @@ APKs gerados:
 - `build/app/outputs/flutter-apk/app-pilot-release.apk`
 
 O APK piloto release validado em 25/11/2026 usa o package
-`br.com.nocorre.mercado.pilot`, versionCode `15`, versionName `1.0.7-pilot`,
+`br.com.nocorre.mercado.pilot`, versionCode `16`, versionName `1.0.8-pilot`,
 assinatura APK v2 válida e SHA-256
-`21A03C4852583EDD93F2B5C3002934F5589E7DA93145FCEFAAA2FA5A3630428A`.
+`E23086D99E94B5EBD7B861AA17C3D6C3580CAE2BEF171886BC6D45E870A26E27`.
 Ele instala lado a lado com a produção e não pode substituir uma instalação
 piloto debug, pois as chaves de assinatura são diferentes.
 
@@ -68,9 +68,10 @@ As regras de produção continuam em `firestore.rules` e são publicadas com `fi
 
 ## Validação manual ainda necessária
 
-O APK release piloto foi instalado e aberto com sucesso em um emulador Android
-17, sem crash, e a tela de autenticação foi renderizada. Isso valida empacotamento,
-assinatura, instalação e inicialização, mas não substitui o teste cooperativo.
+O APK release piloto `1.0.8-pilot+16` foi atualizado sobre a release anterior
+com `adb install -r` e aberto com sucesso em um emulador Android 17, sem crash.
+A tela inicial e os dados da sessão foram preservados. Isso valida empacotamento,
+assinatura, atualização, inicialização e smoke visual, mas não substitui o teste cooperativo.
 
 Com dois dispositivos e duas contas autorizadas, executar:
 

@@ -4,6 +4,13 @@ const projectId = 'demo-mercado-casa';
 const firestoreBase = `http://127.0.0.1:8080/v1/projects/${projectId}/databases/(default)/documents`;
 const authBase = 'http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1';
 
+process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:8080';
+process.env.GCLOUD_PROJECT = projectId;
+const {initializeApp} = require('../functions-pilot/node_modules/firebase-admin/lib/app/index.js');
+const {getFirestore} = require('../functions-pilot/node_modules/firebase-admin/lib/firestore/index.js');
+initializeApp({projectId});
+const adminDb = getFirestore();
+
 async function request(url, options = {}) {
   const response = await fetch(url, {
     ...options,
@@ -256,6 +263,63 @@ async function main() {
   const ownerDelete = await commit(owner, [deleteDocument(chunkPath)]);
   if (ownerDelete.status !== 200) {
     throw new Error(`Owner não excluiu chunk v2: ${ownerDelete.status}`);
+  }
+
+  // Regressão da exclusão da casa: o owner precisa remover todos os dados
+  // compartilhados, a árvore sync v2 e o documento principal.
+  const deletionPaths = [
+    `${household}/tables/catalog`,
+    `${household}/metadata/sync`,
+    `${household}/inviteClaims/${member.uid}`,
+    `${v2Root}/candidates/publication-delete/areas/catalog/parts/0`,
+    `${v2Root}/candidates/publication-delete`,
+    `${v2Root}/conflicts/conflict-delete`,
+    `${v2Root}/state/current-delete`,
+    v2Root,
+  ];
+  await adminDb.doc(`${v2Root}/candidates/publication-delete`).set({
+    status: 'committed',
+    authorUid: owner.uid,
+  });
+  await adminDb.doc(`${v2Root}/conflicts/conflict-delete`).set({
+    status: 'open',
+  });
+  await adminDb.doc(`${v2Root}/state/current-delete`).set({
+    generation: 1,
+  });
+  const createDeletionData = await commit(owner, [
+    set(deletionPaths[0], { payload: { stringValue: 'catalog' } }),
+    set(deletionPaths[1], { revision: { integerValue: '1' } }),
+    set(deletionPaths[3], {
+      payload: { stringValue: 'products' },
+      hash: { stringValue: 'chunk-hash' },
+      count: { integerValue: '1' },
+    }),
+  ]);
+  if (createDeletionData.status !== 200) {
+    throw new Error(
+      `Owner não criou os dados de exclusão: ${JSON.stringify(createDeletionData)}`,
+    );
+  }
+  for (const path of deletionPaths) {
+    const deletion = await commit(owner, [deleteDocument(path)]);
+    if (deletion.status !== 200) {
+      throw new Error(
+        `Owner não excluiu ${path}: ${JSON.stringify(deletion)}`,
+      );
+    }
+  }
+  // Regressão: o app remove membros e casa no mesmo batch. Sem isso, o
+  // documento da casa já não existiria ao excluir os membros (403).
+  const deleteHouseholdAndMembers = await commit(owner, [
+    deleteDocument(`${household}/members/${owner.uid}`),
+    deleteDocument(`${household}/members/${member.uid}`),
+    deleteDocument(household),
+  ]);
+  if (deleteHouseholdAndMembers.status !== 200) {
+    throw new Error(
+      `Owner não excluiu a casa e seus membros em um batch: ${JSON.stringify(deleteHouseholdAndMembers)}`,
+    );
   }
 
   const wrongEmail = await signUp('wrong@example.com');

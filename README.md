@@ -11,8 +11,8 @@ A release assinada está disponível em [nosso-mercadinho-1.0.7.apk](https://git
 O piloto é um APK separado (`br.com.nocorre.mercado.pilot`) e não altera a
 PWA nem a instalação de produção. Consulte [docs/piloto.md](docs/piloto.md)
 para identidade, validações e roteiro cooperativo. O APK release piloto
-`1.0.7-pilot+15` tem SHA-256
-`21A03C4852583EDD93F2B5C3002934F5589E7DA93145FCEFAAA2FA5A3630428A`.
+`1.0.8-pilot+16` tem SHA-256
+`E23086D99E94B5EBD7B861AA17C3D6C3580CAE2BEF171886BC6D45E870A26E27`.
 
 ## O que já funciona
 

@@ -303,11 +303,16 @@ class CloudAuthService {
     if (isPilotBuild) {
       await _deletePilotSyncData(householdId);
     }
-    await household.delete();
+    // Remove a casa e seus membros no mesmo commit. As regras avaliam o
+    // estado anterior do documento da casa; excluí-lo antes deixaria a
+    // remoção dos membros sem autorização e produziria membros órfãos.
     final members = await household.collection('members').get();
+    final batch = _firestore.batch();
     for (final member in members.docs) {
-      await member.reference.delete();
+      batch.delete(member.reference);
     }
+    batch.delete(household);
+    await batch.commit();
   }
 
   Future<void> _deletePilotSyncData(String householdId) async {
