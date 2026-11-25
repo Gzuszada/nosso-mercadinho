@@ -55,6 +55,10 @@ app.*.map.json
 /functions/node_modules/
 /functions/.env*
 /functions/*secret*
+/functions-pilot/lib/
+/functions-pilot/node_modules/
+/functions-pilot/.env*
+/functions-pilot/*secret*
 
 # Widget Preview related
 .widget_preview/

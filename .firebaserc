@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "nosso-mercado-casa"
+    "default": "nosso-mercado-casa",
+    "production": "nosso-mercado-casa",
+    "pilot": "nosso-mercado-casa-pilot"
   }
 }

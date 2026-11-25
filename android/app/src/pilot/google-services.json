@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1055183366543",
+    "project_id": "nosso-mercado-casa-pilot",
+    "storage_bucket": "nosso-mercado-casa-pilot.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1055183366543:android:8f96bffb2bc03b07cac3fa",
+        "android_client_info": {
+          "package_name": "br.com.nocorre.mercado.pilot"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMLnuQuRFJw678J0QNffG35LBDgP4NOuU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

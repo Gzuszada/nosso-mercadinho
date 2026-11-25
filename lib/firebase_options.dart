@@ -66,3 +66,32 @@ class DefaultFirebaseOptions {
     storageBucket: 'nosso-mercado-casa.firebasestorage.app',
   );
 }
+
+/// Firebase configuration for the isolated Android pilot.
+///
+/// This configuration is intentionally not registered for Web. The pilot
+/// protocol must never be used by the production PWA.
+class PilotFirebaseOptions {
+  static FirebaseOptions get currentPlatform {
+    if (kIsWeb) {
+      throw UnsupportedError(
+        'O Firebase piloto está disponível somente no aplicativo Android.',
+      );
+    }
+    if (defaultTargetPlatform != TargetPlatform.android) {
+      throw UnsupportedError(
+        'O Firebase piloto está disponível somente no Android.',
+      );
+    }
+    return android;
+  }
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyDMLnuQuRFJw678J0QNffG35LBDgP4NOuU',
+    appId: '1:1055183366543:android:8f96bffb2bc03b07cac3fa',
+    messagingSenderId: '1055183366543',
+    projectId: 'nosso-mercado-casa-pilot',
+    authDomain: 'nosso-mercado-casa-pilot.firebaseapp.com',
+    storageBucket: 'nosso-mercado-casa-pilot.firebasestorage.app',
+  );
+}

@@ -1,3 +1,17 @@
+## Piloto Android de sincronização v2 — primeira entrega
+
+- Projeto Firebase `nosso-mercado-casa-pilot` criado e app Android `br.com.nocorre.mercado.pilot` registrado. O build `production` preserva `br.com.nocorre.mercado`, o Firebase de produção e o mesmo applicationId para atualização da release existente.
+- Flavor Gradle `pilot` com `applicationIdSuffix=.pilot`, label "Mercado Piloto" e configuração Firebase isolada. A PWA continua usando apenas produção.
+- Backend v2 isolado em `functions-pilot/`, com chunks imutáveis até 700 KiB, manifesto, hashes SHA-256 canônicos, compare-and-swap atômico por `generation`/`manifestHash`, retries idempotentes e retenção de candidates rejeitadas.
+- Estado oficial em `syncV2/{householdId}/state/current`; candidates e conflitos ficam no mesmo prefixo. Regras exclusivas em `firestore.pilot.rules`; `firestore.rules`, `firebase.json` e `functions/` de produção permaneceram sem diff.
+- O cliente detecta pull, push e conflito por área; conflitos do piloto exigem decisão do owner, validada também no backend. Exclusão da casa remove a árvore v2 do piloto.
+- Validação local: `flutter analyze` sem problemas; 102 testes Flutter passaram; 8 testes Node passaram; Emulator Firestore/Auth passou (`REGRAS_OK`); APKs `app-production-debug.apk` e `app-pilot-debug.apk` compilados e inspecionados. O APK piloto contém App ID e projeto Firebase do piloto.
+- Operacional em 24/11/2026: plano Blaze ativo; Identity Platform/GCIP inicializado com E-mail/Senha e senha obrigatória; `beforeCreateUser` e `publishSyncV2` publicadas e ativas; trigger `beforeCreate` vinculado; regras do piloto publicadas; allowlist privada inicializada com hashes SHA-256.
+- E2E real no projeto piloto aprovado: cadastro não autorizado bloqueado com `PERMISSION_DENIED`; cadastro autorizado aceito; `publishSyncV2` confirmou commit CAS e generation oficial; retry idempotente preservou a generation; publication concorrente foi rejeitada, candidate e conflito ficaram retidos; usuário sem vínculo recebeu `PERMISSION_DENIED`. Todas as contas, casas, publications e entradas temporárias de allowlist foram removidas após o teste.
+- Entrega piloto de 25/11/2026: APK release `1.0.7-pilot+15` (`br.com.nocorre.mercado.pilot`, versionCode 15) gerado e assinado com APK Signature Scheme v2 válido, 67.477.952 bytes e SHA-256 `21A03C4852583EDD93F2B5C3002934F5589E7DA93145FCEFAAA2FA5A3630428A`. Instalação limpa e abertura concluídas em emulador Android 17, sem crash; a tela de autenticação foi renderizada. A suíte final permaneceu verde: 102 testes Flutter, 8 testes Node, análise estática e Emulator (`REGRAS_OK`).
+- Pendência física: falta o cenário manual cooperativo com duas contas e dois dispositivos para pull inicial, push, conflito, decisão do owner e exclusão da casa. O emulador valida instalação e abertura, mas não cobre esse fluxo entre pessoas.
+
+
 # Progresso
 
 ## Estado atual — 19/11/2026

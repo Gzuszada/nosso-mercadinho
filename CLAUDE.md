@@ -28,7 +28,8 @@ Depois que houver projeto Flutter:
 - Análise: `flutter analyze`
 - Testes: `flutter test`
 - Dispositivo: `flutter devices`; execução: `flutter run`
-- APK: `flutter build apk --release`, apenas após configurar e conferir assinatura.
+- APK de produção: `flutter build apk --release --flavor production`, apenas após configurar e conferir assinatura.
+- APK piloto: `flutter build apk --debug --flavor pilot`; não substitui a release de produção.
 
 Ajustar os comandos de diretório se o projeto ficar em subpasta, documentando isso. Código gerado não deve ser editado à mão. Rodar geração antes dos testes se houver mudanças que a exijam.
 

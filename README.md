@@ -6,6 +6,14 @@ Aplicativo Android pessoal com dados locais, também publicado como PWA. Abra `a
 
 A release assinada está disponível em [nosso-mercadinho-1.0.7.apk](https://github.com/Gzuszada/nosso-mercadinho/releases/download/v1.0.7/nosso-mercadinho-1.0.7.apk). SHA-256: `7B43417F77CB74288DA73020C0E07EDF05524B71571B8DC79448C392E4311DB7`.
 
+### Piloto Android de sincronização v2
+
+O piloto é um APK separado (`br.com.nocorre.mercado.pilot`) e não altera a
+PWA nem a instalação de produção. Consulte [docs/piloto.md](docs/piloto.md)
+para identidade, validações e roteiro cooperativo. O APK release piloto
+`1.0.7-pilot+15` tem SHA-256
+`21A03C4852583EDD93F2B5C3002934F5589E7DA93145FCEFAAA2FA5A3630428A`.
+
 ## O que já funciona
 
 - Catálogo local persistente, categorias/subcategorias, importação revisável e backup/restauração.
@@ -179,9 +187,9 @@ keyPassword=SENHA_LOCAL_DA_CHAVE
 Substitua os exemplos na sua máquina; não copie senhas para código versionado. A configuração Gradle recusa tarefas release sem keystore/propriedades válidas e nunca usa a chave debug para release. Depois que a chave for criada, registre o pacote e a chave assinante no Android Developer Console conforme o fluxo limitado; então execute na junction ASCII:
 
 ```powershell
-& $flutter build apk --release
+& $flutter build apk --release --flavor production
 ```
 
-O APK fica em `build\app\outputs\flutter-apk\app-release.apk`. APK release é a versão de uso pessoal assinada; APK debug serve para desenvolvimento e usa outra chave. Preserve o `applicationId` e a chave da release para atualizar sem desinstalar. A versão/build number em `pubspec.yaml` deve aumentar a cada atualização.
+O APK fica em `build\app\outputs\flutter-apk\app-production-release.apk`. APK release é a versão de uso pessoal assinada; APK debug serve para desenvolvimento e usa outra chave. Preserve o `applicationId` e a chave da release para atualizar sem desinstalar. A versão/build number em `pubspec.yaml` deve aumentar a cada atualização.
 
 Ainda dependem do usuário: criar e guardar a chave, configurar `key.properties` localmente, completar o Android Developer Console/autorizar o telefone, instalar/restaurar o APK no aparelho e executar a conferência física. Não instale sobre a base atual sem exportar e verificar primeiro o backup JSON.

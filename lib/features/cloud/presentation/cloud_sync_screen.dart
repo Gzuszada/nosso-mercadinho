@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../app_environment.dart';
 import '../../../app_providers.dart';
 import '../data/cloud_models.dart';
 import '../data/cloud_sync_service.dart';
@@ -214,20 +215,19 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
     );
     if (!approved || !mounted) return;
     await _run(() async {
-      final remoteCatalog = await ref
-          .read(cloudSyncServiceProvider)
-          .readRemoteArea(householdId: id, area: CloudSyncConflictArea.catalog);
+      final resolutions = <CloudSyncConflictArea, CloudSyncResolution>{};
+      for (final area in CloudSyncConflictArea.values) {
+        final remoteArea = await ref
+            .read(cloudSyncServiceProvider)
+            .readRemoteArea(householdId: id, area: area);
+        resolutions[area] = CloudSyncResolution(
+          payload: remoteArea,
+          source: CloudSyncResolutionSource.remote,
+        );
+      }
       await ref
           .read(cloudSyncServiceProvider)
-          .synchronize(
-            householdId: id,
-            resolutions: {
-              CloudSyncConflictArea.catalog: CloudSyncResolution(
-                payload: remoteCatalog,
-                source: CloudSyncResolutionSource.remote,
-              ),
-            },
-          );
+          .synchronize(householdId: id, resolutions: resolutions);
       await _refreshSyncStatus(id);
     });
   }
@@ -531,6 +531,16 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
           .read(cloudSyncServiceProvider)
           .synchronize(householdId: householdId, resolutions: resolutions);
     } on CloudSyncConflictException catch (error) {
+      if (isPilotBuild) {
+        final isOwner = await ref
+            .read(cloudAuthServiceProvider)
+            .isHouseholdOwner(householdId);
+        if (!isOwner) {
+          throw StateError(
+            'Este conflito precisa ser decidido pelo dono da casa.',
+          );
+        }
+      }
       final resolution = await _askConflictResolution(error.conflict);
       if (resolution == null || !mounted) {
         rethrow;

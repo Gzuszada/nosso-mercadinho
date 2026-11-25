@@ -54,6 +54,18 @@ android {
         versionName = flutter.versionName
     }
 
+    flavorDimensions += "environment"
+    productFlavors {
+        create("production") {
+            dimension = "environment"
+        }
+        create("pilot") {
+            dimension = "environment"
+            applicationIdSuffix = ".pilot"
+            versionNameSuffix = "-pilot"
+        }
+    }
+
     if (releaseSigningReady) {
         signingConfigs {
             create("release") {

@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../../app_environment.dart';
 import 'cloud_models.dart';
 
 class AuthAccount {
@@ -242,6 +243,16 @@ class CloudAuthService {
     return households;
   }
 
+  Future<bool> isHouseholdOwner(String householdId) async {
+    final user = _auth.currentUser;
+    if (user == null) return false;
+    final household = await _firestore
+        .collection('households')
+        .doc(householdId)
+        .get();
+    return household.data()?['ownerUid'] == user.uid;
+  }
+
   Future<String> createHousehold({required String name}) async {
     final user = _auth.currentUser;
     if (user == null) {
@@ -289,11 +300,37 @@ class CloudAuthService {
         await document.reference.delete();
       }
     }
+    if (isPilotBuild) {
+      await _deletePilotSyncData(householdId);
+    }
     await household.delete();
     final members = await household.collection('members').get();
     for (final member in members.docs) {
       await member.reference.delete();
     }
+  }
+
+  Future<void> _deletePilotSyncData(String householdId) async {
+    final root = _firestore.doc('syncV2/$householdId');
+    final candidates = await root.collection('candidates').get();
+    for (final candidate in candidates.docs) {
+      final areas = await candidate.reference.collection('areas').get();
+      for (final area in areas.docs) {
+        final parts = await area.reference.collection('parts').get();
+        for (final part in parts.docs) {
+          await part.reference.delete();
+        }
+        await area.reference.delete();
+      }
+      await candidate.reference.delete();
+    }
+    for (final collectionName in const ['conflicts', 'state']) {
+      final documents = await root.collection(collectionName).get();
+      for (final document in documents.docs) {
+        await document.reference.delete();
+      }
+    }
+    await root.delete();
   }
 
   Future<String> createInvite({

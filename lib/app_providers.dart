@@ -1,10 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'app_environment.dart';
 import 'data/app_database.dart';
 import 'features/catalog/data/catalog_repository.dart';
 import 'features/cloud/data/cloud_auth_service.dart';
 import 'features/cloud/data/cloud_models.dart';
 import 'features/cloud/data/cloud_sync_service.dart';
+import 'features/cloud/data/sync_v2_client.dart';
 import 'features/settings/data/reset_service.dart';
 import 'features/settings/data/settings_repository.dart';
 import 'features/shopping/data/shopping_repository.dart';
@@ -85,6 +87,7 @@ final cloudSyncServiceProvider = Provider<CloudSyncService>(
   (ref) => CloudSyncService(
     database: ref.watch(databaseProvider),
     settingsRepository: ref.watch(settingsRepositoryProvider),
+    syncV2Client: isPilotBuild ? SyncV2Client() : null,
   ),
 );
 

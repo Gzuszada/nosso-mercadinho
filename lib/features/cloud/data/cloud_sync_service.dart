@@ -6,12 +6,15 @@ import '../../../data/app_database.dart';
 import '../../settings/data/settings_repository.dart';
 import 'cloud_models.dart';
 import 'cloud_snapshot_service.dart';
+import 'sync_v2_candidate.dart';
+import 'sync_v2_client.dart';
 
 class CloudSyncService {
   CloudSyncService({
     required this.database,
     required this.settingsRepository,
     FirebaseFirestore? firestore,
+    this.syncV2Client,
   }) : _firestore = firestore ?? FirebaseFirestore.instance;
 
   static const _areas = {
@@ -28,8 +31,12 @@ class CloudSyncService {
   final AppDatabase database;
   final SettingsRepository settingsRepository;
   final FirebaseFirestore _firestore;
+  final SyncV2Client? syncV2Client;
 
   Future<CloudSyncStatus> inspectStatus(String householdId) async {
+    if (syncV2Client != null) {
+      return _inspectPilotStatus(householdId);
+    }
     final settings = await settingsRepository.getCloudSyncSettings();
     final localPayload = await CloudSnapshotService(database)
         .readLocalPayload();
@@ -75,6 +82,12 @@ class CloudSyncService {
     required String householdId,
     Map<CloudSyncConflictArea, CloudSyncResolution>? resolutions,
   }) async {
+    if (syncV2Client != null) {
+      return _synchronizePilot(
+        householdId,
+        resolutions: resolutions ?? const {},
+      );
+    }
     final settings = await settingsRepository.getCloudSyncSettings();
     var localPayload = await CloudSnapshotService(database).readLocalPayload();
     final baseHashes = _decodeHashes(settings?.lastSyncedHash);
@@ -228,6 +241,20 @@ class CloudSyncService {
     required String householdId,
     required CloudSyncConflictArea area,
   }) async {
+    if (syncV2Client != null) {
+      final remote = await syncV2Client!.readCurrentState(householdId);
+      if (remote == null) {
+        throw StateError('A área remota "${area.label}" não está disponível.');
+      }
+      final payload = await syncV2Client!.readArea(
+        householdId: householdId,
+        area: area.name,
+        manifest: remote.manifest,
+      );
+      final selected = selectArea(payload, area);
+      _validateArea(selected, area);
+      return selected;
+    }
     final remote = await _tryReadArea(householdId, area);
     if (remote.payload == null) {
       throw StateError('A área remota "${area.label}" não está disponível.');
@@ -245,6 +272,9 @@ class CloudSyncService {
   Future<CloudSyncResult> publishAllLocalAreas({
     required String householdId,
   }) async {
+    if (syncV2Client != null) {
+      return _publishPilotAreas(householdId, null);
+    }
     final localPayload = await CloudSnapshotService(database)
         .readLocalPayload();
     final metadata = await _readMetadata(householdId);
@@ -277,6 +307,9 @@ class CloudSyncService {
     required String householdId,
     required CloudSyncConflictArea area,
   }) async {
+    if (syncV2Client != null) {
+      return _publishPilotAreas(householdId, area);
+    }
     final localPayload = await CloudSnapshotService(database)
         .readLocalPayload();
     final localArea = selectArea(localPayload, area);
@@ -300,22 +333,250 @@ class CloudSyncService {
     return CloudSyncResult(pulled: false, pushed: true, revision: revision);
   }
 
+  Future<CloudSyncStatus> _inspectPilotStatus(String householdId) async {
+    final client = syncV2Client!;
+    final settings = await settingsRepository.getCloudSyncSettings();
+    final localPayload = await CloudSnapshotService(database)
+        .readLocalPayload();
+    final baseHashes = _decodeHashes(settings?.lastSyncedHash);
+    final remote = await client.readCurrentState(householdId);
+    final areas = <CloudSyncConflictArea, CloudSyncAreaStatus>{};
+    for (final area in _areas.keys) {
+      final localArea = selectArea(localPayload, area);
+      final localHash = client.areaContentHash(localArea);
+      final remoteManifest = remote?.manifest.areas[area.name];
+      final remoteHash = remoteManifest?.hash;
+      final state = _stateFor(
+        localHash: localHash,
+        remoteHash: remoteHash,
+        baseHash: baseHashes[area.name],
+        remoteError: null,
+      );
+      areas[area] = CloudSyncAreaStatus(
+        area: area,
+        state: state,
+        localCounts: _counts(localArea, area),
+        remoteCounts: remoteManifest == null
+            ? const CloudAreaCounts({})
+            : CloudAreaCounts({
+                for (final key in _areas[area]!)
+                  key: remoteManifest.counts[key] ?? 0,
+              }),
+        localHash: localHash,
+        remoteHash: remoteHash,
+      );
+    }
+    return CloudSyncStatus(
+      householdId: householdId,
+      remoteRevision: remote?.generation ?? 0,
+      areas: areas,
+    );
+  }
+
+  Future<CloudSyncResult> _synchronizePilot(
+    String householdId, {
+    required Map<CloudSyncConflictArea, CloudSyncResolution> resolutions,
+  }) async {
+    final client = syncV2Client!;
+    final settings = await settingsRepository.getCloudSyncSettings();
+    var localPayload = await CloudSnapshotService(database).readLocalPayload();
+    final baseHashes = _decodeHashes(settings?.lastSyncedHash);
+    final remote = await client.readCurrentState(householdId);
+    final remoteAreas = <String, Map<String, dynamic>>{};
+    final localHashes = <String, String?>{};
+    final remoteHashes = <String, String?>{};
+    var pulled = false;
+    var pushed = false;
+    var requiresOwnerModeration = false;
+
+    for (final area in _areas.keys) {
+      final localArea = selectArea(localPayload, area);
+      final localHash = client.areaContentHash(localArea);
+      final remoteHash = remote?.manifest.areas[area.name]?.hash;
+      final remoteArea = remote == null
+          ? null
+          : await client.readArea(
+              householdId: householdId,
+              area: area.name,
+              manifest: remote.manifest,
+            );
+      remoteAreas[area.name] = remoteArea ?? localArea;
+      localHashes[area.name] = localHash;
+      remoteHashes[area.name] = remoteHash;
+      final baseHash = baseHashes[area.name];
+      final localIsEmpty = _counts(localArea, area).total == 0;
+      final localChanged = baseHash == null
+          ? !localIsEmpty || remoteHash == null
+          : baseHash != localHash;
+      final remoteChanged = remoteHash != baseHash;
+      final resolution = resolutions[area];
+
+      if (resolution != null) {
+        final chosen = selectArea(resolution.payload, area);
+        if (resolution.source == CloudSyncResolutionSource.remote) {
+          localPayload = mergeArea(localPayload, area, chosen);
+          remoteAreas[area.name] = chosen;
+          pulled = true;
+        } else {
+          remoteAreas[area.name] = chosen;
+          pushed = true;
+          requiresOwnerModeration = true;
+        }
+      } else if (localChanged && remoteChanged && remoteHash != localHash) {
+        throw CloudSyncConflictException(
+          CloudSyncConflict(
+            area: area,
+            localPayload: localArea,
+            remotePayload: remoteArea ?? const {},
+            remoteRevision: remote?.generation ?? 0,
+          ),
+        );
+      } else if (remoteChanged && !localChanged) {
+        localPayload = mergeArea(localPayload, area, remoteAreas[area.name]!);
+        pulled = true;
+      } else if (localChanged && !remoteChanged) {
+        remoteAreas[area.name] = localArea;
+        pushed = true;
+      } else if (remoteHash == localHash) {
+        remoteAreas[area.name] = localArea;
+      }
+    }
+
+    if (pulled) {
+      await CloudSnapshotService(database).restoreRemotePayload(localPayload);
+    }
+    var generation = remote?.generation ?? 0;
+    if (pushed) {
+      final author = await client.currentAuthor();
+      if (author == null) {
+        throw StateError('Entre na sua conta antes de publicar.');
+      }
+      final publicationId = 'pub-${DateTime.now().microsecondsSinceEpoch}';
+      final result = await client.publish(
+        householdId: householdId,
+        publicationId: publicationId,
+        areas: remoteAreas,
+        authorUid: author.uid,
+        authorName: author.name,
+        deviceId: 'android-pilot',
+        baseGeneration: generation,
+        expectedManifestHash: remote?.manifestHash,
+        requiresOwnerModeration: requiresOwnerModeration,
+      );
+      if (result.status == SyncV2PublishStatus.conflict) {
+        throw CloudSyncConflictException(
+          CloudSyncConflict(
+            area: CloudSyncConflictArea.shopping,
+            localPayload: localPayload,
+            remotePayload: const {},
+            remoteRevision: result.generation,
+          ),
+        );
+      }
+      generation = result.generation;
+    }
+
+    final finalHashes = <String, String?>{};
+    for (final area in _areas.keys) {
+      finalHashes[area.name] = client.areaContentHash(
+        pushed ? remoteAreas[area.name]! : selectArea(localPayload, area),
+      );
+    }
+    await _persistState(
+      householdId: householdId,
+      revision: generation,
+      hashes: finalHashes,
+      localHashes: finalHashes,
+    );
+    return CloudSyncResult(
+      pulled: pulled,
+      pushed: pushed,
+      revision: generation,
+    );
+  }
+
+  Future<CloudSyncResult> _publishPilotAreas(
+    String householdId,
+    CloudSyncConflictArea? changedArea,
+  ) async {
+    final client = syncV2Client!;
+    final localPayload = await CloudSnapshotService(database)
+        .readLocalPayload();
+    final remote = await client.readCurrentState(householdId);
+    final areas = <String, Map<String, dynamic>>{};
+    for (final area in _areas.keys) {
+      if (changedArea == null || area == changedArea) {
+        areas[area.name] = selectArea(localPayload, area);
+      } else if (remote != null) {
+        areas[area.name] = await client.readArea(
+          householdId: householdId,
+          area: area.name,
+          manifest: remote.manifest,
+        );
+      } else {
+        areas[area.name] = selectArea(localPayload, area);
+      }
+    }
+    final author = await client.currentAuthor();
+    if (author == null) {
+      throw StateError('Entre na sua conta antes de publicar.');
+    }
+    final result = await client.publish(
+      householdId: householdId,
+      publicationId: 'pub-${DateTime.now().microsecondsSinceEpoch}',
+      areas: areas,
+      authorUid: author.uid,
+      authorName: author.name,
+      deviceId: 'android-pilot',
+      baseGeneration: remote?.generation ?? 0,
+      expectedManifestHash: remote?.manifestHash,
+      requiresOwnerModeration: true,
+    );
+    if (result.status == SyncV2PublishStatus.conflict) {
+      throw CloudSyncConflictException(
+        CloudSyncConflict(
+          area: changedArea ?? CloudSyncConflictArea.shopping,
+          localPayload: localPayload,
+          remotePayload: const {},
+          remoteRevision: result.generation,
+        ),
+      );
+    }
+    final hashes = {
+      for (final area in _areas.keys)
+        area.name: client.areaContentHash(areas[area.name]!),
+    };
+    await _persistState(
+      householdId: householdId,
+      revision: result.generation,
+      hashes: hashes,
+      localHashes: hashes,
+    );
+    return CloudSyncResult(
+      pulled: false,
+      pushed: true,
+      revision: result.generation,
+    );
+  }
+
   Future<void> _persistState({
     required String householdId,
     required int revision,
     required Map<String, String?> hashes,
     required Map<String, String?> localHashes,
   }) async {
-    await _firestore
-        .collection('households')
-        .doc(householdId)
-        .collection('metadata')
-        .doc('sync')
-        .set({
-          'revision': revision,
-          'hashes': jsonEncode(hashes),
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
+    if (syncV2Client == null) {
+      await _firestore
+          .collection('households')
+          .doc(householdId)
+          .collection('metadata')
+          .doc('sync')
+          .set({
+            'revision': revision,
+            'hashes': jsonEncode(hashes),
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+    }
     await settingsRepository.saveCloudSyncSettings(
       householdId: householdId,
       remoteRevision: revision,
