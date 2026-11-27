@@ -4,6 +4,11 @@ import {HttpsError, onCall} from 'firebase-functions/v2/https';
 
 import {db} from './firebase_app.js';
 import {decideCas} from './sync_v2_cas.js';
+import {
+  findAuthorshipViolation,
+  findReviewDecisionViolation,
+  type AuthorshipRow,
+} from './sync_v2_authorship.js';
 const MAX_CHUNKS = 256;
 const MAX_CHUNK_BYTES = 700 * 1024;
 
@@ -124,6 +129,116 @@ async function assertChunks(
   }
 }
 
+async function rowsFromManifest(
+  manifest: Record<string, unknown>,
+  area: string,
+  table: string,
+): Promise<AuthorshipRow[]> {
+  const areas = object(manifest.areas, 'áreas');
+  const areaManifest = object(areas[area], `área ${area}`);
+  const chunks = areaManifest.chunks;
+  if (!Array.isArray(chunks)) {
+    throw new HttpsError('data-loss', `A área ${area} está incompleta.`);
+  }
+  const rows: AuthorshipRow[] = [];
+  for (const rawChunk of chunks) {
+    const descriptor = object(rawChunk, 'chunk');
+    const path = string(descriptor.path, 'path');
+    const chunk = await db.doc(path).get();
+    if (!chunk.exists) {
+      throw new HttpsError('data-loss', `A área ${area} está incompleta.`);
+    }
+    const payload = object(chunk.get('payload'), 'payload');
+    const values = payload[table];
+    if (Array.isArray(values)) {
+      for (const value of values) {
+        if (value && typeof value === 'object' && !Array.isArray(value)) {
+          rows.push(value as AuthorshipRow);
+        }
+      }
+    }
+  }
+  return rows;
+}
+
+async function assertPublicationAuthors(
+  householdId: string,
+  candidateManifest: Record<string, unknown>,
+  publisherUid: string,
+): Promise<void> {
+  const household = await db.doc(`households/${householdId}`).get();
+  const publisherIsOwner = household.get('ownerUid') === publisherUid;
+  const state = await db.doc(`syncV2/${householdId}/state/current`).get();
+  const currentManifest = state.exists
+    ? object(state.get('manifest'), 'manifesto atual')
+    : null;
+
+  const specifications = [
+    {area: 'catalog', table: 'products'},
+    {area: 'shopping', table: 'plannedItems'},
+  ];
+  for (const specification of specifications) {
+    const currentRows = currentManifest
+      ? await rowsFromManifest(
+        currentManifest,
+        specification.area,
+        specification.table,
+      )
+      : [];
+    const candidateRows = await rowsFromManifest(
+      candidateManifest,
+      specification.area,
+      specification.table,
+    );
+    const violation = findAuthorshipViolation(
+      currentRows,
+      candidateRows,
+      publisherUid,
+      publisherIsOwner,
+    );
+    if (violation) {
+      throw new HttpsError(
+        'permission-denied',
+        `Autoria inválida para ${violation.syncId || 'item sem identidade'} (${violation.reason}).`,
+      );
+    }
+  }
+}
+
+async function assertReviewDecisions(
+  householdId: string,
+  candidateManifest: Record<string, unknown>,
+): Promise<void> {
+  const reviews = await db
+    .collection(`syncV2/${householdId}/reviews`)
+    .get();
+  if (reviews.empty) return;
+
+  const candidateRows = await rowsFromManifest(
+    candidateManifest,
+    'shopping',
+    'plannedItems',
+  );
+  const candidatesBySyncId = new Map<string, AuthorshipRow>();
+  for (const row of candidateRows) {
+    const syncId = typeof row.syncId === 'string' ? row.syncId : '';
+    if (syncId) candidatesBySyncId.set(syncId, row);
+  }
+  for (const reviewSnapshot of reviews.docs) {
+    const review = object(reviewSnapshot.data(), 'revisão');
+    const syncId = typeof review.itemSyncId === 'string' ? review.itemSyncId : '';
+    const violation = findReviewDecisionViolation(
+      review,
+      candidatesBySyncId.get(syncId) ?? null,
+    );
+    if (violation) {
+      throw new HttpsError(
+        'permission-denied',
+        `A decisão do owner não pode ser revertida (${violation.reason}).`,
+      );
+    }
+  }
+}
 
 /**
  * Commits an immutable candidate using compare-and-swap.
@@ -187,6 +302,12 @@ export const publishSyncV2 = onCall(async (request) => {
     }
   }
 
+  await assertPublicationAuthors(
+    householdId,
+    manifest,
+    request.auth.uid,
+  );
+  await assertReviewDecisions(householdId, manifest);
 
   const candidateRef = db.doc(
     `syncV2/${householdId}/candidates/${publicationId}`,

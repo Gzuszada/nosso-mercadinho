@@ -10,9 +10,18 @@ A release assinada está disponível em [nosso-mercadinho-1.0.7.apk](https://git
 
 O piloto é um APK separado (`br.com.nocorre.mercado.pilot`) e não altera a
 PWA nem a instalação de produção. Consulte [docs/piloto.md](docs/piloto.md)
-para identidade, validações e roteiro cooperativo. O APK release piloto
-`1.0.8-pilot+16` tem SHA-256
-`E23086D99E94B5EBD7B861AA17C3D6C3580CAE2BEF171886BC6D45E870A26E27`.
+para identidade, validações e roteiro cooperativo. O último APK release piloto
+validado em aparelho é o `1.0.12-pilot+23`, com SHA-256
+`17300C93F2A74BC3C10FEB447A9C383BFE2F76F48EA20F4C49EC08F01BD5C6D4`. As
+correções de revisão do owner e de comparação semântica descritas em
+[docs/piloto.md](docs/piloto.md) estão no repositório e ainda não foram
+publicadas em um novo APK.
+
+No piloto, os itens criados por membros entram como pendentes e o owner
+confirma ou remove cada item pela central **Conta e sincronização → Revisão do
+owner**. A decisão do owner é autoritativa: ela remove o item da lista do
+membro em todos os aparelhos da casa, e a publicação de qualquer membro passa
+a carregar essa decisão.
 
 ## O que já funciona
 

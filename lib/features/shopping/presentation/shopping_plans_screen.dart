@@ -568,6 +568,38 @@ class ShoppingPlanDetailScreen extends ConsumerWidget {
                     style: Theme.of(context).textTheme.bodyLarge
                         ?.copyWith(fontWeight: FontWeight.w600),
                   ),
+                  if (item.authorName != null || item.authorUid != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      'Adicionado por ${item.authorName ?? item.authorUid}'
+                      '${item.createdAt.year < 2000 ? '' : ' · ${_formatReviewDate(item.createdAt)}'}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                  if (item.reviewState == 'pending_review') ...[
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.tertiaryContainer,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        'Aguardando revisão do owner',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onTertiaryContainer,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 2),
                   progress.when(
                     loading: () => const Text(
@@ -721,6 +753,10 @@ class ShoppingPlanDetailScreen extends ConsumerWidget {
       },
       child: tile,
     );
+  }
+
+  String _formatReviewDate(DateTime value) {
+    return DateFormat('d MMM, HH:mm', 'pt_BR').format(value.toLocal());
   }
 
   String _estimateDescription(PlannedItem item) {

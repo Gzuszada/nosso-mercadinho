@@ -120,6 +120,13 @@ service cloud.firestore {
         allow write: if false;
       }
 
+      // Decisões de revisão são autoritativas e só podem ser gravadas pela
+      // Cloud Function. Todos os membros precisam ler para aplicar a decisão.
+      match /reviews/{itemSyncId} {
+        allow read: if isMember(householdId);
+        allow write: if false;
+      }
+
       // Conflitos pendentes de moderação são visíveis somente ao owner.
       match /conflicts/{conflictId} {
         allow read: if isOwner(householdId);

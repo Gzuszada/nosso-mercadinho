@@ -14,35 +14,73 @@ import 'features/settings/data/settings_repository.dart';
 import 'features/shopping/data/shopping_repository.dart';
 
 Future<CollaborationActor?> _resolveCollaborationActor(Ref ref) async {
+  final settings = await ref
+      .read(settingsRepositoryProvider)
+      .getCloudSyncSettings();
+  final householdId = settings?.householdId;
+  if (householdId == null) {
+    // No household was selected: this is ordinary local/offline use.
+    return null;
+  }
+
   try {
     final user = ref.read(cloudAuthServiceProvider).currentUser;
     if (user == null) {
-      return null;
+      return const CollaborationActor(
+        uid: 'offline:unknown',
+        displayName: 'Membro',
+        role: CollaborationRole.member,
+      );
     }
-    final settings = await ref
-        .read(settingsRepositoryProvider)
-        .getCloudSyncSettings();
-    final householdId = settings?.householdId;
-    if (householdId == null) {
-      return null;
+
+    var ownerUid = settings?.householdOwnerUid;
+    try {
+      final confirmedOwnerUid = await ref
+          .read(cloudAuthServiceProvider)
+          .householdOwnerUid(householdId);
+      if (confirmedOwnerUid != null) {
+        ownerUid = confirmedOwnerUid;
+        await ref
+            .read(settingsRepositoryProvider)
+            .cacheHouseholdOwner(householdId, confirmedOwnerUid);
+      }
+    } on Object {
+      // Keep using the last confirmed owner. If it is unknown, the actor is
+      // treated as a member so new items remain pending instead of being
+      // silently approved while offline.
     }
-    final isOwner = await ref
-        .read(cloudAuthServiceProvider)
-        .isHouseholdOwner(householdId);
+
+    final displayName = user.displayName?.trim().isNotEmpty == true
+        ? user.displayName!.trim()
+        : CloudAuthService.defaultDisplayName(user.email);
+    if (ownerUid == null) {
+      return CollaborationActor(
+        uid: user.uid,
+        displayName: displayName,
+        role: CollaborationRole.member,
+      );
+    }
     return CollaborationActor(
       uid: user.uid,
-      displayName: user.displayName?.trim().isNotEmpty == true
-          ? user.displayName!.trim()
-          : CloudAuthService.defaultDisplayName(user.email),
-      role: isOwner ? CollaborationRole.owner : CollaborationRole.member,
+      displayName: displayName,
+      role: ownerUid == user.uid
+          ? CollaborationRole.owner
+          : CollaborationRole.member,
     );
   } on Object {
-    // Collaboration metadata must never block an offline/local write. Firebase
-    // may not be initialized in tests, the account may have disappeared, or
-    // the owner lookup may fail while the device is offline.
-    return null;
+    // Firebase may be unavailable in a local-only build or in an offline
+    // process. In a selected household this must remain conservative.
+    return const CollaborationActor(
+      uid: 'offline:unknown',
+      displayName: 'Membro',
+      role: CollaborationRole.member,
+    );
   }
 }
+
+final collaborationActorProvider = FutureProvider<CollaborationActor?>(
+  (ref) => _resolveCollaborationActor(ref),
+);
 
 final databaseProvider = Provider<AppDatabase>((ref) {
   final database = AppDatabase();
@@ -69,6 +107,10 @@ final collaborationServiceProvider = Provider<CollaborationService>(
     ref.watch(databaseProvider),
     actorResolver: () => _resolveCollaborationActor(ref),
   ),
+);
+
+final pendingPlanReviewsProvider = StreamProvider<List<PendingPlanReview>>(
+  (ref) => ref.watch(collaborationServiceProvider).watchPendingPlanReviews(),
 );
 
 final settingsRepositoryProvider = Provider<SettingsRepository>(
@@ -136,6 +178,15 @@ final cloudSyncServiceProvider = Provider<CloudSyncService>(
     syncV2Client: isPilotBuild ? SyncV2Client() : null,
   ),
 );
+
+final publishedPendingPlanReviewsProvider =
+    FutureProvider<List<PlanReviewItem>>((ref) async {
+      final household = await ref.watch(selectedCloudHouseholdProvider.future);
+      if (household == null) return const [];
+      return ref
+          .watch(cloudSyncServiceProvider)
+          .readPublishedPendingPlanReviews(householdId: household.id);
+    });
 
 final resetServiceProvider = Provider<ResetService>(
   (ref) => ResetService(ref.watch(databaseProvider)),

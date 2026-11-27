@@ -256,6 +256,32 @@ async function main() {
     throw new Error(`Não-membro leu o chunk v2: ${outsiderChunk.status}`);
   }
 
+  const reviewPath = `${v2Root}/reviews/item-1`;
+  await adminDb.doc(reviewPath).set({
+    itemSyncId: 'item-1',
+    action: 'approve',
+    authorUid: member.uid,
+    reviewedByUid: owner.uid,
+  });
+  const memberReadReview = await request(`${firestoreBase}/${reviewPath}`, {
+    headers: auth(member),
+  });
+  if (memberReadReview.status !== 200) {
+    throw new Error(`Membro não leu a revisão: ${memberReadReview.status}`);
+  }
+  const memberWriteReview = await commit(member, [
+    set(reviewPath, { action: { stringValue: 'remove' } }),
+  ]);
+  if (memberWriteReview.status !== 403) {
+    throw new Error(`Membro não deveria escrever a revisão: ${memberWriteReview.status}`);
+  }
+  const outsiderReadReview = await request(`${firestoreBase}/${reviewPath}`, {
+    headers: auth(outsider),
+  });
+  if (outsiderReadReview.status !== 403) {
+    throw new Error(`Não-membro leu a revisão: ${outsiderReadReview.status}`);
+  }
+
   const memberDelete = await commit(member, [deleteDocument(chunkPath)]);
   if (memberDelete.status !== 403) {
     throw new Error(`Membro não deveria excluir chunk v2: ${memberDelete.status}`);

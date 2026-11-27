@@ -160,6 +160,16 @@ Para comandos Android, use a junction ASCII `C:\Users\Usuario\MercadoApp`, pois 
 - Conferência manual da acessibilidade/fonte ampliada, acentuação no dispositivo, funcionamento offline, migração no aparelho e revisão visual do tema escuro/sugestão de mês/ano.
 - Edição de compras concluídas não está disponível; telas históricas são somente leitura.
 
+## Piloto: hierarquia de remoção do owner e comparação semântica (26/11/2026)
+
+- O backend do piloto passou a decidir a moderação por uma regra pura e testada (`findModerationViolation` em `functions-pilot/src/sync_v2_moderation.ts`): somente o owner confirmado da casa decide, a decisão exige um item publicado de outro membro e um item do próprio owner é recusado.
+- O cliente deixou de duplicar a aplicação da decisão: `moderatePlannedItem` usa agora o helper idempotente e canônico `applySyncV2ReviewToLocalItem`. A decisão repetida não avança mais o `syncRevision` e o instante gravado é normalizado para segundos em UTC, o que elimina a divergência de um dígito entre aparelhos.
+- A publicação do piloto (sincronização e **Enviar todos os dados deste dispositivo**) aplica as decisões do owner antes de publicar e grava a decisão no banco local do aparelho que publica. Antes, a publicação do membro era recusada pelo backend depois de uma remoção do owner.
+- A comparação entre o estado local e o publicado passou a usar o hash semântico por área (`areaSemanticHash`), com a base memorizada em `semantic:<área>`. Dois aparelhos com o mesmo conteúdo deixam de aparecer como divergentes.
+- Validações executadas: `flutter analyze` sem problemas; `flutter test` com 131 testes passando; `npm test` em `functions-pilot` com 21 testes passando, incluindo a hierarquia de moderação e o fluxo completo de remoção (membro cria pendência → owner remove → item fica com tombstone, autoria e instante canônicos → publicação do membro carrega a decisão).
+- O probe temporário usado na investigação foi removido do repositório.
+- Pendente: gerar, assinar e validar em aparelho um novo APK piloto com essas correções; o APK validado continua sendo o `1.0.12-pilot+23`.
+
 ## Próximo passo
 
 Realizar o checklist manual de instalação, backup/restauração, migração, acessibilidade e funcionamento offline no aparelho. Manter a instalação antiga até confirmar os dados; não alterar dados reais nem criar commit pelo assistente.

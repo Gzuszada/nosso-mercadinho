@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:mercado/features/cloud/data/sync_v2_candidate.dart';
 import 'package:mercado/features/cloud/data/sync_v2_client.dart';
+import 'package:mercado/features/cloud/data/sync_v2_review.dart';
 
 void main() {
   group('sync v2 client', () {
@@ -23,6 +24,41 @@ void main() {
           displayName: 'Owner',
         ),
       );
+    });
+
+    test('re-adicao posterior a remoção recebe nova identidade', () {
+      final review = SyncV2Review(
+        itemSyncId: 'planned-item:old',
+        action: SyncV2ReviewAction.remove,
+        reviewedByUid: 'owner-uid',
+        reviewedByName: 'Owner',
+        decidedAt: DateTime.utc(2026, 11, 25, 18, 55, 18),
+        authorUid: 'member-uid',
+        authorName: 'Member',
+      );
+      final payload = {
+        'plannedItems': [
+          {
+            'syncId': 'planned-item:old',
+            'logicalKey': 'planned-item:plan:product',
+            'reviewState': 'pending_review',
+            'isRemoved': false,
+            'deletedAt': null,
+            'updatedAt': '2026-11-25T20:07:11.000',
+            'syncRevision': 14,
+          },
+        ],
+      };
+
+      final separated = separateReaddedPendingItems(payload, [review]);
+      final row = (separated['plannedItems'] as List).single as Map;
+      expect(row['syncId'], isNot('planned-item:old'));
+      expect(row['syncId'], startsWith('planned-item:'));
+
+      final reviewed = applySyncV2Reviews(separated, [review]);
+      final reviewedRow = (reviewed['plannedItems'] as List).single as Map;
+      expect(reviewedRow['reviewState'], 'pending_review');
+      expect(reviewedRow['isRemoved'], isFalse);
     });
 
     test('divide, publica e recompõe uma tabela grande', () async {
@@ -87,6 +123,33 @@ void main() {
             .map((doc) => doc.get('count') as int)
             .reduce((a, b) => a + b),
         rows.length + 1,
+      );
+    });
+
+    test('envia moderação para a callable do backend', () async {
+      final client = SyncV2Client(
+        firestore: firestore,
+        auth: auth,
+        httpClient: MockClient((request) async {
+          expect(request.url.path, '/moderatePlannedItem');
+          final body = jsonDecode(request.body) as Map<String, dynamic>;
+          final data = body['data'] as Map<String, dynamic>;
+          expect(data['householdId'], 'casa');
+          expect(data['itemSyncId'], 'planned-item-1');
+          expect(data['action'], 'approve');
+          return http.Response(
+            jsonEncode({
+              'result': {'status': 'recorded'},
+            }),
+            200,
+          );
+        }),
+      );
+
+      await client.moderatePlannedItem(
+        householdId: 'casa',
+        itemSyncId: 'planned-item-1',
+        action: SyncV2ReviewAction.approve,
       );
     });
 

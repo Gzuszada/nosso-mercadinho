@@ -9,6 +9,7 @@ import {
 import {db} from './firebase_app.js';
 
 export {publishSyncV2} from './sync_v2.js';
+export {moderatePlannedItem} from './sync_v2_moderation.js';
 
 async function loadAllowedEmailHashes(): Promise<Set<string>> {
   const snapshot = await db.doc(REGISTRATION_ALLOWLIST_DOCUMENT).get();

@@ -243,14 +243,19 @@ class CloudAuthService {
     return households;
   }
 
-  Future<bool> isHouseholdOwner(String householdId) async {
-    final user = _auth.currentUser;
-    if (user == null) return false;
+  Future<String?> householdOwnerUid(String householdId) async {
     final household = await _firestore
         .collection('households')
         .doc(householdId)
         .get();
-    return household.data()?['ownerUid'] == user.uid;
+    final ownerUid = household.data()?['ownerUid'];
+    return ownerUid is String && ownerUid.isNotEmpty ? ownerUid : null;
+  }
+
+  Future<bool> isHouseholdOwner(String householdId) async {
+    final user = _auth.currentUser;
+    if (user == null) return false;
+    return await householdOwnerUid(householdId) == user.uid;
   }
 
   Future<String> createHousehold({required String name}) async {

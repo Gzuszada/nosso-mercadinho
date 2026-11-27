@@ -6967,12 +6967,25 @@ class $CloudSyncSettingsTable extends CloudSyncSettings
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _householdOwnerUidMeta = const VerificationMeta(
+    'householdOwnerUid',
+  );
+  @override
+  late final GeneratedColumn<String> householdOwnerUid =
+      GeneratedColumn<String>(
+        'household_owner_uid',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
     householdId,
     remoteRevision,
     lastSyncedHash,
+    householdOwnerUid,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -7016,6 +7029,15 @@ class $CloudSyncSettingsTable extends CloudSyncSettings
         ),
       );
     }
+    if (data.containsKey('household_owner_uid')) {
+      context.handle(
+        _householdOwnerUidMeta,
+        householdOwnerUid.isAcceptableOrUnknown(
+          data['household_owner_uid']!,
+          _householdOwnerUidMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -7041,6 +7063,10 @@ class $CloudSyncSettingsTable extends CloudSyncSettings
         DriftSqlType.string,
         data['${effectivePrefix}last_synced_hash'],
       ),
+      householdOwnerUid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}household_owner_uid'],
+      ),
     );
   }
 
@@ -7056,11 +7082,16 @@ class CloudSyncSetting extends DataClass
   final String? householdId;
   final int remoteRevision;
   final String? lastSyncedHash;
+
+  /// Last owner UID confirmed by the backend. It lets a signed-in member
+  /// remain conservative (pending review) while temporarily offline.
+  final String? householdOwnerUid;
   const CloudSyncSetting({
     required this.id,
     this.householdId,
     required this.remoteRevision,
     this.lastSyncedHash,
+    this.householdOwnerUid,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -7072,6 +7103,9 @@ class CloudSyncSetting extends DataClass
     map['remote_revision'] = Variable<int>(remoteRevision);
     if (!nullToAbsent || lastSyncedHash != null) {
       map['last_synced_hash'] = Variable<String>(lastSyncedHash);
+    }
+    if (!nullToAbsent || householdOwnerUid != null) {
+      map['household_owner_uid'] = Variable<String>(householdOwnerUid);
     }
     return map;
   }
@@ -7086,6 +7120,9 @@ class CloudSyncSetting extends DataClass
       lastSyncedHash: lastSyncedHash == null && nullToAbsent
           ? const Value.absent()
           : Value(lastSyncedHash),
+      householdOwnerUid: householdOwnerUid == null && nullToAbsent
+          ? const Value.absent()
+          : Value(householdOwnerUid),
     );
   }
 
@@ -7099,6 +7136,9 @@ class CloudSyncSetting extends DataClass
       householdId: serializer.fromJson<String?>(json['householdId']),
       remoteRevision: serializer.fromJson<int>(json['remoteRevision']),
       lastSyncedHash: serializer.fromJson<String?>(json['lastSyncedHash']),
+      householdOwnerUid: serializer.fromJson<String?>(
+        json['householdOwnerUid'],
+      ),
     );
   }
   @override
@@ -7109,6 +7149,7 @@ class CloudSyncSetting extends DataClass
       'householdId': serializer.toJson<String?>(householdId),
       'remoteRevision': serializer.toJson<int>(remoteRevision),
       'lastSyncedHash': serializer.toJson<String?>(lastSyncedHash),
+      'householdOwnerUid': serializer.toJson<String?>(householdOwnerUid),
     };
   }
 
@@ -7117,6 +7158,7 @@ class CloudSyncSetting extends DataClass
     Value<String?> householdId = const Value.absent(),
     int? remoteRevision,
     Value<String?> lastSyncedHash = const Value.absent(),
+    Value<String?> householdOwnerUid = const Value.absent(),
   }) => CloudSyncSetting(
     id: id ?? this.id,
     householdId: householdId.present ? householdId.value : this.householdId,
@@ -7124,6 +7166,9 @@ class CloudSyncSetting extends DataClass
     lastSyncedHash: lastSyncedHash.present
         ? lastSyncedHash.value
         : this.lastSyncedHash,
+    householdOwnerUid: householdOwnerUid.present
+        ? householdOwnerUid.value
+        : this.householdOwnerUid,
   );
   CloudSyncSetting copyWithCompanion(CloudSyncSettingsCompanion data) {
     return CloudSyncSetting(
@@ -7137,6 +7182,9 @@ class CloudSyncSetting extends DataClass
       lastSyncedHash: data.lastSyncedHash.present
           ? data.lastSyncedHash.value
           : this.lastSyncedHash,
+      householdOwnerUid: data.householdOwnerUid.present
+          ? data.householdOwnerUid.value
+          : this.householdOwnerUid,
     );
   }
 
@@ -7146,14 +7194,20 @@ class CloudSyncSetting extends DataClass
           ..write('id: $id, ')
           ..write('householdId: $householdId, ')
           ..write('remoteRevision: $remoteRevision, ')
-          ..write('lastSyncedHash: $lastSyncedHash')
+          ..write('lastSyncedHash: $lastSyncedHash, ')
+          ..write('householdOwnerUid: $householdOwnerUid')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, householdId, remoteRevision, lastSyncedHash);
+  int get hashCode => Object.hash(
+    id,
+    householdId,
+    remoteRevision,
+    lastSyncedHash,
+    householdOwnerUid,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -7161,7 +7215,8 @@ class CloudSyncSetting extends DataClass
           other.id == this.id &&
           other.householdId == this.householdId &&
           other.remoteRevision == this.remoteRevision &&
-          other.lastSyncedHash == this.lastSyncedHash);
+          other.lastSyncedHash == this.lastSyncedHash &&
+          other.householdOwnerUid == this.householdOwnerUid);
 }
 
 class CloudSyncSettingsCompanion extends UpdateCompanion<CloudSyncSetting> {
@@ -7169,29 +7224,34 @@ class CloudSyncSettingsCompanion extends UpdateCompanion<CloudSyncSetting> {
   final Value<String?> householdId;
   final Value<int> remoteRevision;
   final Value<String?> lastSyncedHash;
+  final Value<String?> householdOwnerUid;
   const CloudSyncSettingsCompanion({
     this.id = const Value.absent(),
     this.householdId = const Value.absent(),
     this.remoteRevision = const Value.absent(),
     this.lastSyncedHash = const Value.absent(),
+    this.householdOwnerUid = const Value.absent(),
   });
   CloudSyncSettingsCompanion.insert({
     this.id = const Value.absent(),
     this.householdId = const Value.absent(),
     this.remoteRevision = const Value.absent(),
     this.lastSyncedHash = const Value.absent(),
+    this.householdOwnerUid = const Value.absent(),
   });
   static Insertable<CloudSyncSetting> custom({
     Expression<int>? id,
     Expression<String>? householdId,
     Expression<int>? remoteRevision,
     Expression<String>? lastSyncedHash,
+    Expression<String>? householdOwnerUid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (householdId != null) 'household_id': householdId,
       if (remoteRevision != null) 'remote_revision': remoteRevision,
       if (lastSyncedHash != null) 'last_synced_hash': lastSyncedHash,
+      if (householdOwnerUid != null) 'household_owner_uid': householdOwnerUid,
     });
   }
 
@@ -7200,12 +7260,14 @@ class CloudSyncSettingsCompanion extends UpdateCompanion<CloudSyncSetting> {
     Value<String?>? householdId,
     Value<int>? remoteRevision,
     Value<String?>? lastSyncedHash,
+    Value<String?>? householdOwnerUid,
   }) {
     return CloudSyncSettingsCompanion(
       id: id ?? this.id,
       householdId: householdId ?? this.householdId,
       remoteRevision: remoteRevision ?? this.remoteRevision,
       lastSyncedHash: lastSyncedHash ?? this.lastSyncedHash,
+      householdOwnerUid: householdOwnerUid ?? this.householdOwnerUid,
     );
   }
 
@@ -7224,6 +7286,9 @@ class CloudSyncSettingsCompanion extends UpdateCompanion<CloudSyncSetting> {
     if (lastSyncedHash.present) {
       map['last_synced_hash'] = Variable<String>(lastSyncedHash.value);
     }
+    if (householdOwnerUid.present) {
+      map['household_owner_uid'] = Variable<String>(householdOwnerUid.value);
+    }
     return map;
   }
 
@@ -7233,7 +7298,8 @@ class CloudSyncSettingsCompanion extends UpdateCompanion<CloudSyncSetting> {
           ..write('id: $id, ')
           ..write('householdId: $householdId, ')
           ..write('remoteRevision: $remoteRevision, ')
-          ..write('lastSyncedHash: $lastSyncedHash')
+          ..write('lastSyncedHash: $lastSyncedHash, ')
+          ..write('householdOwnerUid: $householdOwnerUid')
           ..write(')'))
         .toString();
   }
@@ -10502,6 +10568,7 @@ typedef $$CloudSyncSettingsTableCreateCompanionBuilder =
       Value<String?> householdId,
       Value<int> remoteRevision,
       Value<String?> lastSyncedHash,
+      Value<String?> householdOwnerUid,
     });
 typedef $$CloudSyncSettingsTableUpdateCompanionBuilder =
     CloudSyncSettingsCompanion Function({
@@ -10509,6 +10576,7 @@ typedef $$CloudSyncSettingsTableUpdateCompanionBuilder =
       Value<String?> householdId,
       Value<int> remoteRevision,
       Value<String?> lastSyncedHash,
+      Value<String?> householdOwnerUid,
     });
 
 class $$CloudSyncSettingsTableFilterComposer
@@ -10537,6 +10605,11 @@ class $$CloudSyncSettingsTableFilterComposer
 
   ColumnFilters<String> get lastSyncedHash => $composableBuilder(
     column: $table.lastSyncedHash,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get householdOwnerUid => $composableBuilder(
+    column: $table.householdOwnerUid,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -10569,6 +10642,11 @@ class $$CloudSyncSettingsTableOrderingComposer
     column: $table.lastSyncedHash,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get householdOwnerUid => $composableBuilder(
+    column: $table.householdOwnerUid,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CloudSyncSettingsTableAnnotationComposer
@@ -10595,6 +10673,11 @@ class $$CloudSyncSettingsTableAnnotationComposer
 
   GeneratedColumn<String> get lastSyncedHash => $composableBuilder(
     column: $table.lastSyncedHash,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get householdOwnerUid => $composableBuilder(
+    column: $table.householdOwnerUid,
     builder: (column) => column,
   );
 }
@@ -10643,11 +10726,13 @@ class $$CloudSyncSettingsTableTableManager
                 Value<String?> householdId = const Value.absent(),
                 Value<int> remoteRevision = const Value.absent(),
                 Value<String?> lastSyncedHash = const Value.absent(),
+                Value<String?> householdOwnerUid = const Value.absent(),
               }) => CloudSyncSettingsCompanion(
                 id: id,
                 householdId: householdId,
                 remoteRevision: remoteRevision,
                 lastSyncedHash: lastSyncedHash,
+                householdOwnerUid: householdOwnerUid,
               ),
           createCompanionCallback:
               ({
@@ -10655,11 +10740,13 @@ class $$CloudSyncSettingsTableTableManager
                 Value<String?> householdId = const Value.absent(),
                 Value<int> remoteRevision = const Value.absent(),
                 Value<String?> lastSyncedHash = const Value.absent(),
+                Value<String?> householdOwnerUid = const Value.absent(),
               }) => CloudSyncSettingsCompanion.insert(
                 id: id,
                 householdId: householdId,
                 remoteRevision: remoteRevision,
                 lastSyncedHash: lastSyncedHash,
+                householdOwnerUid: householdOwnerUid,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

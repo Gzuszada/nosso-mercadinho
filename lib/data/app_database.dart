@@ -198,6 +198,10 @@ class CloudSyncSettings extends Table {
   IntColumn get remoteRevision => integer().withDefault(const Constant(0))();
   TextColumn get lastSyncedHash => text().nullable()();
 
+  /// Last owner UID confirmed by the backend. It lets a signed-in member
+  /// remain conservative (pending review) while temporarily offline.
+  TextColumn get householdOwnerUid => text().nullable()();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
@@ -221,7 +225,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? openAppDatabase());
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -312,8 +316,24 @@ class AppDatabase extends _$AppDatabase {
             )
             WHERE logical_key IS NULL''');
       }
+      if (from < 9) {
+        await _ensureCloudSyncOwnerColumn();
+      }
     },
   );
+
+  Future<void> _ensureCloudSyncOwnerColumn() async {
+    final rows = await customSelect(
+      'PRAGMA table_info(cloud_sync_settings)',
+      readsFrom: {},
+    ).get();
+    final existing = rows.map((row) => row.read<String>('name')).toSet();
+    if (!existing.contains('household_owner_uid')) {
+      await customStatement(
+        'ALTER TABLE cloud_sync_settings ADD COLUMN household_owner_uid TEXT',
+      );
+    }
+  }
 
   Future<void> _ensureCollaborationColumns() async {
     const definitions = <String, List<String>>{

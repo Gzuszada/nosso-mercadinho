@@ -1,0 +1,633 @@
+Resposta às duas dúvidas
+1. Como ver o que dois dispositivos publicaram simultaneamente?
+É possível, mas para isso o sistema não pode simplesmente aceitar a última publicação.
+
+No modelo atual, se dois dispositivos publicarem juntos, um dos snapshots pode sobrescrever o outro. Com o modelo novo, cada publicação vira uma generation imutável e o Firestore mantém um único ponteiro para a generation oficialmente aceita.
+
+Exemplo:
+
+
+G0 = estado comum antes das publicações
+
+Dispositivo A publica:
+G1A = G0 + item “Arroz”
+
+Dispositivo B publica:
+G1B = G0 + item “Leite”
+O resultado seria:
+
+
+Generation atual: G1A
+Publicação concorrente preservada: G1B
+Base comum: G0
+O aplicativo Android mostraria uma tela como:
+
+Publicações simultâneas detectadas
+Publicação de Iasmim — Android 1
+Adicionou: Arroz, 1 pacote
+Alterou: 0 itens
+Removeu: 0 itens
+Publicada às 10:42
+Publicação de Igor — Android 2
+Adicionou: Leite, 1 litro
+Alterou: 0 itens
+Removeu: 0 itens
+Publicada às 10:42
+Resultado possível
+Os itens não entram em conflito porque são diferentes. O app pode combinar as duas publicações automaticamente e criar uma nova generation consolidada.
+
+Nesse exemplo, o resultado seria:
+
+
+G2 = G0 + Arroz + Leite
+E a tela poderia informar:
+
+2 alterações simultâneas combinadas sem conflito.
+
+Quando os dois dispositivos mudam o mesmo item
+Exemplo:
+
+
+Base G0:
+Arroz — 1 pacote
+
+Iasmim alterou:
+Arroz — 2 pacotes
+
+Igor alterou:
+Arroz — 3 pacotes
+O aplicativo não escolheria silenciosamente 2 ou 3. Ele mostraria:
+
+Alteração simultânea do mesmo item
+Arroz
+Antes
+
+1 pacote
+Iasmim enviou
+
+2 pacotes
+Igor enviou
+
+3 pacotes
+Escolha o valor que deve valer:
+
+ 2 pacotes — Iasmim
+ 3 pacotes — Igor
+ Outro valor
+ Manter os dois como itens separados
+Depois da escolha:
+
+
+G2 = G0 + Arroz — 3 pacotes
+A decisão fica registrada no histórico da casa.
+
+Quem resolve cada conflito?
+Minha recomendação é:
+
+Alterações em itens diferentes
+são combinadas automaticamente;
+todos podem visualizar o resultado;
+o owner ainda pode remover um item adicionado por outra pessoa;
+a removal deixa de ser uma “decisão de conflito”, porque não houve sobreposição.
+Alterações no mesmo item
+o owner escolhe o valor final;
+a tela mostra as duas propostas;
+a escolha registra:
+autor;
+dispositivo;
+data;
+valor escolhido;
+valor descartado.
+Remoção versus alteração
+Se uma pessoa removeu um item e a outra alterou a quantidade, isso também será um conflito explícito para o owner.
+
+Isso atende à sua decisão:
+
+todos podem editar a lista oficial;
+o owner pode revisar os itens dos outros;
+o owner pode remover itens dos outros;
+somente decisões realmente ambíguas exigem uma escolha do owner.
+2. Dá para implementar somente no Android inicialmente?
+Sim. E, com o isolamento que você escolheu, é a melhor forma de realizar o teste real.
+
+O projeto utiliza um único código Flutter para Android e Web, mas podemos adicionar um flavor Android pilot sem duplicar o aplicativo inteiro.
+
+Estrutura proposta
+
+Flavor Android production
+├── applicationId: br.com.nocorre.mercado
+├── Firebase: nosso-mercado-casa
+└── Sync: formato legado atual
+
+Flavor Android pilot
+├── applicationId: br.com.nocorre.mercado.pilot
+├── Firebase: nosso-mercado-casa-pilot
+└── Sync: generation, chunks, manifesto e revisão
+O APK piloto poderá ser instalado ao mesmo tempo que o aplicativo normal:
+
+
+Nosso Mercadinho
+br.com.nocorre.mercado
+
+Nosso Mercadinho — Piloto
+br.com.nocorre.mercado.pilot
+Os dois terão:
+
+bancos Drift separados;
+contas Firebase separadas;
+casas separadas;
+nenhum dado real misturado com o piloto;
+nenhuma alteração no APK de produção;
+nenhuma alteração no Firebase de produção;
+nenhuma publicação ou mudança na PWA.
+O que não precisa ser duplicado
+Não vamos criar uma cópia do aplicativo.
+
+As seguintes partes serão reutilizadas:
+
+telas de lista;
+catálogo;
+carrinho;
+compras;
+histórico;
+Drift;
+backup;
+autenticação;
+Cloud Functions;
+regras do Firestore;
+modelos de sincronização.
+O que será isolado por flavor é essencialmente:
+
+configuração do Firebase;
+applicationId;
+nome exibido do APK;
+seleção do protocolo de sincronização.
+Arquitetura do piloto
+Backend de teste
+Novo projeto Firebase:
+
+
+nosso-mercado-casa-pilot
+Dentro dele:
+
+
+Authentication
+Firestore
+Cloud Functions
+Firestore Rules
+Indexes
+O projeto piloto usaria:
+
+
+southamerica-east1
+e allowlist própria, apenas com os e-mails dos participantes do teste.
+
+Configuração Android
+O flavor pilot usaria um google-services.json próprio, com:
+
+
+package_name: br.com.nocorre.mercado.pilot
+project_id: nosso-mercado-casa-pilot
+O firebase_options.dart precisaria permitir escolher a configuração:
+
+
+const pilot = bool.fromEnvironment('MERCADO_PILOT');
+E o main.dart escolheria:
+
+
+Firebase.initializeApp(
+  options: pilot
+      ? PilotFirebaseOptions.currentPlatform
+      : DefaultFirebaseOptions.currentPlatform,
+);
+Isso é necessário porque a configuração atual do firebase_options.dart é fixa para produção tanto no Android quanto na Web.
+
+Mudanças no Gradle
+Seria criado um flavor:
+
+
+flavorDimensions += "environment"
+
+productFlavors {
+    create("production") {
+        dimension = "environment"
+    }
+    create("pilot") {
+        dimension = "environment"
+        applicationIdSuffix = ".pilot"
+        versionNameSuffix = "-pilot"
+    }
+}
+Cada flavor teria sua configuração:
+
+
+android/app/src/production/google-services.json
+android/app/src/pilot/google-services.json
+O build do piloto seria algo como:
+
+
+flutter build apk --flavor pilot `
+  --dart-define=MERCADO_PILOT=true `
+  --release
+O build normal continuaria sendo:
+
+
+flutter build apk --flavor production --release
+O flavor production preservaria:
+
+applicationId;
+assinatura;
+versão;
+Firebase;
+banco local;
+possibility de update sobre a release publicada.
+Como o Firebase de produção fica protegido
+Nenhuma этих operações seriam feitas no projeto de produção durante o piloto:
+
+firebase deploy --only firestore:rules;
+firebase deploy --only functions;
+firebase deploy --only hosting;
+publicação do APK normal;
+alteração do google-services.json de produção;
+alteração da applicationId de produção.
+As Functions e regras do piloto seriam implantadas com:
+
+
+firebase deploy `
+  --project nosso-mercado-casa-pilot `
+  --only firestore:rules,firestore:indexes,functions
+O firebase.json pode ser compartilhado, mas o projeto alvo será explicitamente selecionado pelo comando. Também podemos criar aliases:
+
+
+{
+  "projects": {
+    "default": "nosso-mercado-casa",
+    "production": "nosso-mercado-casa",
+    "pilot": "nosso-mercado-casa-pilot"
+  }
+}
+Assim:
+
+
+firebase use pilot
+e:
+
+
+firebase use production
+tornam explícito qual ambiente está sendo utilizado.
+
+Protocolo do piloto
+Estrutura de dados
+
+households/{householdId}/syncV2/
+  candidates/{candidateId}/
+    areas/catalog/parts/{partIndex}
+    areas/imports/parts/{partIndex}
+    areas/planning/parts/{partIndex}
+    areas/purchases/parts/{partIndex}
+  state/
+    current
+  conflicts/{conflictId}
+  reviews/{itemLogicalKey}
+  tombstones/{itemLogicalKey}
+Publicação
+O Android monta um snapshot local.
+Divide cada área em chunks.
+Grava os chunks como candidate imutável.
+Solicita a publicação à Function.
+A Function compara a generation base com a generation atual.
+Se ainda forem iguais, a Function publica o novo manifesto.
+Se outra publicação tiver happened primeiro:
+a candidate concorrente é preservada;
+um conflito é registrado;
+o aplicativo apresenta as duas versões.
+Por que a candidate rejected não pode ser apagada
+Se a segunda publicação for rejeitada e seus chunks forem apagados, não existe como saber o que aquele dispositivo continha.
+
+Por isso, uma candidate concorrente permanece por um período de retenção, por exemplo:
+
+7 dias para o piloto;
+depois, limpeza automática;
+optionally, 30 dias em produção caso seja útil manter o histórico.
+A candidate não é o estado oficial. É apenas uma versão preservada para comparação e recuperação.
+
+Interface do piloto no Android
+Tela principal de sincronização
+
+Sincronização da casa
+
+Estado
+Em dia
+
+Última publicação
+Hoje, 10:43
+Android do Igor
+
+Atividade da casa
+• 2 alterações simultâneas combinadas
+• 1 item aguardando revisão do owner
+• 0 conflitos pendentes
+Publicações simultâneas
+
+Publicações simultâneas detectadas
+
+Iasmim — Android 1
+Adicionou Arroz, 1 pacote
+
+Igor — Android 2
+Adicionou Leite, 1 litro
+
+As alterações não se sobrepõem.
+Elas serão combinadas automaticamente.
+
+[Combinar alterações]
+Mesmo item alterado
+
+Arroz
+
+Antes
+1 pacote
+
+Iasmim enviou
+2 pacotes
+
+Igor enviou
+3 pacotes
+
+Escolha a quantidade que deve ficar na lista:
+( ) 2 pacotes
+( ) 3 pacotes
+[ ] Definir outro valor
+Revisão do owner
+
+Itens adicionados por outras pessoas
+
+Arroz
+por Iasmim · hoje, 10:42
+Aguardando sua revisão
+
+[Confirmar item] [Remover da lista]
+Identidade e autoria
+Para o piloto, adicionaria os seguintes campos:
+
+Produto
+
+syncId
+Lista
+
+syncId
+createdByUid
+createdByName
+updatedByUid
+Item planejado
+
+syncId
+logicalKey
+planSyncId
+productSyncId
+createdByUid
+createdByName
+updatedByUid
+O logicalKey continua representando:
+
+
+lista + produto + variante
+Assim, duas pessoas que adicionarem o mesmo produto à mesma lista antes de sincronizar produzem uma duplicata identificável, e não dois itens aparentemente sem relação.
+
+Remoção protegida
+A remoção de um item adicionado por outra pessoa deve ser validada no backend.
+
+Cloud Function propuesta:
+
+
+moderatePlannedItem
+Ações:
+
+
+approve
+reject
+remove
+restore
+Permissões:
+
+Ação	Membro comum	Autor do item	Owner
+Confirmar item	Não	Não	Sim
+Remover item próprio	Sim	Sim	Sim
+Remover item de outra pessoa	Não	Não	Sim
+Restaurar item removido	Não	Não	Sim
+Resolver alteração concorrente	Não	Não	Sim
+A Function confere a autoria no estado publicado, sem confiar apenas no UID enviado pelo aplicativo.
+
+A remoção fica em tombstone para impedir que uma publicação antiga traga o item de volta.
+
+Duplicatas
+O app já impede localmente o mesmo produto duas vezes na mesma lista. O piloto adicionará a detecção entre dispositivos.
+
+Exemplo:
+
+
+Possível duplicata
+
+Arroz
+1 pacote
+Adicionado por Iasmim
+
+Outro item igual:
+Arroz
+1 pacote
+Adicionado por Igor
+
+[Manter o da Iasmim]
+[Manter o do Igor]
+[Manter os dois e ajustar as quantidades]
+Não recomendo somar as quantidades automaticamente. Duas pessoas podem ter feito o mesmo pedido, e 1 + 1 nem sempre significa que a quantidade correta é 2.
+
+Banco local e backup do piloto
+O schema Drift precisaria subir de 7 para 8.
+
+Novos campos:
+
+syncId;
+logicalKey;
+relações estáveis;
+autoria;
+updatedByUid.
+Novas tabelas:
+
+
+PlanItemReviews
+ListItemTombstones
+O backup subiria do formato 6 para o formato 7:
+
+backups 1 a 6 continuam legíveis;
+o formato 7 inclui autoria, revisão e tombstones;
+registros antigos recebem IDs legados determinísticos;
+restaurar o mesmo backup duas vezes não duplica itens.
+Cloud Functions do piloto
+publishHouseholdSnapshot
+Responsabilidades:
+
+autenticar o usuário;
+confirmar que ele pertence à casa;
+validar chunks e hashes;
+aplicar compare-and-swap;
+preservar candidates concorrentes;
+criar conflitos quando necessário;
+publicar o commit;
+ser idempotente em caso de timeout.
+moderatePlannedItem
+Responsabilidades:
+
+verificar owner ou autoria;
+aprovar;
+rejeitar;
+remover;
+restaurar;
+registrar auditoria.
+resolveConcurrentPublication
+Opcionalmente, a resolução de conflitos pode usar uma terceira Function, mas ela não é obrigatória. O Android pode calcular o merge e submeter uma nova generation.
+
+A Function deve validar:
+
+generation base;
+candidateIDs envolvidos;
+alterações escolhidas;
+ausência de gravação em campos protegidos.
+Firestore Rules do piloto
+As regras seriam implantadas somente no projeto piloto.
+
+Novas permissões:
+
+Candidates
+membro da casa pode criar;
+chunks são imutáveis;
+ninguém altera candidate de outro;
+publicação oficial é feita pela Function.
+Manifest
+membro pode ler;
+cliente não escreve;
+Function publica.
+Reviews e tombstones
+membros podem ler;
+somente a Function altera decisões sensíveis;
+owner é verificado por ownerUid da casa.
+Também corrigiria no piloto a regra excessivamente permissiva de membros. Na regra atual, a condição baseada em resource.data.role == 'owner' precisa ser substituída por uma comparação explícita com:
+
+
+households/{householdId}.ownerUid
+Teste real necessário
+Idealmente, o teste deve usar:
+
+um aparelho Android físico;
+um segundo aparelho Android físico; ou
+um aparelho físico e um emulador Android.
+Atualmente, flutter devices detectou apenas:
+
+Windows;
+Chrome;
+Edge.
+Nenhum aparelho ou emulador Android está conectado neste momento. Isso será uma pendência da validação manual, não da implementação.
+
+Roteiro do piloto
+Preparação
+criar o projeto Firebase piloto;
+configurar Authentication;
+configurar Firestore em southamerica-east1;
+registrar o app Android com package br.com.nocorre.mercado.pilot;
+configurar allowlist com os e-mails de teste;
+criar duas contas;
+instalar o APK piloto nos dois dispositivos.
+Cenário 1 —正常使用
+owner cria a casa;
+membro entra pelo convite;
+ambos sincronizam;
+owner adiciona produto;
+membro sincroniza e recebe o produto.
+Cenário 2 — autoria
+membro adiciona item;
+owner sincroniza;
+item mostra o nome do membro;
+owner confirma;
+estado de revisão muda.
+Cenário 3 — remoção
+membro adiciona item;
+owner sincroniza;
+owner remove;
+membro sincroniza;
+item não reaparece.
+Cenário 4 — publicação simultânea sem sobreposição
+os dois partem da mesma generation;
+owner adiciona Arroz;
+membro adiciona Leite;
+ambos publicam antes de sincronizar;
+o sistema identifica as duas publications;
+combina os dois itens;
+publica uma generation consolidada;
+ambos recebem Arroz e Leite.
+Cenário 5 — publicação simultânea com sobreposição
+ambos partem da mesma generation;
+owner altera Arroz para 2;
+membro altera Arroz para 3;
+ambos publicam;
+o owner vê as duas versões;
+escolhe 2 ou 3;
+a generation final preserva a decisão.
+Cenário 6 — duplicata
+ambos adicionam o mesmo produto offline;
+publicam simultaneamente;
+o sistema identifica a mesma logicalKey;
+o owner vê os dois registros;
+escolhe qual manter.
+Cenário 7 — falha de rede
+corta a internet durante a gravação dos chunks;
+o commit não ocorre;
+a generation anterior continua visível;
+ao retornar, a mesma publication é retomada idempotentemente.
+Cenário 8 — owner remove durante publicação antiga
+membro com snapshot antigo tenta publicar;
+owner já removeu o item;
+a tombstone impede a ressurreição;
+o membro recebe a generation consolidada.
+Esforço e risco
+Item	Esforço	Risco
+Flavor e projeto Firebase piloto	Médio	Baixo
+Schema e backup 7	Alto	Médio
+Chunking e generation	Alto	Médio
+Compare-and-swap	Médio	Médio
+Preservação de candidates concorrentes	Médio	Médio
+Comparador de publicações	Médio	Baixo
+Merge de planejamento	Alto	Alto
+Autoria e reviews	Médio	Baixo
+Moderação e tombstones	Médio	Médio
+Teste com dois dispositivos	Alto manual	Baixo para produção
+Plano final que recomendo
+Piloto Android isolado
+criar o projeto Firebase piloto;
+configurar flavor Android pilot;
+implementar schema 8 e backup 7;
+implementar IDs estáveis e autoria;
+implementar chunks, candidates e manifest;
+implementar compare-and-swap;
+preservar e apresentar candidates concorrentes;
+implementar comparação e merge de alterações;
+implementar revisão do owner;
+implementar moderação e tombstones;
+criar APK .pilot;
+executar o roteiro com duas contas e dois dispositivos;
+registrar os resultados;
+só depois decidir a migration da Web.
+O que fica fora do piloto
+publicação da PWA;
+alteração do Firebase de produção;
+alteração do APK normal;
+alteração do applicationId de produção;
+migração do formato em produção;
+compatibilidade da Web com o protocolo v2.
+Minha recomendação final
+Não duplicaria o aplicativo inteiro. Eu faria um flavor Android piloto com backend Firebase separado.
+
+A parte que responde diretamente à sua primeira dúvida é:
+
+Cada publicação simultânea será preservada como uma generation separada, e o Android mostrará um comparador com “antes”, “publicado por este dispositivo” e “publicado pelo outro dispositivo”. Alterações diferentes serão combinadas automaticamente; alterações no mesmo item serão resolvidas explicitamente pelo owner.
+
+Isso permite observar exatamente o conteúdo publicado por cada dispositivo, em vez de apenas receber uma mensagem genérica de conflito.

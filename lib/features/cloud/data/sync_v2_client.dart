@@ -4,8 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 
+import '../domain/sync_v2_canonical.dart';
 import 'sync_v2_candidate.dart';
 import 'sync_v2_manifest.dart';
+import 'sync_v2_review.dart';
 
 /// Publishes immutable candidates and asks the backend for an atomic commit.
 class SyncV2Client {
@@ -36,6 +38,57 @@ class SyncV2Client {
           ? user.displayName!.trim()
           : 'Usuário piloto',
     );
+  }
+
+  Future<List<SyncV2Review>> readReviews(String householdId) async {
+    final snapshot = await _firestore
+        .collection('syncV2')
+        .doc(householdId)
+        .collection('reviews')
+        .get();
+    return snapshot.docs
+        .map(
+          (doc) => SyncV2Review.fromMap(Map<String, dynamic>.from(doc.data())),
+        )
+        .where((review) => review.itemSyncId.isNotEmpty)
+        .toList();
+  }
+
+  Future<void> moderatePlannedItem({
+    required String householdId,
+    required String itemSyncId,
+    required SyncV2ReviewAction action,
+  }) async {
+    final token = await _auth.currentUser?.getIdToken();
+    if (token == null) {
+      throw StateError('Entre na sua conta antes de revisar um item.');
+    }
+    final uri = Uri.https(
+      '$region-$projectId.cloudfunctions.net',
+      'moderatePlannedItem',
+    );
+    final response = await _httpClient.post(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'data': {
+          'householdId': householdId,
+          'itemSyncId': itemSyncId,
+          'action': action.key,
+        },
+      }),
+    );
+    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode != 200) {
+      final error = decoded['error'] as Map<String, dynamic>?;
+      throw StateError(
+        error?['message'] as String? ??
+            'Não foi possível registrar a revisão do item.',
+      );
+    }
   }
 
   Future<SyncV2RemoteState?> readCurrentState(String householdId) async {
@@ -106,6 +159,18 @@ class SyncV2Client {
           'count': _payloadRowCount(chunks[index]),
         },
     ]);
+  }
+
+  /// Hash of the area content, independent of the device that produced it.
+  ///
+  /// The bytes of an area differ between devices even when the data is the
+  /// same: the integer identifiers are numbered by each device, `syncRevision`
+  /// is a counter that each device advances on its own and the same instant
+  /// can be written with different timezones and precisions. This hash
+  /// describes the content, so two devices that hold the same data produce the
+  /// same value and are not reported as divergent.
+  String areaSemanticHash(Map<String, dynamic> payload) {
+    return canonicalHash(syncV2SemanticArea(payload));
   }
 
   Future<SyncV2PublishResult> publish({
@@ -183,6 +248,11 @@ class SyncV2Client {
       conflictId: data['conflictId'] as String?,
     );
   }
+
+  Map<String, dynamic> applyReviews(
+    Map<String, dynamic> payload,
+    Iterable<SyncV2Review> reviews,
+  ) => applySyncV2Reviews(payload, reviews);
 
   Future<SyncV2AreaManifest> _uploadArea({
     required String householdId,

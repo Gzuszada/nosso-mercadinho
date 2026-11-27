@@ -5,10 +5,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../data/app_database.dart';
 import '../../settings/data/settings_repository.dart';
 import '../domain/collaboration.dart';
+import '../domain/sync_v2_canonical.dart';
 import 'cloud_models.dart';
 import 'cloud_snapshot_service.dart';
 import 'sync_v2_candidate.dart';
 import 'sync_v2_client.dart';
+import 'sync_v2_review.dart';
 
 class CloudSyncService {
   CloudSyncService({
@@ -344,14 +346,27 @@ class CloudSyncService {
     final areas = <CloudSyncConflictArea, CloudSyncAreaStatus>{};
     for (final area in _areas.keys) {
       final localArea = selectArea(localPayload, area);
-      final localHash = client.areaContentHash(localArea);
+      final localHash = client.areaSemanticHash(localArea);
       final remoteManifest = remote?.manifest.areas[area.name];
-      final remoteHash = remoteManifest?.hash;
+      String? remoteHash;
+      String? remoteError;
+      if (remoteManifest != null && remote != null) {
+        try {
+          final remoteArea = await client.readArea(
+            householdId: householdId,
+            area: area.name,
+            manifest: remote.manifest,
+          );
+          remoteHash = client.areaSemanticHash(remoteArea);
+        } on Object catch (error) {
+          remoteError = error.toString();
+        }
+      }
       final state = _stateFor(
         localHash: localHash,
         remoteHash: remoteHash,
-        baseHash: baseHashes[area.name],
-        remoteError: null,
+        baseHash: baseHashes[_semanticBaseKey(area.name)],
+        remoteError: remoteError,
       );
       areas[area] = CloudSyncAreaStatus(
         area: area,
@@ -381,36 +396,53 @@ class CloudSyncService {
     final client = syncV2Client!;
     final settings = await settingsRepository.getCloudSyncSettings();
     var localPayload = await CloudSnapshotService(database).readLocalPayload();
-    final originalLocalPayload = Map<String, dynamic>.from(localPayload);
     final baseHashes = _decodeHashes(settings?.lastSyncedHash);
     final remote = await client.readCurrentState(householdId);
+    final reviews = await client.readReviews(householdId);
+    localPayload = separateReaddedPendingItems(localPayload, reviews);
+    final reviewedLocalPayload = client.applyReviews(localPayload, reviews);
+    final reviewChangedLocally = !syncV2PayloadEquals(
+      localPayload,
+      reviewedLocalPayload,
+    );
+    localPayload = reviewedLocalPayload;
+    final originalLocalPayload = Map<String, dynamic>.from(localPayload);
     final remoteAreas = <String, Map<String, dynamic>>{};
     final localHashes = <String, String?>{};
     final remoteHashes = <String, String?>{};
-    var pulled = false;
+    var pulled = reviewChangedLocally;
     var pushed = false;
     var requiresOwnerModeration = false;
 
     for (final area in _areas.keys) {
       final localArea = selectArea(localPayload, area);
-      final localHash = client.areaContentHash(localArea);
-      final remoteHash = remote?.manifest.areas[area.name]?.hash;
+      final localHash = client.areaSemanticHash(localArea);
       final remoteArea = remote == null
           ? null
-          : await client.readArea(
-              householdId: householdId,
-              area: area.name,
-              manifest: remote.manifest,
+          : client.applyReviews(
+              await client.readArea(
+                householdId: householdId,
+                area: area.name,
+                manifest: remote.manifest,
+              ),
+              reviews,
             );
+      final remoteHash = remoteArea == null
+          ? null
+          : client.areaSemanticHash(remoteArea);
       remoteAreas[area.name] = remoteArea ?? localArea;
       localHashes[area.name] = localHash;
       remoteHashes[area.name] = remoteHash;
-      final baseHash = baseHashes[area.name];
+      final baseHash = baseHashes[_semanticBaseKey(area.name)];
       final localIsEmpty = _counts(localArea, area).total == 0;
+      // Without a semantic base the device cannot tell which side changed, so
+      // the two sides are compared directly: equal areas are already in sync.
       final localChanged = baseHash == null
-          ? !localIsEmpty || remoteHash == null
+          ? (remoteHash == null ? !localIsEmpty : localHash != remoteHash)
           : baseHash != localHash;
-      final remoteChanged = remoteHash != baseHash;
+      final remoteChanged = baseHash == null
+          ? (remoteHash != null && localHash != remoteHash)
+          : baseHash != remoteHash;
       final resolution = resolutions[area];
 
       if (resolution != null) {
@@ -498,8 +530,12 @@ class CloudSyncService {
 
     final finalHashes = <String, String?>{};
     for (final area in _areas.keys) {
-      finalHashes[area.name] = client.areaContentHash(
-        pushed ? remoteAreas[area.name]! : selectArea(localPayload, area),
+      final areaPayload = selectArea(localPayload, area);
+      finalHashes[area.name] = client.areaContentHash(areaPayload);
+      // The semantic base is stored under its own key, so the legacy byte hash
+      // keeps its meaning and the two comparisons never mix.
+      finalHashes[_semanticBaseKey(area.name)] = client.areaSemanticHash(
+        areaPayload,
       );
     }
     await _persistState(
@@ -520,22 +556,35 @@ class CloudSyncService {
     CloudSyncConflictArea? changedArea,
   ) async {
     final client = syncV2Client!;
-    final localPayload = await CloudSnapshotService(database)
-        .readLocalPayload();
+    var localPayload = await CloudSnapshotService(database).readLocalPayload();
+    final reviews = await client.readReviews(householdId);
+    // The owner decisions are authoritative. A publication that ignores them
+    // is refused by the backend, so a member could not publish anything again
+    // after the owner removed an item of their list.
+    localPayload = separateReaddedPendingItems(localPayload, reviews);
+    localPayload = client.applyReviews(localPayload, reviews);
     final remote = await client.readCurrentState(householdId);
     final areas = <String, Map<String, dynamic>>{};
     for (final area in _areas.keys) {
       if (changedArea == null || area == changedArea) {
         areas[area.name] = selectArea(localPayload, area);
       } else if (remote != null) {
-        areas[area.name] = await client.readArea(
-          householdId: householdId,
-          area: area.name,
-          manifest: remote.manifest,
+        areas[area.name] = client.applyReviews(
+          await client.readArea(
+            householdId: householdId,
+            area: area.name,
+            manifest: remote.manifest,
+          ),
+          reviews,
         );
       } else {
         areas[area.name] = selectArea(localPayload, area);
       }
+    }
+    // The decision also reaches the database of this device, so the local
+    // state and the published state describe the same item.
+    for (final review in reviews) {
+      await applySyncV2ReviewToLocalItem(database, review);
     }
     final author = await client.currentAuthor();
     if (author == null) {
@@ -580,6 +629,123 @@ class CloudSyncService {
       pushed: true,
       revision: result.generation,
     );
+  }
+
+  /// Reads pending member-authored items directly from the authoritative
+  /// published state. The owner panel uses this as a fallback when a full
+  /// local pull is blocked by an unrelated conflict.
+  Future<List<PlanReviewItem>> readPublishedPendingPlanReviews({
+    required String householdId,
+  }) async {
+    final client = syncV2Client;
+    if (client == null) return const [];
+    final remote = await client.readCurrentState(householdId);
+    if (remote == null) return const [];
+
+    final shoppingManifest = remote.manifest.areas['shopping'];
+    if (shoppingManifest == null) return const [];
+    final shopping = await client.readArea(
+      householdId: householdId,
+      area: 'shopping',
+      manifest: remote.manifest,
+    );
+    var catalog = const <String, dynamic>{};
+    final catalogManifest = remote.manifest.areas['catalog'];
+    if (catalogManifest != null) {
+      catalog = await client.readArea(
+        householdId: householdId,
+        area: 'catalog',
+        manifest: remote.manifest,
+      );
+    }
+
+    final productNames = <String, String>{
+      for (final row in _payloadRows(catalog['products']))
+        if ((row['syncId'] as String?)?.isNotEmpty == true)
+          row['syncId'] as String: (row['name'] as String?) ?? 'Produto',
+    };
+    final planNames = <String, String>{
+      for (final row in _payloadRows(shopping['shoppingPlans']))
+        if ((row['syncId'] as String?)?.isNotEmpty == true)
+          row['syncId'] as String: (row['name'] as String?) ?? 'Lista',
+    };
+    final decidedIds = {
+      for (final review in await client.readReviews(householdId))
+        review.itemSyncId,
+    };
+
+    final pending = <PlanReviewItem>[];
+    for (final row in _payloadRows(shopping['plannedItems'])) {
+      final syncId = row['syncId'] as String?;
+      if (syncId == null || syncId.isEmpty || decidedIds.contains(syncId)) {
+        continue;
+      }
+      if (row['reviewState'] != CollaborationMetadata.pendingReview ||
+          row['isRemoved'] == true ||
+          row['deletedAt'] != null) {
+        continue;
+      }
+      final productSyncId = row['productSyncId'] as String?;
+      final planSyncId = row['planSyncId'] as String?;
+      pending.add(
+        PlanReviewItem(
+          itemSyncId: syncId,
+          productName: productNames[productSyncId] ?? 'Produto',
+          planName: planNames[planSyncId] ?? 'Lista',
+          authorName: row['authorName'] as String?,
+          authorUid: row['authorUid'] as String?,
+          createdAt:
+              _payloadDate(row['createdAt']) ??
+              DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
+        ),
+      );
+    }
+    pending.sort((left, right) => left.createdAt.compareTo(right.createdAt));
+    return pending;
+  }
+
+  static List<Map<String, dynamic>> _payloadRows(Object? value) => [
+    for (final row in (value as List<Object?>? ?? const []))
+      if (row is Map) Map<String, dynamic>.from(row),
+  ];
+
+  static DateTime? _payloadDate(Object? value) {
+    if (value is String) return DateTime.tryParse(value)?.toUtc();
+    if (value is DateTime) return value.toUtc();
+    return null;
+  }
+
+  Future<void> moderatePlannedItem({
+    required String householdId,
+    required String itemSyncId,
+    required SyncV2ReviewAction action,
+  }) async {
+    final client = syncV2Client;
+    if (client == null) {
+      throw StateError(
+        'A moderação está disponível somente no piloto Android.',
+      );
+    }
+    await client.moderatePlannedItem(
+      householdId: householdId,
+      itemSyncId: itemSyncId,
+      action: action,
+    );
+
+    // A review decision is authoritative on its own. Do not run a full
+    // synchronization here: unrelated local/remote differences must remain a
+    // separate, explicitly resolved conflict and must not make the review
+    // action look like it failed.
+    final reviews = await client.readReviews(householdId);
+    final review = reviews
+        .where((item) => item.itemSyncId == itemSyncId)
+        .firstOrNull;
+    if (review == null) {
+      throw StateError(
+        'A revisão foi registrada, mas ainda não pôde ser aplicada neste dispositivo.',
+      );
+    }
+    await applySyncV2ReviewToLocalItem(database, review);
   }
 
   Future<void> _persistState({
@@ -745,6 +911,10 @@ class CloudSyncService {
     final decoded = jsonDecode(encoded) as Map<String, dynamic>;
     return decoded.map((key, value) => MapEntry(key, value as String?));
   }
+
+  /// Key that holds the semantic base hash of an area.
+  static String _semanticBaseKey(String areaName) =>
+      '$syncV2SemanticBaseKeyPrefix$areaName';
 }
 
 class _RemoteArea {

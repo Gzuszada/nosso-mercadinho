@@ -398,31 +398,9 @@ class ShoppingRepository {
           'Este produto já está na lista. Edite a quantidade existente.',
         );
       }
-      if (existing.isNotEmpty) {
-        final item = existing.last;
-        await (_database.update(
-          _database.plannedItems,
-        )..where((row) => row.id.equals(item.id))).write(
-          PlannedItemsCompanion(
-            measurementMode: Value(currentMode.name),
-            quantity: Value(quantity),
-            isRemoved: const Value(false),
-            deletedAt: const Value(null),
-            authorUid: Value(actor.uid),
-            authorName: Value(actor.displayName),
-            reviewState: Value(reviewState),
-            syncRevision: Value(item.syncRevision + 1),
-            estimatePriceNumeratorCents: Value(estimate?.priceNumeratorCents),
-            estimateQuantityDenominator: Value(estimate?.quantityDenominator),
-            estimateSource: Value(estimate?.source),
-            estimateReferenceDate: Value(estimate?.referenceDate),
-            estimateReferenceTripId: Value(estimate?.referenceTripId),
-            updatedAt: Value(DateTime.now()),
-          ),
-        );
-        return item.id;
-      }
-
+      // Removed items keep their tombstone and stable identity. A later
+      // re-add is a new pending review and must receive a new syncId; reviving
+      // the old row would make the previous owner decision ambiguous.
       return _database
           .into(_database.plannedItems)
           .insert(
@@ -566,6 +544,14 @@ class ShoppingRepository {
       throw const FormatException('Esta lista não está ativa.');
     }
     await _ensurePlanNotCompleted(plan.id);
+    final actor = await _actor();
+    if (item.authorUid != null &&
+        item.authorUid != actor.uid &&
+        !actor.isOwner) {
+      throw const FormatException(
+        'Somente o dono da casa pode remover um item de outra pessoa.',
+      );
+    }
     final updated =
         await (_database.update(
           _database.plannedItems,

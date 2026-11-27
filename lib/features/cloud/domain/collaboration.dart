@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'sync_v2_canonical.dart';
+
 /// The role is resolved from the selected household. It is deliberately kept
 /// out of the repositories so local/offline use does not require Firebase.
 enum CollaborationRole { owner, member, local }
@@ -24,6 +26,26 @@ class CollaborationActor {
 }
 
 typedef CollaborationActorResolver = Future<CollaborationActor?> Function();
+
+/// A review entry shown in the owner panel. It can originate from the local
+/// database or from the authoritative published state of the household.
+class PlanReviewItem {
+  const PlanReviewItem({
+    required this.itemSyncId,
+    required this.productName,
+    required this.planName,
+    required this.createdAt,
+    this.authorName,
+    this.authorUid,
+  });
+
+  final String itemSyncId;
+  final String productName;
+  final String planName;
+  final DateTime createdAt;
+  final String? authorName;
+  final String? authorUid;
+}
 
 class CollaborationMetadata {
   const CollaborationMetadata._();
@@ -73,9 +95,13 @@ class CollaborativeItem {
     required this.revision,
     required this.deletedAt,
     required this.value,
+    required this.table,
   });
 
-  factory CollaborativeItem.fromJson(Map<String, dynamic> json) {
+  factory CollaborativeItem.fromJson(
+    Map<String, dynamic> json, {
+    required String table,
+  }) {
     final deletedAt = json['deletedAt'];
     return CollaborativeItem(
       syncId: json['syncId'] as String? ?? '',
@@ -83,6 +109,7 @@ class CollaborativeItem {
       revision: (json['syncRevision'] as num?)?.toInt() ?? 0,
       deletedAt: deletedAt is String ? DateTime.tryParse(deletedAt) : null,
       value: json,
+      table: table,
     );
   }
 
@@ -92,17 +119,33 @@ class CollaborativeItem {
   final DateTime? deletedAt;
   final Map<String, dynamic> value;
 
+  /// Table the row belongs to, used to know which fields are device-local.
+  final String table;
+
   bool get isTombstone => deletedAt != null;
 
-  String get _stableValue => jsonEncode(_withoutVolatileMergeFields(value));
+  /// Content of the row, as every device describes it.
+  ///
+  /// The same rule used by the area comparison is applied here: the instants
+  /// are normalized and the device-local fields are ignored, so the same item
+  /// published by two devices is not reported as a concurrent edit.
+  ///
+  /// `deletedAt` is left out because a tombstone is compared through
+  /// [isTombstone], which always wins over a live value.
+  String get _stableValue {
+    final canonical = canonicalSyncV2Row(table, value)..remove('deletedAt');
+    return jsonEncode(_canonicalize(canonical));
+  }
 
-  Map<String, dynamic> _withoutVolatileMergeFields(
-    Map<String, dynamic> source,
-  ) {
-    return Map<String, dynamic>.from(source)
-      ..remove('id')
-      ..remove('syncRevision')
-      ..remove('deletedAt');
+  static Object? _canonicalize(Object? value) {
+    if (value is Map) {
+      final keys = value.keys.map((key) => key.toString()).toList()..sort();
+      return {for (final key in keys) key: _canonicalize(value[key])};
+    }
+    if (value is List) {
+      return value.map(_canonicalize).toList();
+    }
+    return value;
   }
 }
 
@@ -168,6 +211,13 @@ class CollaborativeAreaMerger {
       if (collaborativeTables.contains(table) || table == 'formatVersion') {
         continue;
       }
+      if (_equivalentSemanticRows(table, local[table], remote[table])) {
+        // The same history can have different local integer IDs on each
+        // device. Keep the remote row identities while comparing the
+        // meaningful content only.
+        merged[table] = remote[table];
+        continue;
+      }
       if (jsonEncode(local[table]) != jsonEncode(remote[table])) {
         conflicts.add(
           const ItemMergeResult(
@@ -181,9 +231,18 @@ class CollaborativeAreaMerger {
     for (final table in collaborativeTables) {
       final localRows = _rows(local[table]);
       final remoteRows = _rows(remote[table]);
-      final duplicateIdentity = _duplicateSyncId(localRows, remoteRows);
+      final duplicateIdentity = _duplicateSyncId(localRows, remoteRows, table);
       if (duplicateIdentity != null) {
         conflicts.add(duplicateIdentity);
+        continue;
+      }
+      final duplicateLogicalKey = _duplicateLiveLogicalKey(
+        localRows,
+        remoteRows,
+        table,
+      );
+      if (duplicateLogicalKey != null) {
+        conflicts.add(duplicateLogicalKey);
         continue;
       }
       final localGroups = _group(localRows);
@@ -198,17 +257,21 @@ class CollaborativeAreaMerger {
             ItemMergeResult(
               kind: ItemMergeKind.conflict,
               item: null,
-              local: localGroup.isEmpty ? null : _item(localGroup.first),
-              remote: remoteGroup.isEmpty ? null : _item(remoteGroup.first),
+              local: localGroup.isEmpty ? null : _item(localGroup.first, table),
+              remote: remoteGroup.isEmpty
+                  ? null
+                  : _item(remoteGroup.first, table),
               reason: 'duplicate_logical_key',
             ),
           );
           continue;
         }
-        final localItem = localGroup.isEmpty ? null : _item(localGroup.first);
+        final localItem = localGroup.isEmpty
+            ? null
+            : _item(localGroup.first, table);
         final remoteItem = remoteGroup.isEmpty
             ? null
-            : _item(remoteGroup.first);
+            : _item(remoteGroup.first, table);
         final result = itemMerger.merge(local: localItem, remote: remoteItem);
         if (result.kind == ItemMergeKind.conflict) {
           conflicts.add(result);
@@ -221,6 +284,26 @@ class CollaborativeAreaMerger {
     return CollaborativeAreaMergeResult(payload: merged, conflicts: conflicts);
   }
 
+  static bool _equivalentSemanticRows(
+    String table,
+    Object? localValue,
+    Object? remoteValue,
+  ) {
+    List<String> canonicalRows(Object? value) =>
+        _rows(value)
+            .map((row) => syncV2CanonicalJson(canonicalSyncV2Row(table, row)))
+            .toList()
+          ..sort();
+
+    final local = canonicalRows(localValue);
+    final remote = canonicalRows(remoteValue);
+    return local.length == remote.length &&
+        List.generate(
+          local.length,
+          (index) => local[index] == remote[index],
+        ).every((equal) => equal);
+  }
+
   static List<Map<String, dynamic>> _rows(Object? value) => [
     for (final row in (value as List<Object?>? ?? const []))
       if (row is Map) Map<String, dynamic>.from(row),
@@ -231,18 +314,61 @@ class CollaborativeAreaMerger {
   ) {
     final groups = <String, List<Map<String, dynamic>>>{};
     for (final row in rows) {
+      // The stable identity wins. logicalKey is a semantic duplicate detector,
+      // not the identity of a tombstone or of a later re-add.
       final key =
-          row['logicalKey'] as String? ??
           row['syncId'] as String? ??
+          row['logicalKey'] as String? ??
           'id:${row['id']}';
       groups.putIfAbsent(key, () => []).add(row);
     }
     return groups;
   }
 
+  static ItemMergeResult? _duplicateLiveLogicalKey(
+    List<Map<String, dynamic>> localRows,
+    List<Map<String, dynamic>> remoteRows,
+    String table,
+  ) {
+    final byLogicalKey = <String, List<Map<String, dynamic>>>{};
+    for (final row in [...localRows, ...remoteRows]) {
+      final logicalKey = row['logicalKey'] as String?;
+      if (logicalKey == null || logicalKey.isEmpty || !_isLive(row)) continue;
+      byLogicalKey.putIfAbsent(logicalKey, () => []).add(row);
+    }
+    for (final rows in byLogicalKey.values) {
+      final syncIds = {
+        for (final row in rows)
+          if (row['syncId'] != null) row['syncId'] as String,
+      };
+      if (syncIds.length > 1) {
+        return ItemMergeResult(
+          kind: ItemMergeKind.conflict,
+          item: null,
+          local:
+              rows.where((row) => localRows.contains(row)).firstOrNull == null
+              ? null
+              : _item(rows.first, table),
+          remote:
+              rows.where((row) => remoteRows.contains(row)).firstOrNull == null
+              ? null
+              : _item(rows.last, table),
+          reason: 'duplicate_logical_key',
+        );
+      }
+    }
+    return null;
+  }
+
+  static bool _isLive(Map<String, dynamic> row) =>
+      row['deletedAt'] == null &&
+      row['isRemoved'] != true &&
+      row['reviewState'] != 'rejected';
+
   static ItemMergeResult? _duplicateSyncId(
     List<Map<String, dynamic>> localRows,
     List<Map<String, dynamic>> remoteRows,
+    String table,
   ) {
     final localBySyncId = <String, Map<String, dynamic>>{};
     for (final row in localRows) {
@@ -250,7 +376,7 @@ class CollaborativeAreaMerger {
       if (syncId == null) continue;
       final existing = localBySyncId[syncId];
       if (existing != null && existing['logicalKey'] != row['logicalKey']) {
-        return _duplicateSyncIdConflict(existing, row);
+        return _duplicateSyncIdConflict(existing, row, table);
       }
       localBySyncId[syncId] = row;
     }
@@ -260,12 +386,12 @@ class CollaborativeAreaMerger {
       if (syncId == null) continue;
       final existing = remoteBySyncId[syncId];
       if (existing != null && existing['logicalKey'] != row['logicalKey']) {
-        return _duplicateSyncIdConflict(existing, row);
+        return _duplicateSyncIdConflict(existing, row, table);
       }
       remoteBySyncId[syncId] = row;
       final local = localBySyncId[syncId];
       if (local != null && local['logicalKey'] != row['logicalKey']) {
-        return _duplicateSyncIdConflict(local, row);
+        return _duplicateSyncIdConflict(local, row, table);
       }
     }
     return null;
@@ -274,16 +400,17 @@ class CollaborativeAreaMerger {
   static ItemMergeResult _duplicateSyncIdConflict(
     Map<String, dynamic> first,
     Map<String, dynamic> second,
+    String table,
   ) => ItemMergeResult(
     kind: ItemMergeKind.conflict,
     item: null,
-    local: _item(first),
-    remote: _item(second),
+    local: _item(first, table),
+    remote: _item(second, table),
     reason: 'duplicate_sync_id',
   );
 
-  static CollaborativeItem _item(Map<String, dynamic> row) =>
-      CollaborativeItem.fromJson(row);
+  static CollaborativeItem _item(Map<String, dynamic> row, String table) =>
+      CollaborativeItem.fromJson(row, table: table);
 }
 
 class CollaborativeIdentityNormalizer {

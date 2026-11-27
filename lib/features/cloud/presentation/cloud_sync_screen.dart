@@ -5,7 +5,11 @@ import '../../../app_environment.dart';
 import '../../../app_providers.dart';
 import '../data/cloud_models.dart';
 import '../data/cloud_sync_service.dart';
+import '../data/sync_v2_review.dart';
+import '../domain/collaboration.dart';
+import '../domain/collaboration_service.dart';
 import 'cloud_sync_status_panel.dart';
+import 'owner_review_panel.dart';
 
 class _SignedOutMessage extends StatelessWidget {
   const _SignedOutMessage();
@@ -71,121 +75,170 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
     );
   }
 
-  List<Widget> _buildAccount(String? displayName, String? email) => [
-    Card(
-      child: ListTile(
-        leading: const Icon(Icons.person_outline),
-        title: Text(displayName ?? 'Usuário'),
-        subtitle: Text(email ?? 'Conta conectada'),
-        trailing: TextButton(
-          onPressed: _busy ? null : _editDisplayName,
-          child: const Text('Editar nome'),
-        ),
-      ),
-    ),
-    Align(
-      alignment: Alignment.centerLeft,
-      child: TextButton.icon(
-        onPressed: _busy ? null : _signOut,
-        icon: const Icon(Icons.logout),
-        label: const Text('Sair'),
-      ),
-    ),
-    const Divider(),
-    if (_loadingHouseholds)
-      const ListTile(
-        leading: SizedBox.square(
-          dimension: 24,
-          child: CircularProgressIndicator(strokeWidth: 2),
-        ),
-        title: Text('Buscando suas casas…'),
-      )
-    else if (_households.isNotEmpty) ...[
-      Text('Minhas casas', style: Theme.of(context).textTheme.titleMedium),
-      const SizedBox(height: 8),
-      for (final household in _households)
-        ListTile(
-          contentPadding: EdgeInsets.zero,
-          leading: Icon(
-            household.id == _householdId
-                ? Icons.check_circle
-                : Icons.radio_button_unchecked,
-            color: household.id == _householdId
-                ? Theme.of(context).colorScheme.primary
-                : null,
-          ),
-          title: Text(household.name),
-          subtitle: Text(
-            household.id == _householdId
-                ? 'Casa selecionada'
-                : 'Toque para selecionar esta casa',
-          ),
-          onTap: _busy ? null : () => _selectHousehold(household.id),
-        ),
-      const SizedBox(height: 12),
-    ],
-    TextField(
-      controller: _householdNameController,
-      decoration: const InputDecoration(labelText: 'Nome da casa'),
-    ),
-    const SizedBox(height: 12),
-    FilledButton.icon(
-      onPressed: _busy ? null : _createHousehold,
-      icon: const Icon(Icons.home_outlined),
-      label: const Text('Criar uma casa'),
-    ),
-    const SizedBox(height: 20),
-    TextField(
-      controller: _inviteEmailController,
-      keyboardType: TextInputType.emailAddress,
-      decoration: const InputDecoration(
-        labelText: 'E-mail da pessoa convidada',
-      ),
-    ),
-    const SizedBox(height: 12),
-    OutlinedButton.icon(
-      onPressed: _busy ? null : _createInvite,
-      icon: const Icon(Icons.person_add_alt),
-      label: const Text('Gerar convite'),
-    ),
-    if (_inviteCode != null)
+  List<Widget> _buildAccount(String? displayName, String? email) {
+    final actor = ref.watch(collaborationActorProvider).asData?.value;
+    final localPendingReviews =
+        ref.watch(pendingPlanReviewsProvider).asData?.value ??
+        const <PendingPlanReview>[];
+    final publishedPendingReviews =
+        ref.watch(publishedPendingPlanReviewsProvider).asData?.value ??
+        const <PlanReviewItem>[];
+    final pendingReviews = _mergePendingReviews(
+      localPendingReviews,
+      publishedPendingReviews,
+    );
+    return [
       Card(
         child: ListTile(
-          title: Text('Código: $_inviteCode'),
-          subtitle: const Text(
-            'Compartilhe este código com o e-mail informado.',
+          leading: const Icon(Icons.person_outline),
+          title: Text(displayName ?? 'Usuário'),
+          subtitle: Text(email ?? 'Conta conectada'),
+          trailing: TextButton(
+            onPressed: _busy ? null : _editDisplayName,
+            child: const Text('Editar nome'),
           ),
         ),
       ),
-    const SizedBox(height: 20),
-    TextField(
-      controller: _inviteCodeController,
-      textCapitalization: TextCapitalization.characters,
-      decoration: const InputDecoration(labelText: 'Código de convite'),
-    ),
-    const SizedBox(height: 12),
-    OutlinedButton.icon(
-      onPressed: _busy ? null : _joinHousehold,
-      icon: const Icon(Icons.login),
-      label: const Text('Entrar na casa'),
-    ),
-    if (_householdId != null) ...[
-      const Divider(height: 32),
-      CloudSyncStatusPanel(
-        status: _syncStatus,
-        busy: _busy,
-        onCheck: _checkSyncStatus,
-        onSendAll: _sendAllLocalData,
-        onUseAll: _useAllRemoteData,
-        onSynchronize: _synchronize,
-        onDeleteHousehold: _deleteHousehold,
+      Align(
+        alignment: Alignment.centerLeft,
+        child: TextButton.icon(
+          onPressed: _busy ? null : _signOut,
+          icon: const Icon(Icons.logout),
+          label: const Text('Sair'),
+        ),
       ),
-    ],
-  ];
+      const Divider(),
+      if (_loadingHouseholds)
+        const ListTile(
+          leading: SizedBox.square(
+            dimension: 24,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+          title: Text('Buscando suas casas…'),
+        )
+      else if (_households.isNotEmpty) ...[
+        Text('Minhas casas', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        for (final household in _households)
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: Icon(
+              household.id == _householdId
+                  ? Icons.check_circle
+                  : Icons.radio_button_unchecked,
+              color: household.id == _householdId
+                  ? Theme.of(context).colorScheme.primary
+                  : null,
+            ),
+            title: Text(household.name),
+            subtitle: Text(
+              household.id == _householdId
+                  ? 'Casa selecionada'
+                  : 'Toque para selecionar esta casa',
+            ),
+            onTap: _busy ? null : () => _selectHousehold(household.id),
+          ),
+        const SizedBox(height: 12),
+      ],
+      TextField(
+        controller: _householdNameController,
+        decoration: const InputDecoration(labelText: 'Nome da casa'),
+      ),
+      const SizedBox(height: 12),
+      FilledButton.icon(
+        onPressed: _busy ? null : _createHousehold,
+        icon: const Icon(Icons.home_outlined),
+        label: const Text('Criar uma casa'),
+      ),
+      const SizedBox(height: 20),
+      TextField(
+        controller: _inviteEmailController,
+        keyboardType: TextInputType.emailAddress,
+        decoration: const InputDecoration(
+          labelText: 'E-mail da pessoa convidada',
+        ),
+      ),
+      const SizedBox(height: 12),
+      OutlinedButton.icon(
+        onPressed: _busy ? null : _createInvite,
+        icon: const Icon(Icons.person_add_alt),
+        label: const Text('Gerar convite'),
+      ),
+      if (_inviteCode != null)
+        Card(
+          child: ListTile(
+            title: Text('Código: $_inviteCode'),
+            subtitle: const Text(
+              'Compartilhe este código com o e-mail informado.',
+            ),
+          ),
+        ),
+      const SizedBox(height: 20),
+      TextField(
+        controller: _inviteCodeController,
+        textCapitalization: TextCapitalization.characters,
+        decoration: const InputDecoration(labelText: 'Código de convite'),
+      ),
+      const SizedBox(height: 12),
+      OutlinedButton.icon(
+        onPressed: _busy ? null : _joinHousehold,
+        icon: const Icon(Icons.login),
+        label: const Text('Entrar na casa'),
+      ),
+      if (_householdId != null) ...[
+        const Divider(height: 32),
+        OwnerReviewPanel(
+          reviews: pendingReviews,
+          isOwner: actor?.isOwner == true,
+          busy: _busy,
+          onApprove: (review) =>
+              _moderateReview(review, SyncV2ReviewAction.approve),
+          onRemove: (review) =>
+              _moderateReview(review, SyncV2ReviewAction.remove),
+        ),
+        const SizedBox(height: 12),
+        CloudSyncStatusPanel(
+          status: _syncStatus,
+          busy: _busy,
+          onCheck: _checkSyncStatus,
+          onSendAll: _sendAllLocalData,
+          onUseAll: _useAllRemoteData,
+          onSynchronize: _synchronize,
+          onDeleteHousehold: _deleteHousehold,
+        ),
+      ],
+    ];
+  }
+
+  List<PlanReviewItem> _mergePendingReviews(
+    List<PendingPlanReview> local,
+    List<PlanReviewItem> published,
+  ) {
+    final bySyncId = <String, PlanReviewItem>{};
+    for (final review in local) {
+      final syncId = review.item.syncId;
+      if (syncId == null || syncId.isEmpty) continue;
+      bySyncId[syncId] = PlanReviewItem(
+        itemSyncId: syncId,
+        productName: review.product.name,
+        planName: review.plan.name,
+        authorName: review.item.authorName,
+        authorUid: review.item.authorUid,
+        createdAt: review.item.createdAt,
+      );
+    }
+    for (final review in published) {
+      bySyncId.putIfAbsent(review.itemSyncId, () => review);
+    }
+    final merged = bySyncId.values.toList()
+      ..sort((left, right) => left.createdAt.compareTo(right.createdAt));
+    return merged;
+  }
 
   Future<void> _checkSyncStatus() => _run(() async {
     final id = _householdId;
     if (id == null) return;
+    ref.invalidate(publishedPendingPlanReviewsProvider);
     final status = await ref.read(cloudSyncServiceProvider).inspectStatus(id);
     if (mounted) setState(() => _syncStatus = status);
   });
@@ -315,6 +368,7 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
             lastSyncedHash: null,
           );
       ref.invalidate(selectedCloudHouseholdProvider);
+      ref.invalidate(collaborationActorProvider);
       setState(() {
         _householdId = null;
         _syncStatus = null;
@@ -356,6 +410,7 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
         await ref
             .read(settingsRepositoryProvider)
             .selectCloudHousehold(selectedId);
+        ref.invalidate(collaborationActorProvider);
       }
       if (selectedId != null) {
         await _refreshSyncStatus(selectedId);
@@ -385,7 +440,88 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
         .read(settingsRepositoryProvider)
         .selectCloudHousehold(householdId);
     ref.invalidate(selectedCloudHouseholdProvider);
+    ref.invalidate(collaborationActorProvider);
     await _refreshSyncStatus(householdId);
+  }
+
+  Future<void> _moderateReview(
+    PlanReviewItem review,
+    SyncV2ReviewAction action,
+  ) async {
+    final householdId = _householdId;
+    if (householdId == null) return;
+    final actor = await ref.read(collaborationActorProvider.future);
+    if (!mounted) return;
+    if (actor?.isOwner != true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Somente o dono da casa pode revisar este item.'),
+        ),
+      );
+      return;
+    }
+    final syncId = review.itemSyncId;
+    if (syncId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Este item legado ainda não tem uma identidade estável.',
+          ),
+        ),
+      );
+      return;
+    }
+    if (action == SyncV2ReviewAction.remove) {
+      if (!mounted) return;
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Remover item da lista?'),
+          content: Text(
+            '${review.productName}, adicionado por '
+            '${review.authorName ?? review.authorUid ?? 'membro'}, '
+            'será removido para todos os dispositivos.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('Remover'),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true || !mounted) return;
+    }
+
+    var completed = false;
+    await _run(() async {
+      await ref
+          .read(cloudSyncServiceProvider)
+          .moderatePlannedItem(
+            householdId: householdId,
+            itemSyncId: syncId,
+            action: action,
+          );
+      ref.invalidate(pendingPlanReviewsProvider);
+      ref.invalidate(publishedPendingPlanReviewsProvider);
+      await _refreshSyncStatus(householdId);
+      completed = true;
+    });
+    if (completed && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            action == SyncV2ReviewAction.approve
+                ? 'Item confirmado.'
+                : 'Item removido da lista.',
+          ),
+        ),
+      );
+    }
   }
 
   Future<void> _run(Future<void> Function() action) async {
@@ -407,6 +543,7 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
 
   Future<void> _signOut() => _run(() async {
     await ref.read(cloudAuthServiceProvider).signOut();
+    ref.invalidate(collaborationActorProvider);
     if (!mounted) {
       return;
     }
@@ -511,6 +648,7 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
     if (id == null) {
       throw StateError('Nenhuma casa selecionada.');
     }
+    ref.invalidate(publishedPendingPlanReviewsProvider);
     final result = await _synchronizeResolvingConflicts(id, {});
     await _refreshSyncStatus(id);
     if (mounted) {

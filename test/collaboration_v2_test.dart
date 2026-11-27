@@ -27,7 +27,7 @@ void main() {
         previousMultipleDatabaseWarning;
   });
 
-  test('migracao 7 para 8 preenche IDs e logical keys legacy', () async {
+  test('migracao 7 para 9 preenche IDs e logical keys legacy', () async {
     final file = File(
       '${Directory.systemTemp.path}/mercado-collaboration-${DateTime.now().microsecondsSinceEpoch}.sqlite',
     );
@@ -82,7 +82,7 @@ void main() {
     final plan = await database.select(database.shoppingPlans).getSingle();
     final item = await database.select(database.plannedItems).getSingle();
 
-    expect(database.schemaVersion, 8);
+    expect(database.schemaVersion, 9);
     expect(product.syncId, 'legacy:product:7');
     expect(product.logicalKey, 'product:leite:unit');
     expect(plan.syncId, 'legacy:plan:3');
@@ -125,7 +125,7 @@ void main() {
     final backup = await BackupService(database).createBackup();
     final payload = jsonDecode(backup) as Map<String, dynamic>;
     expect(payload['formatVersion'], 7);
-    expect(payload['schemaVersion'], 8);
+    expect(payload['schemaVersion'], 9);
     final row = (payload['products'] as List).single as Map<String, dynamic>;
     expect(row['syncId'], startsWith('product:'));
     expect(row['logicalKey'], 'product:café:unit');
@@ -329,6 +329,55 @@ void main() {
     expect(recreatedItem.reviewState, CollaborationMetadata.pendingReview);
   });
 
+  test('re-adicao preserva tombstone e cria nova identidade', () async {
+    final database = AppDatabase(NativeDatabase.memory());
+    addTearDown(database.close);
+    final actor = _actor(
+      CollaborationRole.member,
+      uid: 'member-readd',
+      name: 'Membro',
+    );
+    final productId = await CatalogRepository(database, actorResolver: actor)
+        .saveProduct(
+          name: 'Carne de Hambúrguer',
+          measurementMode: MeasurementMode.unit,
+          needsCategoryReview: false,
+        );
+    final shopping = ShoppingRepository(database, actorResolver: actor);
+    final planId = await shopping.createPlan(
+      monthKey: '2026-11',
+      name: 'Compras',
+    );
+    final firstId = await shopping.addPlannedItem(
+      planId: planId,
+      productId: productId,
+      mode: MeasurementMode.unit,
+      quantity: 1,
+    );
+    final first = await (database.select(
+      database.plannedItems,
+    )..where((item) => item.id.equals(firstId))).getSingle();
+    await shopping.removePlannedItem(firstId);
+    final secondId = await shopping.addPlannedItem(
+      planId: planId,
+      productId: productId,
+      mode: MeasurementMode.unit,
+      quantity: 1,
+    );
+
+    final rows = await database.select(database.plannedItems).get();
+    expect(rows, hasLength(2));
+    final tombstone = rows.singleWhere((item) => item.id == firstId);
+    final readded = rows.singleWhere((item) => item.id == secondId);
+    expect(tombstone.isRemoved, isTrue);
+    expect(tombstone.deletedAt, isNotNull);
+    expect(readded.isRemoved, isFalse);
+    expect(readded.deletedAt, isNull);
+    expect(readded.syncId, isNot(first.syncId));
+    expect(readded.logicalKey, first.logicalKey);
+    expect(readded.reviewState, CollaborationMetadata.pendingReview);
+  });
+
   test('normalizacao realoca PK remota e corrige referencias', () {
     final local = _fullPayload(
       products: [_row('product:local', 'product:local', 'Local')],
@@ -447,6 +496,150 @@ void main() {
 
       expect(result.hasConflicts, isTrue);
       expect(result.conflicts.single.reason, 'duplicate_logical_key');
+    });
+
+    test('aceita item novo quando historico só difere em IDs locais', () {
+      Map<String, dynamic> area({
+        required int tripId,
+        required int lineId,
+        required int quantity,
+      }) => {
+        'formatVersion': 7,
+        'products': const <Object?>[],
+        'shoppingPlans': const <Object?>[],
+        'plannedItems': [
+          {
+            'id': 5,
+            'logicalKey': 'planned-item:plan:product',
+            'syncId': 'planned-item:new',
+            'name': 'Novo item',
+            'syncRevision': 0,
+          },
+        ],
+        'shoppingTrips': [
+          {
+            'id': tripId,
+            'planId': tripId + 10,
+            'originPlanNameSnapshot': 'Compras',
+            'purchaseDate': '2026-11-25',
+            'marketName': 'Mercado',
+            'status': 'completed',
+          },
+        ],
+        'purchaseLines': [
+          {
+            'id': lineId,
+            'tripId': tripId,
+            'productId': lineId + 20,
+            'plannedItemId': lineId + 30,
+            'productNameSnapshot': 'Arroz',
+            'measurementMode': 'package',
+            'quantity': quantity,
+            'totalCents': 500,
+            'status': 'purchased',
+          },
+        ],
+      };
+
+      final result = const CollaborativeAreaMerger().merge(
+        area(tripId: 10, lineId: 20, quantity: 2),
+        area(tripId: 90, lineId: 80, quantity: 2),
+      );
+
+      expect(result.hasConflicts, isFalse);
+      expect(result.payload['plannedItems'], hasLength(1));
+      expect((result.payload['shoppingTrips'] as List).single['id'], 90);
+      expect((result.payload['purchaseLines'] as List).single['id'], 80);
+    });
+
+    test('mantem conflito quando historico muda semanticamente', () {
+      Map<String, dynamic> area(int quantity) => {
+        'formatVersion': 7,
+        'products': const <Object?>[],
+        'shoppingPlans': const <Object?>[],
+        'plannedItems': const <Object?>[],
+        'shoppingTrips': const <Object?>[],
+        'purchaseLines': [
+          {
+            'id': 1,
+            'tripId': 1,
+            'productId': 1,
+            'plannedItemId': null,
+            'productNameSnapshot': 'Arroz',
+            'measurementMode': 'package',
+            'quantity': quantity,
+            'totalCents': 500,
+            'status': 'purchased',
+          },
+        ],
+      };
+
+      final result = const CollaborativeAreaMerger().merge(area(2), area(3));
+
+      expect(result.hasConflicts, isTrue);
+      expect(result.conflicts.single.reason, 'non_collaborative_area_changed');
+    });
+
+    test('ordem das chaves do Firestore nao cria falso conflito', () {
+      final result = const CollaborativeAreaMerger().merge(
+        _area([
+          {
+            'id': 1,
+            'logicalKey': 'product:arroz:package',
+            'syncId': 'product:arroz',
+            'name': 'Arroz',
+            'syncRevision': 1,
+            'details': {'unit': 'package', 'brand': 'Marca'},
+          },
+        ]),
+        _area([
+          {
+            'details': {'brand': 'Marca', 'unit': 'package'},
+            'syncRevision': 1,
+            'name': 'Arroz',
+            'syncId': 'product:arroz',
+            'logicalKey': 'product:arroz:package',
+            'id': 99,
+          },
+        ]),
+      );
+
+      expect(result.hasConflicts, isFalse);
+      expect(result.payload['products'], hasLength(1));
+    });
+
+    test('tombstone e re-adicao convivem com identidades diferentes', () {
+      final result = const CollaborativeAreaMerger().merge(
+        {
+          'products': const <Object?>[],
+          'shoppingPlans': const <Object?>[],
+          'plannedItems': [
+            {
+              ..._row('planned-item:plan:product', 'planned-item:new', 'Carne'),
+              'id': 2,
+              'deletedAt': null,
+            },
+          ],
+        },
+        {
+          'products': const <Object?>[],
+          'shoppingPlans': const <Object?>[],
+          'plannedItems': [
+            {
+              ..._row(
+                'planned-item:plan:product',
+                'planned-item:old',
+                'Carne',
+                id: 1,
+              ),
+              'deletedAt': '2026-11-25T18:55:18.000Z',
+            },
+          ],
+        },
+      );
+
+      expect(result.hasConflicts, isFalse);
+      expect(result.payload['plannedItems'], hasLength(2));
     });
 
     test('tombstone impede ressurreicao de item vivo', () {

@@ -46,8 +46,14 @@ class SettingsRepository {
     String? householdId,
     required int remoteRevision,
     required String? lastSyncedHash,
+    String? householdOwnerUid,
+    bool resetHouseholdOwner = false,
   }) async {
     await _database.transaction(() async {
+      final current = await getCloudSyncSettings();
+      final ownerUid = resetHouseholdOwner
+          ? null
+          : householdOwnerUid ?? current?.householdOwnerUid;
       await _database
           .into(_database.cloudSyncSettings)
           .insert(
@@ -56,10 +62,25 @@ class SettingsRepository {
               householdId: Value(householdId),
               remoteRevision: Value(remoteRevision),
               lastSyncedHash: Value(lastSyncedHash),
+              householdOwnerUid: Value(ownerUid),
             ),
             mode: InsertMode.insertOrReplace,
           );
     });
+  }
+
+  Future<void> cacheHouseholdOwner(String householdId, String ownerUid) async {
+    final current = await getCloudSyncSettings();
+    if (current?.householdId != householdId ||
+        current?.householdOwnerUid == ownerUid) {
+      return;
+    }
+    await saveCloudSyncSettings(
+      householdId: householdId,
+      remoteRevision: current?.remoteRevision ?? 0,
+      lastSyncedHash: current?.lastSyncedHash,
+      householdOwnerUid: ownerUid,
+    );
   }
 
   Future<void> selectCloudHousehold(String householdId) async {
@@ -71,6 +92,7 @@ class SettingsRepository {
       householdId: householdId,
       remoteRevision: 0,
       lastSyncedHash: null,
+      resetHouseholdOwner: true,
     );
   }
 }

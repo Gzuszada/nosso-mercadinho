@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 import '../../../data/app_database.dart';
 import '../../catalog/data/catalog_import.dart';
 import '../../cloud/domain/collaboration.dart';
+import '../../cloud/domain/sync_v2_canonical.dart';
 import '../../shopping/domain/shopping_calculations.dart';
 
 const _backupAppVersion = '1.0.0+7';
@@ -439,8 +440,8 @@ class BackupService {
     'name': row.name,
     'sortOrder': row.sortOrder,
     'isArchived': row.isArchived,
-    'createdAt': row.createdAt.toIso8601String(),
-    'updatedAt': row.updatedAt.toIso8601String(),
+    'createdAt': _instant(row.createdAt),
+    'updatedAt': _instant(row.updatedAt),
   };
 
   static Map<String, Object?> _subcategoryToJson(Subcategory row) => {
@@ -449,8 +450,8 @@ class BackupService {
     'name': row.name,
     'sortOrder': row.sortOrder,
     'isArchived': row.isArchived,
-    'createdAt': row.createdAt.toIso8601String(),
-    'updatedAt': row.updatedAt.toIso8601String(),
+    'createdAt': _instant(row.createdAt),
+    'updatedAt': _instant(row.updatedAt),
   };
 
   static Map<String, Object?> _productToJson(Product row) => {
@@ -474,11 +475,11 @@ class BackupService {
     'reviewState': row.reviewState,
     'reviewedByUid': row.reviewedByUid,
     'reviewedByName': row.reviewedByName,
-    'reviewedAt': row.reviewedAt?.toIso8601String(),
-    'deletedAt': row.deletedAt?.toIso8601String(),
+    'reviewedAt': _nullableInstant(row.reviewedAt),
+    'deletedAt': _nullableInstant(row.deletedAt),
     'syncRevision': row.syncRevision,
-    'createdAt': row.createdAt.toIso8601String(),
-    'updatedAt': row.updatedAt.toIso8601String(),
+    'createdAt': _instant(row.createdAt),
+    'updatedAt': _instant(row.updatedAt),
   };
 
   static Map<String, Object?> _batchToJson(ImportBatch row) => {
@@ -486,7 +487,7 @@ class BackupService {
     'sourceKey': row.sourceKey,
     'sourceName': row.sourceName,
     'entryCount': row.entryCount,
-    'importedAt': row.importedAt.toIso8601String(),
+    'importedAt': _instant(row.importedAt),
   };
 
   static Map<String, Object?> _entryToJson(
@@ -523,11 +524,11 @@ class BackupService {
     'reviewState': row.reviewState,
     'reviewedByUid': row.reviewedByUid,
     'reviewedByName': row.reviewedByName,
-    'reviewedAt': row.reviewedAt?.toIso8601String(),
-    'deletedAt': row.deletedAt?.toIso8601String(),
+    'reviewedAt': _nullableInstant(row.reviewedAt),
+    'deletedAt': _nullableInstant(row.deletedAt),
     'syncRevision': row.syncRevision,
-    'createdAt': row.createdAt.toIso8601String(),
-    'updatedAt': row.updatedAt.toIso8601String(),
+    'createdAt': _instant(row.createdAt),
+    'updatedAt': _instant(row.updatedAt),
   };
 
   static Map<String, Object?> _plannedItemToJson(
@@ -556,11 +557,11 @@ class BackupService {
     'reviewState': row.reviewState,
     'reviewedByUid': row.reviewedByUid,
     'reviewedByName': row.reviewedByName,
-    'reviewedAt': row.reviewedAt?.toIso8601String(),
-    'deletedAt': row.deletedAt?.toIso8601String(),
+    'reviewedAt': _nullableInstant(row.reviewedAt),
+    'deletedAt': _nullableInstant(row.deletedAt),
     'syncRevision': row.syncRevision,
-    'createdAt': row.createdAt.toIso8601String(),
-    'updatedAt': row.updatedAt.toIso8601String(),
+    'createdAt': _instant(row.createdAt),
+    'updatedAt': _instant(row.updatedAt),
   };
 
   static Map<String, Object?> _tripToJson(ShoppingTrip row) => {
@@ -570,9 +571,9 @@ class BackupService {
     'purchaseDate': row.purchaseDate,
     'marketName': row.marketName,
     'status': row.status,
-    'createdAt': row.createdAt.toIso8601String(),
-    'updatedAt': row.updatedAt.toIso8601String(),
-    'completedAt': row.completedAt?.toIso8601String(),
+    'createdAt': _instant(row.createdAt),
+    'updatedAt': _instant(row.updatedAt),
+    'completedAt': _nullableInstant(row.completedAt),
   };
 
   static Map<String, Object?> _purchaseLineToJson(
@@ -595,8 +596,8 @@ class BackupService {
     'productNameSnapshot': row.productNameSnapshot,
     'categoryNameSnapshot': row.categoryNameSnapshot,
     'subcategoryNameSnapshot': row.subcategoryNameSnapshot,
-    'createdAt': row.createdAt.toIso8601String(),
-    'updatedAt': row.updatedAt.toIso8601String(),
+    'createdAt': _instant(row.createdAt),
+    'updatedAt': _instant(row.updatedAt),
   };
 
   static Map<String, dynamic> _validatedPayload(String contents) {
@@ -618,7 +619,7 @@ class BackupService {
     final formatVersion = _integer(root, 'formatVersion');
     final schemaVersion = _integer(root, 'schemaVersion');
     if (!const {1, 2, 3, 4, 5, 6, 7}.contains(formatVersion) ||
-        !const {1, 2, 3, 4, 5, 6, 7, 8}.contains(schemaVersion)) {
+        !const {1, 2, 3, 4, 5, 6, 7, 8, 9}.contains(schemaVersion)) {
       throw const FormatException(
         'Versão de backup não compatível com esta versão do aplicativo.',
       );
@@ -1220,6 +1221,17 @@ class BackupService {
     }
     return date;
   }
+
+  /// Serializes an instant in UTC, with the precision the database keeps.
+  ///
+  /// The same instant must always produce the same text, on every device and
+  /// in every timezone, otherwise two devices holding the same data produce
+  /// different payloads and appear divergent.
+  static String _instant(DateTime value) =>
+      canonicalSyncV2Timestamp(value.toUtc());
+
+  static String? _nullableInstant(DateTime? value) =>
+      value == null ? null : _instant(value);
 
   static DateTime? _nullableDate(Map<String, Object?> row, String key) {
     final value = row[key];
