@@ -168,7 +168,7 @@ Para comandos Android, use a junction ASCII `C:\Users\Usuario\MercadoApp`, pois 
 - A comparação entre o estado local e o publicado passou a usar o hash semântico por área (`areaSemanticHash`), com a base memorizada em `semantic:<área>`. Dois aparelhos com o mesmo conteúdo deixam de aparecer como divergentes.
 - Validações executadas: `flutter analyze` sem problemas; `flutter test` com 131 testes passando; `npm test` em `functions-pilot` com 21 testes passando, incluindo a hierarquia de moderação e o fluxo completo de remoção (membro cria pendência → owner remove → item fica com tombstone, autoria e instante canônicos → publicação do membro carrega a decisão).
 - O probe temporário usado na investigação foi removido do repositório.
-- Pendente: gerar, assinar e validar em aparelho um novo APK piloto com essas correções; o APK validado continua sendo o `1.0.12-pilot+23`.
+- Pendente: validar em aparelho o novo APK piloto `1.0.13-pilot+24`, que já inclui essas correções; o APK validado continua sendo o `1.0.12-pilot+23`.
 
 ## Piloto: estado local × Firebase sem falso divergente (26/11/2026)
 
@@ -176,6 +176,7 @@ Para comandos Android, use a junction ASCII `C:\Users\Usuario\MercadoApp`, pois 
 - A ação **Usar todos os dados da casa** também aplica as decisões do owner antes de restaurar, para que a restauração completa não ressuscite um item removido pelo owner.
 - Quando existe divergência real, a tela passa a dizer o que difere: `Removidos: aqui X, casa Y` e `Aguardando o owner: aqui X, casa Y`. A remoção preserva a linha como tombstone, então a contagem de linhas continuava igual e a diferença ficava invisível.
 - Validações executadas: `flutter analyze` sem problemas; `dart format` sem pendências; `flutter test` com 133 testes passando, incluindo a regressão "status não acusa divergência quando só a decisão do owner difere" e o painel que detalha a diferença.
+- APK piloto release `1.0.13-pilot+24` gerado e assinado com APK Signature Scheme v2 válido, 67.985.956 bytes e SHA-256 `A8DE1D30C23D8CB3BFE33C03B2F689263D581DF8703685C715E222B2EEDC4B19`, copiado para `release-assets/nosso-mercadinho-1.0.13-pilot.apk`. A instalação e a validação no aparelho real ficam pendentes, pois não havia dispositivo conectado durante a geração.
 
 ## Próximo passo
 

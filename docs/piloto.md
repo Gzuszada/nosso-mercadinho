@@ -73,6 +73,12 @@ SHA-256 `17300C93F2A74BC3C10FEB447A9C383BFE2F76F48EA20F4C49EC08F01BD5C6D4`.
 Ele foi instalado com `adb install -r` nos emuladores `emulator-5554` e
 `emulator-5556` e validado no fluxo real membro → owner → membro.
 
+A entrega com a correção do estado local × Firebase usa o APK piloto release
+`1.0.13-pilot+24`, assinatura APK v2 válida, tamanho `67.985.956` bytes e
+SHA-256 `A8DE1D30C23D8CB3BFE33C03B2F689263D581DF8703685C715E222B2EEDC4B19`.
+Ele foi gerado em 26/11/2026 e ainda não foi instalado em aparelho: a
+validação manual no fluxo real membro → owner → membro continua pendente.
+
 ## Deploy exclusivo do piloto
 
 ```powershell
@@ -157,18 +163,19 @@ depender de aparelho:
   moderação (`findModerationViolation`): o owner remove um item de outro
   membro, um membro sem o papel de owner é recusado, item não publicado e item
   legado sem autoria são recusados, e o owner não modera item próprio.
-- `flutter test`: passou com 131 testes, incluindo o fluxo completo de remoção
+- `flutter test`: passou com 133 testes, incluindo o fluxo completo de remoção
   (membro cria item pendente → owner remove → item fica com tombstone no banco
   local, com autoria e instante canônicos, e a repetição da decisão não conta
-  de novo), a publicação do membro carregando a decisão do owner e o
+  de novo), a publicação do membro carregando a decisão do owner, o
   reconhecimento de "em dia" para áreas com o mesmo conteúdo e identificadores
-  locais diferentes.
+  locais diferentes, o status que não acusa divergência quando só a decisão do
+  owner difere e o painel que detalha a diferença.
 - `flutter analyze`: sem problemas.
 
-Essas correções estão no repositório e ainda não foram publicadas em um APK
-piloto: o APK validado continua sendo o `1.0.12-pilot+23`. Um novo build
-precisa ser gerado, assinado e validado no fluxo real membro → owner → membro
-antes de tratar a hierarquia de remoção como validada em aparelho.
+Essas correções estão publicadas no APK piloto `1.0.13-pilot+24`, que ainda
+não foi validado em aparelho. Antes de tratar o fluxo como validado em
+aparelho, o novo build precisa ser instalado e exercitado no fluxo real
+membro → owner → membro.
 
 O Emulator foi validado com o JDK 25 já instalado em
 `C:\Program Files\Android\Android Studio1\jbr`:
@@ -205,7 +212,7 @@ item, `logicalKey`, tombstones, merge por item e a central de moderação do own
 ## Limitações e próxima camada
 
 - O cliente persiste apenas o hash da base, não o payload-base. Alterações concorrentes do mesmo item são, por isso, tratadas conservadoramente como conflito. A base é memorizada em duas chaves: o hash de bytes histórico e o hash semântico (`semantic:<área>`), que é o usado na comparação de conteúdo.
-- As correções da revisão do owner (aplicação idempotente, publicação honrando a decisão e comparação semântica) estão no repositório, mas ainda não em um APK piloto publicado. O build `1.0.12-pilot+23` continua sendo o último validado em aparelho.
+- As correções da revisão do owner (aplicação idempotente, publicação honrando a decisão e comparação semântica) e da comparação de estado local × Firebase estão publicadas no APK piloto `1.0.13-pilot+24`, que ainda não foi validado em aparelho. O build `1.0.12-pilot+23` continua sendo o último validado em aparelho.
 - A separação entre uma remoção do owner e uma re-addição posterior do membro usa o instante local da linha e o instante servidor da decisão. Um aparelho com o relógio muito adiantado pode tratar um item como re-addição e manter a pendência; o item continua visível para o owner decidir de novo.
 - Não existe UI central de conflitos/publicação consolidada; a decisão de duplicatas continua pendente. A moderação de autoria/revisão possui UI central própria.
 - A migração do Firestore piloto para `southamerica-east1` exige uma operação destrutiva coordenada; o projeto permanece em `nam5`.
