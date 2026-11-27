@@ -178,6 +178,13 @@ Para comandos Android, use a junction ASCII `C:\Users\Usuario\MercadoApp`, pois 
 - Validações executadas: `flutter analyze` sem problemas; `dart format` sem pendências; `flutter test` com 133 testes passando, incluindo a regressão "status não acusa divergência quando só a decisão do owner difere" e o painel que detalha a diferença.
 - APK piloto release `1.0.13-pilot+24` gerado e assinado com APK Signature Scheme v2 válido, 67.985.956 bytes e SHA-256 `A8DE1D30C23D8CB3BFE33C03B2F689263D581DF8703685C715E222B2EEDC4B19`, copiado para `release-assets/nosso-mercadinho-1.0.13-pilot.apk`. A instalação e a validação no aparelho real ficam pendentes, pois não havia dispositivo conectado durante a geração.
 
+## Piloto: Functions publicadas com a hierarquia de moderação (27/11/2026)
+
+- Backup do estado anterior das Functions do projeto `nosso-mercado-casa-pilot` em `C:\Dev\Mercado\release-assets\functions-pilot-backup-2026-11-27-0845.zip`: código exato que estava no ar (commit `6e78b18`, o último a alterar `functions-pilot` antes do deploy de 25/11), metadados da API Cloud Functions v2, políticas IAM, `firebase.pilot.json`, `firestore.pilot.rules`, `firestore.indexes.json` e o procedimento de rollback.
+- Publicação executada com `firebase deploy --config firebase.pilot.json --only functions --project nosso-mercado-casa-pilot`: `beforeCreateUser`, `moderatePlannedItem` e `publishSyncV2` atualizadas com sucesso.
+- Verificação pós-publicação: estado `ACTIVE`, runtime nodejs22, timeout 60 s, revisão `moderateplanneditem-00002-guz`, `firebase-functions-hash` `90efaddf6af6c6d0a4c1f9739db8cddc586fdf92`; as chamadas sem token chegam à função e respondem `INVALID_ARGUMENT`, o que confirma o `roles/run.invoker` público; o artefato baixado do bucket `gcf-v2-sources` contém `lib/sync_v2_moderation.js` com a regra `isHouseholdOwner`.
+- `npm test` em `functions-pilot` antes da publicação: 21 testes passando, incluindo a hierarquia de moderação do owner.
+
 ## Próximo passo
 
 Realizar o checklist manual de instalação, backup/restauração, migração, acessibilidade e funcionamento offline no aparelho. Manter a instalação antiga até confirmar os dados; não alterar dados reais nem criar commit pelo assistente.

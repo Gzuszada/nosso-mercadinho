@@ -88,6 +88,25 @@ firebase deploy --config firebase.pilot.json --only functions --project nosso-me
 
 As regras de produção continuam em `firestore.rules` e são publicadas com `firebase.json`. O backend v2 fica em `functions-pilot/`; o source `functions/` continua exclusivo de produção.
 
+### Publicação das Functions em 27/11/2026
+
+As três Functions do projeto `nosso-mercado-casa-pilot` foram atualizadas em
+27/11/2026 com `firebase deploy --config firebase.pilot.json --only functions
+--project nosso-mercado-casa-pilot`. `beforeCreateUser`, `moderatePlannedItem`
+e `publishSyncV2` ficaram `ACTIVE`, runtime nodejs22, timeout 60 s, revisão
+`moderateplanneditem-00002-guz` e `firebase-functions-hash`
+`90efaddf6af6c6d0a4c1f9739db8cddc586fdf92`. O `roles/run.invoker` foi
+preservado (as chamadas sem token chegam à função e respondem
+`INVALID_ARGUMENT`, e não com `PERMISSION_DENIED` do IAM) e o artefato baixado
+do bucket `gcf-v2-sources` contém `lib/sync_v2_moderation.js` com a regra
+`isHouseholdOwner`: a hierarquia de moderação está no ar.
+
+Antes da publicação foi guardado o backup em
+`C:\Dev\Mercado\release-assets\functions-pilot-backup-2026-11-27-0845.zip`, com
+o código exato que estava rodando (commit `6e78b18`, o último a alterar
+`functions-pilot` antes do deploy de 25/11), os metadados da API, as políticas
+IAM, a configuração do projeto e o procedimento de rollback.
+
 ## Protocolo v2 implementado
 
 - O schema persistente é Drift 9. Produtos, listas e itens planejados possuem `syncId`, `logicalKey`, autoria, estado de revisão, `deletedAt` e `syncRevision`; as configurações de sincronização memorizam o último owner confirmado para um fallback offline conservador.
