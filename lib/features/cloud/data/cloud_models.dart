@@ -20,11 +20,26 @@ String cloudTableLabel(String table, {int? count}) => switch (table) {
 };
 
 class CloudAreaCounts {
-  const CloudAreaCounts(this.values);
+  const CloudAreaCounts(
+    this.values, {
+    this.removed = const {},
+    this.pending = const {},
+  });
 
   final Map<String, int> values;
 
+  /// Rows already removed, by table. A removal keeps the row as a tombstone,
+  /// so these rows are counted in [values] as well.
+  final Map<String, int> removed;
+
+  /// Rows waiting for the owner decision, by table.
+  final Map<String, int> pending;
+
   int get total => values.values.fold(0, (sum, count) => sum + count);
+
+  int get removedTotal => removed.values.fold(0, (sum, count) => sum + count);
+
+  int get pendingTotal => pending.values.fold(0, (sum, count) => sum + count);
 
   String get summary => values.entries
       .map(

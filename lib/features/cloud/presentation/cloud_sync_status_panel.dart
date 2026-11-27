@@ -70,9 +70,20 @@ class CloudSyncStatusPanel extends StatelessWidget {
                     leading: Icon(_stateIcon(area.state)),
                     title: Text(area.area.label),
                     subtitle: Text(
-                      '${area.state.label}\n'
-                      'Aqui: ${area.localCounts.summary}\n'
-                      'Casa: ${area.remoteCounts.summary}',
+                      [
+                        area.state.label,
+                        'Aqui: ${area.localCounts.summary}',
+                        'Casa: ${area.remoteCounts.summary}',
+                        if (area.localCounts.removedTotal !=
+                            area.remoteCounts.removedTotal)
+                          'Removidos: aqui ${area.localCounts.removedTotal}, '
+                              'casa ${area.remoteCounts.removedTotal}',
+                        if (area.localCounts.pendingTotal !=
+                            area.remoteCounts.pendingTotal)
+                          'Aguardando o owner: aqui '
+                              '${area.localCounts.pendingTotal}, '
+                              'casa ${area.remoteCounts.pendingTotal}',
+                      ].join('\n'),
                     ),
                     isThreeLine: true,
                   ),

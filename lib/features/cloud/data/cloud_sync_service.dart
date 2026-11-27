@@ -254,7 +254,13 @@ class CloudSyncService {
         area: area.name,
         manifest: remote.manifest,
       );
-      final selected = selectArea(payload, area);
+      // As decisões do owner são autoritativas: restaurar a casa inteira não
+      // pode ressuscitar um item que o owner removeu.
+      final reviews = await syncV2Client!.readReviews(householdId);
+      final selected = selectArea(
+        syncV2Client!.applyReviews(payload, reviews),
+        area,
+      );
       _validateArea(selected, area);
       return selected;
     }
@@ -343,6 +349,9 @@ class CloudSyncService {
         .readLocalPayload();
     final baseHashes = _decodeHashes(settings?.lastSyncedHash);
     final remote = await client.readCurrentState(householdId);
+    // As decisões do owner são autoritativas: o estado publicado pode ainda
+    // carregar o item como pendente, mas ele já está removido para a casa.
+    final reviews = await client.readReviews(householdId);
     final areas = <CloudSyncConflictArea, CloudSyncAreaStatus>{};
     for (final area in _areas.keys) {
       final localArea = selectArea(localPayload, area);
@@ -350,13 +359,18 @@ class CloudSyncService {
       final remoteManifest = remote?.manifest.areas[area.name];
       String? remoteHash;
       String? remoteError;
+      Map<String, dynamic>? remoteAreaPayload;
       if (remoteManifest != null && remote != null) {
         try {
-          final remoteArea = await client.readArea(
-            householdId: householdId,
-            area: area.name,
-            manifest: remote.manifest,
+          final remoteArea = client.applyReviews(
+            await client.readArea(
+              householdId: householdId,
+              area: area.name,
+              manifest: remote.manifest,
+            ),
+            reviews,
           );
+          remoteAreaPayload = remoteArea;
           remoteHash = client.areaSemanticHash(remoteArea);
         } on Object catch (error) {
           remoteError = error.toString();
@@ -372,7 +386,9 @@ class CloudSyncService {
         area: area,
         state: state,
         localCounts: _counts(localArea, area),
-        remoteCounts: remoteManifest == null
+        remoteCounts: remoteAreaPayload != null
+            ? _counts(remoteAreaPayload, area)
+            : remoteManifest == null
             ? const CloudAreaCounts({})
             : CloudAreaCounts({
                 for (final key in _areas[area]!)
@@ -869,10 +885,25 @@ class CloudSyncService {
     Map<String, dynamic> payload,
     CloudSyncConflictArea area,
   ) {
-    return CloudAreaCounts({
-      for (final key in _areas[area]!)
-        key: (payload[key] as List? ?? const []).length,
-    });
+    final values = <String, int>{};
+    final removed = <String, int>{};
+    final pending = <String, int>{};
+    for (final key in _areas[area]!) {
+      final rows = (payload[key] as List? ?? const [])
+          .whereType<Map>()
+          .map((row) => Map<String, dynamic>.from(row))
+          .toList();
+      values[key] = rows.length;
+      // A remoção preserva a linha como tombstone, então a contagem de linhas
+      // continua igual e a diferença aparece só nestes contadores.
+      removed[key] = rows
+          .where((row) => row['isRemoved'] == true || row['deletedAt'] != null)
+          .length;
+      pending[key] = rows
+          .where((row) => row['reviewState'] == 'pending_review')
+          .length;
+    }
+    return CloudAreaCounts(values, removed: removed, pending: pending);
   }
 
   static CloudSyncAreaState _stateFor({

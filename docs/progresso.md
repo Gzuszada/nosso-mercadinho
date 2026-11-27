@@ -170,6 +170,13 @@ Para comandos Android, use a junction ASCII `C:\Users\Usuario\MercadoApp`, pois 
 - O probe temporário usado na investigação foi removido do repositório.
 - Pendente: gerar, assinar e validar em aparelho um novo APK piloto com essas correções; o APK validado continua sendo o `1.0.12-pilot+23`.
 
+## Piloto: estado local × Firebase sem falso divergente (26/11/2026)
+
+- Corrigido o sintoma "Este dispositivo não está igual ao Firebase" em uma tela que mostrava os dois lados com os mesmos números. A causa era a comparação de status: ela aplicava as decisões do owner apenas no lado local, enquanto o estado publicado ainda carregava o item como pendente. Como a decisão é autoritativa, o hash semântico agora é calculado sobre o estado remoto já com as revisões aplicadas, e o aparelho passa a acusar **Em dia**.
+- A ação **Usar todos os dados da casa** também aplica as decisões do owner antes de restaurar, para que a restauração completa não ressuscite um item removido pelo owner.
+- Quando existe divergência real, a tela passa a dizer o que difere: `Removidos: aqui X, casa Y` e `Aguardando o owner: aqui X, casa Y`. A remoção preserva a linha como tombstone, então a contagem de linhas continuava igual e a diferença ficava invisível.
+- Validações executadas: `flutter analyze` sem problemas; `dart format` sem pendências; `flutter test` com 133 testes passando, incluindo a regressão "status não acusa divergência quando só a decisão do owner difere" e o painel que detalha a diferença.
+
 ## Próximo passo
 
 Realizar o checklist manual de instalação, backup/restauração, migração, acessibilidade e funcionamento offline no aparelho. Manter a instalação antiga até confirmar os dados; não alterar dados reais nem criar commit pelo assistente.

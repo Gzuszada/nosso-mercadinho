@@ -20,6 +20,48 @@ import 'package:mercado/features/cloud/domain/collaboration.dart';
 import 'package:mercado/features/settings/data/settings_repository.dart';
 import 'package:mercado/features/shopping/data/shopping_repository.dart';
 
+/// Publica um estado completo no Firestore falso, como o backend do piloto.
+Future<void> publishRemoteState(
+  FakeFirebaseFirestore firestore, {
+  required String householdId,
+  required Map<String, dynamic> payload,
+}) async {
+  final manifestAreas = <String, dynamic>{};
+  for (final area in CloudSyncConflictArea.values) {
+    final areaPayload = CloudSyncService.selectArea(payload, area);
+    final path = 'syncV2/$householdId/chunks/${area.name}-0';
+    final hash = canonicalHash(areaPayload);
+    final count = areaPayload.values.fold<int>(0, (total, value) {
+      return total + (value is List ? value.length : 1);
+    });
+    await firestore.doc(path).set({'payload': areaPayload, 'hash': hash});
+    manifestAreas[area.name] = {
+      'hash': hash,
+      'counts': {
+        for (final entry in areaPayload.entries)
+          if (entry.value is List) entry.key: (entry.value as List).length,
+      },
+      'chunks': [
+        {'index': 0, 'path': path, 'hash': hash, 'count': count},
+      ],
+    };
+  }
+  await firestore.doc('syncV2/$householdId/state/current').set({
+    'generation': 7,
+    'manifestHash': 'manifest-hash',
+    'manifest': {
+      'protocolVersion': 2,
+      'publicationId': 'publication-1',
+      'baseGeneration': 6,
+      'authorUid': 'owner-1',
+      'authorName': 'Owner',
+      'deviceId': 'android-pilot',
+      'createdAt': '2026-11-25T19:30:00.000Z',
+      'areas': manifestAreas,
+    },
+  });
+}
+
 void main() {
   const owner = CollaborationActor(
     uid: 'owner-1',
@@ -343,4 +385,111 @@ void main() {
       CloudSyncAreaState.inSync,
     );
   });
+
+  test(
+    'status não acusa divergência quando só a decisão do owner difere',
+    () async {
+      final database = AppDatabase(NativeDatabase.memory());
+      addTearDown(database.close);
+      final productId =
+          await CatalogRepository(
+            database,
+            actorResolver: () async => owner,
+          ).saveProduct(
+            name: 'Arroz',
+            measurementMode: MeasurementMode.package,
+            needsCategoryReview: false,
+          );
+      final planId = await ShoppingRepository(
+        database,
+        actorResolver: () async => owner,
+      ).createPlan(monthKey: '2026-11', name: 'Compras');
+      await ShoppingRepository(
+        database,
+        actorResolver: () async => member,
+      ).addPlannedItem(
+        planId: planId,
+        productId: productId,
+        mode: MeasurementMode.package,
+        quantity: 1,
+      );
+      final item = await database.select(database.plannedItems).getSingle();
+
+      // O estado publicado ainda carrega o item como pendente.
+      final publishedPayload = await CloudSnapshotService(database)
+          .readLocalPayload();
+
+      final now = DateTime.now().toUtc();
+      final decidedAt = DateTime.utc(
+        now.year,
+        now.month,
+        now.day,
+        now.hour,
+        now.minute,
+        now.second,
+      ).add(const Duration(hours: 1));
+      final firestore = FakeFirebaseFirestore();
+      await firestore
+          .collection('syncV2')
+          .doc('casa')
+          .collection('reviews')
+          .doc(item.syncId!)
+          .set({
+            'itemSyncId': item.syncId,
+            'action': 'remove',
+            'authorUid': 'member-1',
+            'authorName': 'Membro',
+            'reviewedByUid': 'owner-1',
+            'reviewedByName': 'Owner',
+            'decidedAt': decidedAt.toIso8601String(),
+          });
+      await publishRemoteState(
+        firestore,
+        householdId: 'casa',
+        payload: publishedPayload,
+      );
+
+      // O aparelho já aplicou a decisão do owner.
+      await applySyncV2ReviewToLocalItem(
+        database,
+        SyncV2Review(
+          itemSyncId: item.syncId!,
+          action: SyncV2ReviewAction.remove,
+          reviewedByUid: 'owner-1',
+          reviewedByName: 'Owner',
+          decidedAt: decidedAt,
+          authorUid: 'member-1',
+          authorName: 'Membro',
+        ),
+      );
+
+      final client = SyncV2Client(
+        firestore: firestore,
+        auth: MockFirebaseAuth(
+          signedIn: true,
+          mockUser: MockUser(
+            uid: 'member-1',
+            email: 'member@example.com',
+            displayName: 'Membro',
+          ),
+        ),
+      );
+      final service = CloudSyncService(
+        database: database,
+        settingsRepository: SettingsRepository(database),
+        firestore: firestore,
+        syncV2Client: client,
+      );
+
+      final status = await service.inspectStatus('casa');
+
+      // A decisão do owner é autoritativa: os dois lados descrevem o mesmo
+      // item removido, mesmo que o estado publicado ainda esteja atrasado.
+      expect(
+        status.areas[CloudSyncConflictArea.shopping]!.state,
+        CloudSyncAreaState.inSync,
+      );
+      expect(status.needsSynchronization, isFalse);
+    },
+  );
 }

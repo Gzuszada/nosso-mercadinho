@@ -100,6 +100,54 @@ void main() {
       expect(find.textContaining(technicalTerm), findsNothing);
     }
   });
+
+  testWidgets('mostra o que difere quando a área está divergente', (
+    tester,
+  ) async {
+    final status = CloudSyncStatus(
+      householdId: 'casa',
+      remoteRevision: 4,
+      areas: {
+        for (final area in CloudSyncConflictArea.values)
+          area: CloudSyncAreaStatus(
+            area: area,
+            state: area == CloudSyncConflictArea.shopping
+                ? CloudSyncAreaState.divergent
+                : CloudSyncAreaState.inSync,
+            localCounts: _localCounts(area),
+            remoteCounts: _remoteCounts(area),
+            localHash: 'local',
+            remoteHash: 'remote',
+          ),
+      },
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: CloudSyncStatusPanel(
+              status: status,
+              busy: false,
+              onCheck: () {},
+              onSendAll: () {},
+              onUseAll: () {},
+              onSynchronize: () {},
+              onDeleteHousehold: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // A remoção vira tombstone: a contagem de linhas continua igual, então a
+    // tela precisa dizer que a diferença está nos itens removidos.
+    expect(find.textContaining('Removidos: aqui 1, casa 0'), findsOneWidget);
+    expect(
+      find.textContaining('Aguardando o owner: aqui 1, casa 0'),
+      findsOneWidget,
+    );
+  });
 }
 
 CloudAreaCounts _localCounts(CloudSyncConflictArea area) => switch (area) {
@@ -112,12 +160,16 @@ CloudAreaCounts _localCounts(CloudSyncConflictArea area) => switch (area) {
     'importBatches': 1,
     'importEntries': 2,
   }),
-  CloudSyncConflictArea.shopping => const CloudAreaCounts({
-    'shoppingPlans': 3,
-    'plannedItems': 52,
-    'shoppingTrips': 57,
-    'purchaseLines': 57,
-  }),
+  CloudSyncConflictArea.shopping => const CloudAreaCounts(
+    {
+      'shoppingPlans': 3,
+      'plannedItems': 52,
+      'shoppingTrips': 57,
+      'purchaseLines': 57,
+    },
+    removed: {'plannedItems': 1},
+    pending: {'plannedItems': 1},
+  ),
 };
 
 CloudAreaCounts _remoteCounts(CloudSyncConflictArea area) => switch (area) {
