@@ -120,7 +120,7 @@ final settingsRepositoryProvider = Provider<SettingsRepository>(
 );
 
 final cloudAuthServiceProvider = Provider<CloudAuthService>(
-  (ref) => CloudAuthService(),
+  (ref) => CloudAuthService(pilotInvitePolicy: isPilotBuild),
 );
 
 final pilotHouseholdAdministrationServiceProvider =

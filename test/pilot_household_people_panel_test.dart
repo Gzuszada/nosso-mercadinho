@@ -35,8 +35,12 @@ void main() {
           ),
         ],
       ),
-      invites: const [
-        CloudHouseholdInvite(code: 'ABCD1234', email: 'convite@example.com'),
+      invites: [
+        CloudHouseholdInvite(
+          code: 'ABCD1234',
+          email: 'convite@example.com',
+          expiresAt: DateTime.now().add(const Duration(days: 3)),
+        ),
       ],
     );
 
@@ -52,6 +56,7 @@ void main() {
     expect(find.textContaining('ana@example.com'), findsOneWidget);
     expect(find.text('Convites pendentes'), findsOneWidget);
     expect(find.text('convite@example.com'), findsOneWidget);
+    expect(find.textContaining('expira em 3 dias'), findsOneWidget);
     expect(find.byKey(const Key('member-actions-membro')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('member-actions-membro')));

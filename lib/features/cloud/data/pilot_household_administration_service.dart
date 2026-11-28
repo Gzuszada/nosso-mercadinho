@@ -36,6 +36,19 @@ class CloudHouseholdInvite {
   final String email;
   final DateTime? createdAt;
   final DateTime? expiresAt;
+
+  bool isExpiredAt(DateTime now) =>
+      expiresAt != null && !expiresAt!.isAfter(now);
+
+  int remainingDaysAt(DateTime now) {
+    final expiry = expiresAt;
+    if (expiry == null || !expiry.isAfter(now)) return 0;
+    final difference = expiry.difference(now);
+    return (difference.inMicroseconds +
+            const Duration(days: 1).inMicroseconds -
+            1) ~/
+        const Duration(days: 1).inMicroseconds;
+  }
 }
 
 /// The authoritative people and owner state of a household.

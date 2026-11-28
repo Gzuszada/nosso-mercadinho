@@ -78,7 +78,7 @@ Atualizado em 27/11/2026. Este registro documenta decisões aprovadas para a Eta
 ## Etapa 4: confiabilidade e APK pessoal
 
 - Distribuição aprovada: Android Developer Console **Limited distribution**, fora da Google Play, com autorização do dispositivo pessoal. Requer conta Google, autenticação em duas etapas e perfil de pagamentos; o usuário fará cadastro e verificação diretamente com Google, sem compartilhar credenciais.
-- O `applicationId` aprovado é `br.com.nocorre.mercado`; versão atual `1.0.17+28` (build 28).
+- O `applicationId` aprovado é `br.com.nocorre.mercado`; versão atual `1.0.18+29` (build 29).
 - Backup automático Android/Google Drive e regras de transferência de dispositivo foram explicitamente desativados. A recuperação depende do JSON manual do app, que contém dados pessoais; documentado no README.
 - Release só pode usar uma chave própria carregada de `android/key.properties`; build release falha se a chave ou propriedades não estiverem disponíveis. O arquivo de chave permanece fora do projeto e nunca deve ser compartilhado.
 - APK release e debug usam assinaturas diferentes. A release usa `MercadoRelease.jks`, cuja assinatura é compatível com a instalação release anterior; atualizações futuras do mesmo pacote devem usar essa mesma chave. Dados pessoais devem continuar protegidos por backup JSON manual e não versionados.
@@ -127,6 +127,7 @@ Atualizado em 27/11/2026. Este registro documenta decisões aprovadas para a Eta
 - A remoção apaga a associação do membro e sua claim de entrada, revogando o acesso, mas preserva os dados já compartilhados pela casa. Todas essas operações continuam devolvendo erro quando o usuário não é o owner.
 - A transferência reutiliza a Function `transferHouseholdOwnership`, que troca `ownerUid` e os papéis em uma transação atômica. O cliente do piloto chama o callable no projeto `nosso-mercado-casa-pilot`; clientes não podem alterar `ownerUid` diretamente.
 - A implementação reutiliza as regras e a Function já existentes: nenhuma regra do Firestore, Function, formato de sincronização ou dependência nova foi adicionada. A tela administrativa não aparece no build de produção.
+- No piloto, um convite expira em 7 dias. `expiresAt` é gravado como timestamp futuro e as regras do Firestore validam, pelo relógio do servidor (`request.time`), que ele está no futuro e não pode exceder 8 dias. O aceite cria a claim e a associação e consome o convite em uma transação atômica; por isso, um código aceito não pode ser reutilizado. Convites ausentes, expirados, já usados ou enviados a outro e-mail recebem a mesma mensagem: **Convite inválido ou expirado.** O owner continua podendo revogar um convite antes do uso.
 - A callable `transferHouseholdOwnership` já implementada em `functions-pilot` precisa estar publicada no projeto piloto antes da validação manual da transferência; esta entrega de código não publica Functions no Firebase.
 
 ## Pendências para concluir a Etapa 4

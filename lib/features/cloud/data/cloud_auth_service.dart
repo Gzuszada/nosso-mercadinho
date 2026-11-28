@@ -15,12 +15,23 @@ class AuthAccount {
 }
 
 class CloudAuthService {
-  CloudAuthService({FirebaseAuth? auth, FirebaseFirestore? firestore})
-    : _auth = auth ?? FirebaseAuth.instance,
-      _firestore = firestore ?? FirebaseFirestore.instance;
+  CloudAuthService({
+    FirebaseAuth? auth,
+    FirebaseFirestore? firestore,
+    DateTime Function()? clock,
+    this.pilotInvitePolicy = false,
+  }) : _auth = auth ?? FirebaseAuth.instance,
+       _firestore = firestore ?? FirebaseFirestore.instance,
+       _clock = clock ?? DateTime.now;
 
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
+  final DateTime Function() _clock;
+  final bool pilotInvitePolicy;
+
+  static const Duration pilotInviteValidity = Duration(days: 7);
+  static const String invalidPilotInviteMessage =
+      'Convite inválido ou expirado.';
 
   User? get currentUser => _auth.currentUser;
   Stream<AuthAccount?> get authStateChanges => _auth.userChanges().map(
@@ -367,13 +378,26 @@ class CloudAuthService {
       throw StateError('Entre na sua conta antes de convidar alguém.');
     }
     final code = _randomCode();
+    if (!pilotInvitePolicy) {
+      await _firestore.collection('householdInvites').doc(code).set({
+        'code': code,
+        'householdId': householdId,
+        'email': invitedEmail.trim().toLowerCase(),
+        'createdBy': user.uid,
+        'createdAt': FieldValue.serverTimestamp(),
+        'expiresAt': FieldValue.serverTimestamp(),
+      });
+      return code;
+    }
+    final createdAt = _clock().toUtc();
+    final expiresAt = createdAt.add(pilotInviteValidity);
     await _firestore.collection('householdInvites').doc(code).set({
       'code': code,
       'householdId': householdId,
       'email': invitedEmail.trim().toLowerCase(),
       'createdBy': user.uid,
-      'createdAt': FieldValue.serverTimestamp(),
-      'expiresAt': FieldValue.serverTimestamp(),
+      'createdAt': Timestamp.fromDate(createdAt),
+      'expiresAt': Timestamp.fromDate(expiresAt),
     });
     return code;
   }
@@ -384,16 +408,39 @@ class CloudAuthService {
       throw StateError('Entre na sua conta antes de entrar em uma casa.');
     }
     final normalized = code.trim().toUpperCase();
-    final invitation = await _firestore
+    final invitationRef = _firestore
         .collection('householdInvites')
-        .doc(normalized)
-        .get();
+        .doc(normalized);
+    final invitation = await invitationRef.get().onError<Object>((
+      error,
+      stack,
+    ) {
+      if (pilotInvitePolicy &&
+          error is FirebaseException &&
+          error.code == 'permission-denied') {
+        throw StateError(invalidPilotInviteMessage);
+      }
+      throw error;
+    });
     if (!invitation.exists) {
-      throw StateError('Código de convite não encontrado.');
+      throw StateError(
+        pilotInvitePolicy
+            ? invalidPilotInviteMessage
+            : 'Código de convite não encontrado.',
+      );
     }
     final invitedEmail = invitation.get('email') as String? ?? '';
     if (invitedEmail.isNotEmpty && invitedEmail != user.email?.toLowerCase()) {
-      throw StateError('Este convite foi enviado para outro e-mail.');
+      throw StateError(
+        pilotInvitePolicy
+            ? invalidPilotInviteMessage
+            : 'Este convite foi enviado para outro e-mail.',
+      );
+    }
+    final expiresAt = invitation.get('expiresAt');
+    if (pilotInvitePolicy &&
+        (expiresAt is! Timestamp || !expiresAt.toDate().isAfter(_clock()))) {
+      throw StateError(invalidPilotInviteMessage);
     }
     final householdId = invitation.get('householdId') as String;
     final memberRef = _firestore
@@ -406,6 +453,42 @@ class CloudAuthService {
         .doc(householdId)
         .collection('inviteClaims')
         .doc(user.uid);
+    if (pilotInvitePolicy) {
+      try {
+        await _firestore.runTransaction((transaction) async {
+          final currentInvitation = await transaction.get(invitationRef);
+          if (!currentInvitation.exists) {
+            throw StateError(invalidPilotInviteMessage);
+          }
+          final currentExpiresAt = currentInvitation.get('expiresAt');
+          if (currentExpiresAt is! Timestamp ||
+              !currentExpiresAt.toDate().isAfter(_clock())) {
+            throw StateError(invalidPilotInviteMessage);
+          }
+          transaction.set(claimRef, {
+            'uid': user.uid,
+            'email': user.email,
+            'inviteCode': normalized,
+            'claimedAt': FieldValue.serverTimestamp(),
+          });
+          transaction.set(memberRef, {
+            'uid': user.uid,
+            'email': user.email,
+            'displayName': user.displayName,
+            'role': 'member',
+            'joinedAt': FieldValue.serverTimestamp(),
+          });
+          transaction.delete(invitationRef);
+        });
+      } on FirebaseException catch (error) {
+        if (error.code == 'permission-denied' || error.code == 'aborted') {
+          throw StateError(invalidPilotInviteMessage);
+        }
+        rethrow;
+      }
+      return householdId;
+    }
+
     final batch = _firestore.batch();
     batch.set(claimRef, {
       'uid': user.uid,
@@ -421,7 +504,7 @@ class CloudAuthService {
       'joinedAt': FieldValue.serverTimestamp(),
     });
     await batch.commit();
-    await invitation.reference.delete();
+    await invitationRef.delete();
     return householdId;
   }
 

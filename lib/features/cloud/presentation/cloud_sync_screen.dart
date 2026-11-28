@@ -172,8 +172,10 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
           Card(
             child: ListTile(
               title: Text('Código: $_inviteCode'),
-              subtitle: const Text(
-                'Compartilhe este código com o e-mail informado.',
+              subtitle: Text(
+                isPilotBuild
+                    ? 'Compartilhe este código. O convite expira em 7 dias.'
+                    : 'Compartilhe este código com o e-mail informado.',
               ),
             ),
           ),

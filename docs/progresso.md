@@ -270,6 +270,17 @@ Para comandos Android, use a junction ASCII `C:\Users\Usuario\MercadoApp`, pois 
   pôde ser iniciado porque o `firebase-tools` exige JDK 21 e a máquina possui
   JDK 17; nenhuma regra mudou nesta entrega.
 
+## Piloto: expiração e uso único de convites (28/11/2026)
+
+- A criação de convite no piloto grava `createdAt` no instante atual e `expiresAt` sete dias no futuro. As regras do Firestore do piloto validam os timestamps e usam `request.time`, de modo que o prazo máximo continue limitado mesmo se um cliente tentar enviar uma data arbitrária.
+- O aceite no piloto cria a claim e a associação e exclui o convite na mesma transação. Um convite aceito, revogado ou expirado não pode ser reutilizado. A revogação pelo owner permanece disponível.
+- Convites inexistentes, expirados, consumidos ou enviados para outro e-mail usam a mensagem genérica **Convite inválido ou expirado.** A tela administrativa informa **expira em X dias**, e o código recém-gerado informa a validade de sete dias.
+- A correção é exclusiva do piloto: o cliente de produção preserva o protocolo anterior e as regras de produção não foram alteradas.
+- Versão do app: `1.0.18+29`.
+- APK piloto release: `68.231.944` bytes, SHA-256 `8DFCABA01352C246097627F467FC2C8EA0FD961D5A9E3D17F5F45CC90D466A33`, assinatura APK v2 válida; não instalado em aparelho.
+- Web piloto publicada; `main.dart.js` local/remoto com SHA-256 `686D66AB7DA69DF88430607D730AC343C6941CF813FE2F47B160E51D27EFB0BE`.
+- Validações: `flutter analyze` sem problemas; 165 testes Flutter; build TypeScript e 26 testes Node das Functions piloto. As regras do Firestore piloto compilaram e foram publicadas com sucesso.
+
 ## Próximo passo
 
 Realizar o checklist manual de instalação, backup/restauração, migração, acessibilidade e funcionamento offline no aparelho. Manter a instalação antiga até confirmar os dados; não alterar dados reais nem criar commit pelo assistente.

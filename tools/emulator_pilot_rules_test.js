@@ -101,8 +101,8 @@ async function main() {
       householdId: { stringValue: household.split('/')[1] },
       email: { stringValue: member.email },
       createdBy: { stringValue: owner.uid },
-      createdAt: { timestampValue: '2026-01-01T00:00:00Z' },
-      expiresAt: { timestampValue: '2027-01-01T00:00:00Z' },
+      createdAt: { timestampValue: new Date().toISOString() },
+      expiresAt: { timestampValue: new Date(Date.now() + 7 * 86400000).toISOString() },
     }),
   ]);
   if (createInvite.status !== 200) throw new Error(`Membro não criou convite: ${JSON.stringify(createInvite)}`);
@@ -419,8 +419,8 @@ async function main() {
       householdId: { stringValue: household.split('/')[1] },
       email: { stringValue: outsider.email },
       createdBy: { stringValue: member.uid },
-      createdAt: { timestampValue: '2026-01-01T00:00:00Z' },
-      expiresAt: { timestampValue: '2027-01-01T00:00:00Z' },
+      createdAt: { timestampValue: new Date().toISOString() },
+      expiresAt: { timestampValue: new Date(Date.now() + 7 * 86400000).toISOString() },
     }),
   ]);
   if (memberInvite.status !== 403) {

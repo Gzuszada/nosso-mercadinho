@@ -160,7 +160,8 @@ class _PilotHouseholdPeoplePanelState
                       title: Text(invite.email),
                       subtitle: Text(
                         'Código ${invite.code}'
-                        '${_dateSuffix(invite.createdAt)}',
+                        '${_dateSuffix(invite.createdAt)}'
+                        '${_expirySuffix(invite)}',
                       ),
                       trailing: TextButton(
                         key: Key('revoke-invite-${invite.code}'),
@@ -271,6 +272,15 @@ class _PilotHouseholdPeoplePanelState
   static String _dateSuffix(DateTime? date) {
     if (date == null) return '';
     return ' • ${DateFormat('dd/MM/yyyy').format(date.toLocal())}';
+  }
+
+  static String _expirySuffix(CloudHouseholdInvite invite) {
+    final expiry = invite.expiresAt;
+    if (expiry == null) return ' • expiração não informada';
+    final now = DateTime.now();
+    if (invite.isExpiredAt(now)) return ' • expirado';
+    final days = invite.remainingDaysAt(now);
+    return days == 1 ? ' • expira em 1 dia' : ' • expira em $days dias';
   }
 }
 

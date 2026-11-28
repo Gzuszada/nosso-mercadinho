@@ -128,6 +128,40 @@ O Hosting piloto foi publicado somente em `nosso-mercado-casa-pilot`, no release
 `https://nosso-mercado-casa-pilot.web.app` respondeu HTTP 200 e o bundle remoto
 teve o mesmo hash do bundle local.
 
+## Entrega 1.0.18+29 — expiração de convites
+
+A entrega de 28/11/2026 corrige o ciclo de vida dos convites somente no piloto:
+
+- `expiresAt` contém um timestamp sete dias no futuro;
+- as regras do piloto validam a expiração com `request.time` e limitam o prazo máximo;
+- claim, associação e consumo do convite acontecem em uma transação atômica;
+- revogação pelo owner permanece disponível;
+- a interface mostra **expira em X dias**;
+- erros de convite ausente, expirado, consumido ou destinado a outro e-mail são apresentados como **Convite inválido ou expirado.**
+
+O protocolo e as regras de produção não foram alterados. A versão do app é
+`1.0.18+29`.
+
+### APK piloto
+
+- Package: `br.com.nocorre.mercado.pilot`
+- versionName: `1.0.18-pilot`
+- versionCode: `29`
+- Tamanho: `68.231.944` bytes
+- SHA-256: `8DFCABA01352C246097627F467FC2C8EA0FD961D5A9E3D17F5F45CC90D466A33`
+- Distribuição: `C:\Dev\Mercado\release-assets\nosso-mercadinho-1.0.18-pilot.apk`
+- Checksum: `C:\Dev\Mercado\release-assets\nosso-mercadinho-1.0.18-pilot.apk.sha256`
+
+A assinatura APK Signature Scheme v2 foi validada com o certificado release
+`4576ea958c127b5a3fa0a671d47b65307d64b925032a04d99225087f39942035`
+(RSA 2048). O APK não foi instalado em um aparelho.
+
+### Site Web piloto
+
+O bundle foi publicado somente em `nosso-mercado-casa-pilot`, em
+`https://nosso-mercado-casa-pilot.web.app`. O SHA-256 do `main.dart.js` local e
+remoto é `686D66AB7DA69DF88430607D730AC343C6941CF813FE2F47B160E51D27EFB0BE`.
+
 ### Backend e validação
 
 As regras piloto e as Functions já foram publicadas em
