@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app_environment.dart';
 import 'data/app_database.dart';
 import 'features/catalog/data/catalog_repository.dart';
+import 'features/cloud/data/auto_sync_coordinator.dart';
 import 'features/cloud/data/cloud_auth_service.dart';
 import 'features/cloud/data/cloud_models.dart';
 import 'features/cloud/data/cloud_sync_service.dart';
@@ -178,6 +179,21 @@ final cloudSyncServiceProvider = Provider<CloudSyncService>(
     syncV2Client: isPilotBuild ? SyncV2Client() : null,
   ),
 );
+
+final autoSyncCoordinatorProvider = Provider<AutoSyncCoordinator>((ref) {
+  final auth = ref.watch(cloudAuthServiceProvider);
+  final settings = ref.watch(settingsRepositoryProvider);
+  final sync = ref.watch(cloudSyncServiceProvider);
+  return AutoSyncCoordinator(
+    hasNetwork: AutoSyncCoordinator.probeNetworkWithHttp,
+    hasValidSession: auth.hasValidSession,
+    selectedHouseholdId: () async =>
+        (await settings.getCloudSyncSettings())?.householdId,
+    inspectStatus: sync.inspectStatus,
+    synchronize: (householdId) =>
+        sync.synchronize(householdId: householdId, conservative: true),
+  );
+});
 
 final publishedPendingPlanReviewsProvider =
     FutureProvider<List<PlanReviewItem>>((ref) async {

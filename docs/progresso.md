@@ -1,5 +1,35 @@
 ## Piloto Android de sincronização v2 — primeira entrega
 
+# Sincronização automática entre dispositivos — 27/11/2026
+
+- Implementada sincronização automática conservadora para Android e Web, sem
+  polling, sync em background, novas dependências ou alteração de backend,
+  Functions, regras ou formato do protocolo.
+- A classificação por hash local/remoto/base agora distingue **Em dia**,
+  **Alterado neste dispositivo**, **Alterado na casa** e **Divergente**.
+  Somente o lado local publica; somente o lado remoto aplica; lados divergentes
+  bloqueiam a automação e não são mesclados nem sobrescritos.
+- `AutoSyncCoordinator` verifica rede, sessão Firebase e casa selecionada,
+  ignora execuções simultâneas, aplica cooldown e pausa em conflito ou leitura
+  remota inválida. O aviso de divergência orienta a resolução manual em
+  **Conta e sincronização**.
+- Gatilhos implementados: entrada/retorno ao primeiro plano, alteração local
+  com debounce de um segundo e, na Web, foco/visibilidade do documento. O
+  watcher local do Drift usa contagem e `updated_at` das tabelas sincronizáveis.
+- O primeiro vínculo manual sem hash-base preserva o bootstrap legado. A
+  automação, porém, não adivinha qual lado mudou quando a base está ausente.
+- A detecção do runner de testes foi corrigida: `bool.fromEnvironment` não
+  recebe `FLUTTER_TEST` neste SDK, mas o processo exporta `FLUTTER_TEST=true`;
+  a automação fica isolada nos testes Flutter.
+- Versão do cliente atualizada para `1.0.16+27`. Não houve geração, assinatura,
+  instalação ou publicação de APK/Hosting nesta entrega.
+- Validação: `flutter analyze` sem problemas; suíte Flutter completa com 152
+  testes aprovados; 26/26 testes Node do `functions-pilot`; build Web release
+  piloto compilada. O Emulator permanece indisponível sem JDK 21 e não foi
+  necessário porque as regras não mudaram. Falta validar o fluxo cooperativo em
+  dois dispositivos e em aparelho Android real.
+
+
 - Projeto Firebase `nosso-mercado-casa-pilot` criado e app Android `br.com.nocorre.mercado.pilot` registrado. O build `production` preserva `br.com.nocorre.mercado`, o Firebase de produção e o mesmo applicationId para atualização da release existente.
 - Flavor Gradle `pilot` com `applicationIdSuffix=.pilot`, label "Mercado Piloto" e configuração Firebase isolada. A PWA continua usando apenas produção.
 - Backend v2 isolado em `functions-pilot/`, com chunks imutáveis até 700 KiB, manifesto, hashes SHA-256 canônicos, compare-and-swap atômico por `generation`/`manifestHash`, retries idempotentes e retenção de candidates rejeitadas.

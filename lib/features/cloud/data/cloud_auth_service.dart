@@ -76,6 +76,21 @@ class CloudAuthService {
 
   Future<void> signOut() => _auth.signOut();
 
+  /// Checks that Firebase still considers the current session usable.
+  ///
+  /// Obtaining the ID token also refreshes an expired session when possible.
+  /// A network failure is treated as an invalid session so automatic
+  /// synchronization remains conservative and never writes while offline.
+  Future<bool> hasValidSession() async {
+    final user = _auth.currentUser;
+    if (user == null) return false;
+    try {
+      return await user.getIdToken() != null;
+    } on Object {
+      return false;
+    }
+  }
+
   /// Envia o e-mail de redefinição de senha usando o template do Firebase.
   ///
   /// A URL permite que a página de ação do Firebase conclua a troca e

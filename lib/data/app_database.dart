@@ -432,4 +432,47 @@ class AppDatabase extends _$AppDatabase {
           ..orderBy([(table) => OrderingTerm.asc(table.name)]))
         .watch();
   }
+
+  /// Watches the data that participates in household synchronization.
+  ///
+  /// The fingerprint combines row counts and the latest update instant. Drift
+  /// re-runs this query only when one of the declared tables changes, so the
+  /// Web can react to a relevant local edit without polling.
+  Stream<String> watchSyncRelevantFingerprint() {
+    final query = customSelect(
+      '''
+      SELECT
+        (SELECT COUNT(*) FROM categories) +
+        (SELECT COUNT(*) FROM subcategories) +
+        (SELECT COUNT(*) FROM products) +
+        (SELECT COUNT(*) FROM import_batches) +
+        (SELECT COUNT(*) FROM import_entries) +
+        (SELECT COUNT(*) FROM shopping_plans) +
+        (SELECT COUNT(*) FROM planned_items) +
+        (SELECT COUNT(*) FROM shopping_trips) +
+        (SELECT COUNT(*) FROM purchase_lines) AS row_count,
+        (SELECT COALESCE(MAX(updated_at), 0) FROM categories) +
+        (SELECT COALESCE(MAX(updated_at), 0) FROM subcategories) +
+        (SELECT COALESCE(MAX(updated_at), 0) FROM products) +
+        (SELECT COALESCE(MAX(updated_at), 0) FROM shopping_plans) +
+        (SELECT COALESCE(MAX(updated_at), 0) FROM planned_items) +
+        (SELECT COALESCE(MAX(updated_at), 0) FROM shopping_trips) +
+        (SELECT COALESCE(MAX(updated_at), 0) FROM purchase_lines) AS updated_at
+      ''',
+      readsFrom: {
+        categories,
+        subcategories,
+        products,
+        importBatches,
+        importEntries,
+        shoppingPlans,
+        plannedItems,
+        shoppingTrips,
+        purchaseLines,
+      },
+    );
+    return query.watchSingle().map(
+      (row) => '${row.read<int>('row_count')}:${row.read<int>('updated_at')}',
+    );
+  }
 }

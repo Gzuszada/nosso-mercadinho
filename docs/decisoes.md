@@ -1,6 +1,6 @@
 # Decisões técnicas e funcionais
 
-Atualizado em 17/11/2026. Este registro documenta decisões aprovadas para a Etapa 4; não autoriza funcionalidades extras. A PWA usa Dart2JS para a interface e SQLite WebAssembly no worker do Drift (`flutter build web --release --no-pub`), preservando compatibilidade com Safari sem WasmGC e evitando bindings FFI nativos no navegador. O `sqlite3.wasm` é compatível com a versão resolvida do pacote e o Hosting usa cache `no-cache` para entrypoints e WASM.
+Atualizado em 27/11/2026. Este registro documenta decisões aprovadas para a Etapa 4; não autoriza funcionalidades extras. A PWA usa Dart2JS para a interface e SQLite WebAssembly no worker do Drift (`flutter build web --release --no-pub`), preservando compatibilidade com Safari sem WasmGC e evitando bindings FFI nativos no navegador. O `sqlite3.wasm` é compatível com a versão resolvida do pacote e o Hosting usa cache `no-cache` para entrypoints e WASM.
 
 - O schema Drift 6 adiciona `purchase_lines.is_label_total`. O valor pago de uma linha é sempre `total_cents`; quando o total vem da etiqueta, `unit_price_cents` guarda apenas o preço por base derivado necessário para a interface e para a conversão de unidade.
 - O backup usa formato 6 e aceita formatos 1 a 6. `formatVersion` é encaminhado à restauração para que esquema do banco e versão do formato sejam validados de modo independente.
@@ -78,7 +78,7 @@ Atualizado em 17/11/2026. Este registro documenta decisões aprovadas para a Eta
 ## Etapa 4: confiabilidade e APK pessoal
 
 - Distribuição aprovada: Android Developer Console **Limited distribution**, fora da Google Play, com autorização do dispositivo pessoal. Requer conta Google, autenticação em duas etapas e perfil de pagamentos; o usuário fará cadastro e verificação diretamente com Google, sem compartilhar credenciais.
-- O `applicationId` aprovado é `br.com.nocorre.mercado`; versão atual `1.0.7+15` (build 15).
+- O `applicationId` aprovado é `br.com.nocorre.mercado`; versão atual `1.0.16+27` (build 27).
 - Backup automático Android/Google Drive e regras de transferência de dispositivo foram explicitamente desativados. A recuperação depende do JSON manual do app, que contém dados pessoais; documentado no README.
 - Release só pode usar uma chave própria carregada de `android/key.properties`; build release falha se a chave ou propriedades não estiverem disponíveis. O arquivo de chave permanece fora do projeto e nunca deve ser compartilhado.
 - APK release e debug usam assinaturas diferentes. A release usa `MercadoRelease.jks`, cuja assinatura é compatível com a instalação release anterior; atualizações futuras do mesmo pacote devem usar essa mesma chave. Dados pessoais devem continuar protegidos por backup JSON manual e não versionados.
@@ -108,6 +108,16 @@ Atualizado em 17/11/2026. Este registro documenta decisões aprovadas para a Eta
 - O diagnóstico de sincronização é local, aditivo e versionado: attempt, sucesso, origem, autor, resultado por área e falha ficam em `cloud_sync_settings.sync_diagnostics` (schema Drift 10). A revisão técnica permanece disponível, mas data, dispositivo/origem, resultado e ação de recuperação são o indicador principal. Falhas de rede, permissão, dados inválidos, divergência e conta devem sugerir ações acionáveis; exportar backup reutiliza o fluxo existente e nunca substitui os dados locais. A origem oficial da última publicação vem do manifesto v2 (`deviceId`, `authorName`, `createdAt`), sem exigir mudança de backend.
 - A allowlist de produção contém dois hashes SHA-256 únicos: o e-mail principal e o e-mail confirmado da Iasmim. A Iasmim está autorizada para criar a conta, mas ainda não criou login no Identity Platform.
 - Após o login, a descoberta de casas consulta os documentos `members` cujo campo `uid` é igual ao UID autenticado e lê o nome de cada `households/{id}`. A regra permite ao usuário listar apenas os próprios registros de membro. Se a conta pertence a uma única casa, ela é selecionada e persistida automaticamente; se pertence a várias, os nomes são exibidos para escolha explícita. Trocar de casa zera revisão e hash-base locais para impedir a mistura de bases de sincronização.
+
+## Sincronização automática conservadora
+
+- A sincronização automática só executa quando há rede disponível, sessão Firebase válida e uma casa selecionada. A verificação de rede usa um endpoint HTTP público; qualquer falha, timeout ou sessão expirada interrompe a execução sem escrita.
+- A classificação de cada área usa três estados: `localHash`, `remoteHash` e `baseHash`. Hash local igual ao remoto significa **Em dia** e não gera escrita; somente o local diferente da base significa **Alterado neste dispositivo** e publica; somente o remoto diferente significa **Alterado na casa** e aplica o remoto; os dois diferentes da base significam **Divergente** e bloqueiam a sincronização automática.
+- Divergência nunca é resolvida por sobrescrita, mesclagem automática ou escolha do relógio mais recente. O piloto também não faz merge nem publica antes de detectar a divergência. A escolha entre as versões continua sendo manual em **Conta e sincronização**; no piloto, a decisão do owner pode exigir moderação.
+- Os gatilhos são entrada em primeiro plano, retorno do app ao primeiro plano, alteração local com debounce de um segundo e, na Web, retorno de foco ou documento visível. Não há polling, timer periódico, sincronização em background nem nova dependência.
+- O watcher local observa uma fingerprint de contagem e `updated_at` das tabelas sincronizáveis. Ele não é um gatilho de escrita: a comparação com a base decide se existe algo a publicar.
+- Execuções concorrentes são ignoradas, há cooldown após uma sincronização e o estado de conflito impede novas execuções até uma resolução manual. Uma falha de rede ou de leitura remota pausa a automação para evitar dados incorretos.
+- A automação é desativada no processo de testes Flutter por meio da variável `FLUTTER_TEST=true` exportada pelo runner. O código de produção não consulta o Emulator, não grava no backend por conta própria e não altera regras, Functions ou o formato do protocolo.
 
 ## Pendências para concluir a Etapa 4
 

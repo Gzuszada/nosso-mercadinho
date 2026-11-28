@@ -8,6 +8,7 @@ import 'app_environment.dart';
 import 'app_providers.dart';
 import 'firebase_options.dart';
 import 'features/cloud/presentation/auth_screen.dart';
+import 'features/cloud/presentation/auto_sync_scope.dart';
 import 'features/catalog/presentation/catalog_screen.dart';
 import 'features/settings/presentation/settings_screen.dart';
 import 'features/shopping/presentation/shopping_history_screen.dart';
@@ -79,7 +80,7 @@ class MercadoApp extends ConsumerWidget {
         ),
       ),
       themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      home: const AuthGate(),
+      home: const AutoSyncScope(child: AuthGate()),
     );
   }
 }

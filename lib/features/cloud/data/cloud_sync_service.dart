@@ -56,7 +56,7 @@ class CloudSyncService {
           ? null
           : CloudSnapshot.hashPayload(selectArea(remote.payload!, area));
       final baseHash = baseHashes[area.name];
-      final state = _stateFor(
+      final state = classifyAreaState(
         localHash: localHash,
         remoteHash: remoteHash,
         baseHash: baseHash,
@@ -85,6 +85,7 @@ class CloudSyncService {
   Future<CloudSyncResult> synchronize({
     required String householdId,
     Map<CloudSyncConflictArea, CloudSyncResolution>? resolutions,
+    bool conservative = false,
   }) async {
     final previous = await _readDiagnostics(householdId);
     await _saveDiagnostics(
@@ -102,6 +103,7 @@ class CloudSyncService {
       final result = await _synchronizeUntracked(
         householdId: householdId,
         resolutions: resolutions,
+        conservative: conservative,
       );
       final areas = {for (final area in _areas.keys) area.name: 'inSync'};
       await _saveDiagnostics(
@@ -143,11 +145,13 @@ class CloudSyncService {
   Future<CloudSyncResult> _synchronizeUntracked({
     required String householdId,
     Map<CloudSyncConflictArea, CloudSyncResolution>? resolutions,
+    required bool conservative,
   }) async {
     if (syncV2Client != null) {
       return _synchronizePilot(
         householdId,
         resolutions: resolutions ?? const {},
+        conservative: conservative,
       );
     }
     final settings = await settingsRepository.getCloudSyncSettings();
@@ -236,12 +240,11 @@ class CloudSyncService {
 
       final localChanged = baseHash == null || baseHash != localHash;
       final remoteChanged = remoteHash != baseHash;
-      if (baseHash == null) {
-        await _writeArea(householdId, area, localArea);
-        revision += 1;
+      // Equal areas never cause a remote write, even when this device does not
+      // have a semantic base yet (for example, after reinstalling the app).
+      if (remoteHash != null && remoteHash == localHash) {
         newHashes[area.name] = localHash;
         newRemoteHashes[area.name] = localHash;
-        pushed = true;
         continue;
       }
       if (remoteHash == null) {
@@ -252,18 +255,28 @@ class CloudSyncService {
         pushed = true;
         continue;
       }
-      if (remoteHash == localHash) {
+      if (baseHash == null) {
+        if (conservative) {
+          throw CloudSyncConflictException(
+            CloudSyncConflict(
+              area: area,
+              localPayload: localArea,
+              remotePayload: remotePayload!,
+              remoteRevision: revision,
+            ),
+          );
+        }
+        // The legacy protocol has no common base on the first link. The
+        // explicit manual flow keeps its historical bootstrap behavior; the
+        // automatic flow above refuses to guess which side changed.
+        await _writeArea(householdId, area, localArea);
+        revision += 1;
         newHashes[area.name] = localHash;
         newRemoteHashes[area.name] = localHash;
+        pushed = true;
         continue;
       }
       if (localChanged && remoteChanged) {
-        await _persistState(
-          householdId: householdId,
-          revision: revision,
-          hashes: newRemoteHashes,
-          localHashes: newHashes,
-        );
         throw CloudSyncConflictException(
           CloudSyncConflict(
             area: area,
@@ -462,7 +475,7 @@ class CloudSyncService {
           remoteError = error.toString();
         }
       }
-      final state = _stateFor(
+      final state = classifyAreaState(
         localHash: localHash,
         remoteHash: remoteHash,
         baseHash: baseHashes[_semanticBaseKey(area.name)],
@@ -499,6 +512,7 @@ class CloudSyncService {
   Future<CloudSyncResult> _synchronizePilot(
     String householdId, {
     required Map<CloudSyncConflictArea, CloudSyncResolution> resolutions,
+    required bool conservative,
   }) async {
     final client = syncV2Client!;
     final settings = await settingsRepository.getCloudSyncSettings();
@@ -564,6 +578,19 @@ class CloudSyncService {
           requiresOwnerModeration = true;
         }
       } else if (localChanged && remoteChanged && remoteHash != localHash) {
+        // Automatic synchronization never merges two changed sides. The
+        // explicit manual flow may still merge non-overlapping collaborative
+        // items, but an automatic attempt must stop and request a decision.
+        if (conservative) {
+          throw CloudSyncConflictException(
+            CloudSyncConflict(
+              area: area,
+              localPayload: localArea,
+              remotePayload: remoteArea ?? const {},
+              remoteRevision: remote?.generation ?? 0,
+            ),
+          );
+        }
         final merged = const CollaborativeAreaMerger().merge(
           localArea,
           remoteArea ?? const {},
@@ -1074,7 +1101,7 @@ class CloudSyncService {
     return CloudAreaCounts(values, removed: removed, pending: pending);
   }
 
-  static CloudSyncAreaState _stateFor({
+  static CloudSyncAreaState classifyAreaState({
     required String localHash,
     required String? remoteHash,
     required String? baseHash,
@@ -1083,7 +1110,14 @@ class CloudSyncService {
     if (remoteError != null) return CloudSyncAreaState.invalid;
     if (remoteHash == null) return CloudSyncAreaState.localOnly;
     if (remoteHash == localHash) return CloudSyncAreaState.inSync;
-    return CloudSyncAreaState.divergent;
+    // Without a common base it is impossible to prove which side changed.
+    // Treat the area as divergent instead of risking an overwrite.
+    if (baseHash == null) return CloudSyncAreaState.divergent;
+    final localChanged = baseHash != localHash;
+    final remoteChanged = baseHash != remoteHash;
+    if (localChanged && remoteChanged) return CloudSyncAreaState.divergent;
+    if (remoteChanged) return CloudSyncAreaState.remoteOnly;
+    return CloudSyncAreaState.localOnly;
   }
 
   static List<String> areaKeys(CloudSyncConflictArea area) =>

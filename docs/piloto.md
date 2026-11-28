@@ -405,3 +405,44 @@ item, `logicalKey`, tombstones, merge por item e a central de moderação do own
 - A migração do Firestore piloto para `southamerica-east1` exige uma operação destrutiva coordenada; o projeto permanece em `nam5`.
 - A collaborative key (`syncId`) é validada como única por tabela no payload, mas não há índice UNIQUE físico no schema 9.
 - O fluxo de re-addição e moderação foi validado com duas contas/dispositivos; publications concorrentes, duplicatas e exclusão da árvore v2 continuam como cenários futuros.
+
+## Sincronização automática conservadora — 1.0.16+27
+
+A versão `1.0.16+27` acrescenta sincronização automática ao APK e à Web do
+piloto. A mudança é somente no cliente: `functions-pilot`, regras do Firestore,
+manifesto v2 e formato de backup não foram alterados.
+
+A automação só age quando existe rede, sessão Firebase válida e casa
+selecionada. Cada área é comparada por hash local, remoto e hash-base:
+
+- local e remoto iguais: **Em dia**, sem escrita;
+- somente local diferente da base: publica a área local;
+- somente remoto diferente da base: aplica a área remota;
+- local e remoto diferentes da base: **Divergente**, sem merge, publicação ou
+  sobrescrita.
+
+No piloto, a divergência interrompe toda a sincronização automática. O aviso
+**Há uma divergência pendente** pede que o usuário abra **Conta e
+sincronização**. A resolução continua explícita: **Usar remota**,
+**Enviar todos os dados deste dispositivo** ou a decisão de conflito/owner
+exigida pelo fluxo v2. A automação não escolhe o relógio mais recente e não
+substitui essa decisão.
+
+Os gatilhos são entrada em primeiro plano, retorno do app ao primeiro plano,
+alteração local com debounce de um segundo e, na Web, foco/visibilidade do
+documento. Não há polling nem sincronização em background. Uma verificação HTTP
+pública impede escrita quando a rede falha; sessões expiradas e falhas de
+leitura remota também pausam a automação. Execuções simultâneas são ignoradas
+e um cooldown evita loops de publicação.
+
+O watcher local do Drift usa contagem e `updated_at` das tabelas
+sincronizáveis. Ele somente agenda uma verificação; a decisão de escrever vem
+sempre da comparação com a base. Em testes Flutter, a automação é desligada
+pela variável `FLUTTER_TEST=true` exportada pelo runner.
+
+Validação local desta entrega: `flutter analyze` sem problemas; 152 testes
+Flutter aprovados; 26/26 testes Node do `functions-pilot`; build Web release
+compilada com `MERCADO_PILOT_WEB=true`. O Emulator continua indisponível nesta
+máquina por ausência de JDK 21 para a versão instalada do `firebase-tools`, e
+nenhuma regra foi alterada. A validação em dois dispositivos e em aparelho
+Android real permanece manual.
