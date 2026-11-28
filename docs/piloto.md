@@ -144,6 +144,72 @@ Validação desta entrega:
 - APK: assinatura v2 válida, instalação e abertura em dois emuladores;
 - Web: HTTP 200, somente App ID piloto e hash local/remoto idêntico.
 
+## Entrega 1.0.15+26 — diagnóstico de sincronização
+
+A entrega de 27/11/2026 melhora o diagnóstico da sincronização no APK e na Web
+do piloto. O painel passa a mostrar a última tentativa, a última sincronização
+bem-sucedida, o dispositivo atual, a plataforma que fez a última publicação
+oficial, o resultado por área e uma falha acionável. As ações contextuais são
+**Tentar novamente**, **Verificar internet**, **Verificar acesso à casa** e
+**Exportar backup**. A revisão técnica foi movida para **Detalhes técnicos**.
+
+O diagnóstico é persistido como JSON versionado em `cloud_sync_settings.sync_diagnostics`.
+O schema Drift evoluiu de 9 para 10 com migração aditiva; a troca de casa limpa
+o histórico anterior e atualizações de revisão/hash preservam o diagnóstico da
+casa atual. O backup continua no formato 7 e aceita schemas 1 a 10.
+
+### APK piloto
+
+- Package: `br.com.nocorre.mercado.pilot`
+- versionName: `1.0.15-pilot`
+- versionCode: `26`
+- Tamanho: `68.068.056` bytes
+- SHA-256: `BDF03A8260DC102F2001825B86BF1CEE5A3595E1DFDBED245C80E6E9F85C8D6B`
+- APK Distribution: `C:\Dev\Mercado\release-assets\nosso-mercadinho-1.0.15-pilot.apk`
+- Checksum: `C:\Dev\Mercado\release-assets\nosso-mercadinho-1.0.15-pilot.apk.sha256`
+
+A assinatura APK Signature Scheme v2 foi validada com o certificado
+`4576ea958c127b5a3fa0a671d47b65307d64b925032a04d99225087f39942035`
+(RSA 2048). O APK foi instalado por cima da versão piloto anterior com
+`adb install -r` e aberto sem crash nos emuladores `emulator-5554` e
+`emulator-5556`; ambos reportaram `versionName=1.0.15-pilot` e `versionCode=26`.
+
+### Site Web piloto
+
+O bundle foi gerado com:
+
+```powershell
+flutter build web --release --no-wasm-dry-run --base-href=/ --dart-define=MERCADO_PILOT_WEB=true
+node tools/prepare_pilot_web.js
+```
+
+A inspeção do `main.dart.js` encontrou o App ID piloto
+`1:1055183366543:web:94b3a4699576ce33cac3fa` uma vez e nenhum App ID de
+produção. O Hosting do projeto `nosso-mercado-casa-pilot` foi atualizado e
+respondeu HTTP 200 com `Cache-Control: no-cache`. O SHA-256 do bundle local e
+remoto é:
+
+```text
+12598598D6B7F5C46B6C74AFCEDC68D2A64820A000F28C6885308939BFA3C271
+```
+
+### Backend e validação
+
+Nenhum backend, regra do Firestore ou manifesto remoto foi alterado ou
+republicado. A origem oficial exibida pela tela vem dos campos existentes
+`deviceId`, `authorName` e `createdAt` do manifesto v2.
+
+Validação desta entrega:
+
+- Flutter: 139/139 testes;
+- Functions piloto: 26/26 testes Node;
+- Functions de produção: 7/7 testes Node, sem alteração de código;
+- `flutter analyze`: sem problemas;
+- APK: assinatura v2 válida, instalação e abertura em dois emuladores;
+- Web: HTTP 200, somente App ID piloto e hash local/remoto idêntico;
+- Emulator: execução impedida porque o `firebase-tools` desta máquina exige
+  JDK 21 e só há JDK 17 instalado; as regras não foram alteradas nesta entrega.
+
 ## Deploy exclusivo do piloto
 
 ```powershell
@@ -211,9 +277,9 @@ verde com 26 testes Node, 133 testes Flutter, `flutter analyze` sem problemas e
 
 ## Protocolo v2 implementado
 
-- O schema persistente é Drift 9. Produtos, listas e itens planejados possuem `syncId`, `logicalKey`, autoria, estado de revisão, `deletedAt` e `syncRevision`; as configurações de sincronização memorizam o último owner confirmado para um fallback offline conservador.
-- A migração 7 → 9 preenche IDs e chaves legadas de forma determinística e tolera bancos com layout parcial.
-- O backup atual é formato 7, serializa os metadados de colaboração e preserva tombstones. Backups 1–6 continuam aceitos e recebem defaults legadas durante o restore.
+- O schema persistente é Drift 10. Produtos, listas e itens planejados possuem `syncId`, `logicalKey`, autoria, estado de revisão, `deletedAt` e `syncRevision`; as configurações de sincronização memorizam o último owner confirmado para um fallback offline conservador e o diagnóstico JSON da última tentativa.
+- As migrações 7 → 9 preenchem IDs e chaves legadas de forma determinística e tolera bancos com layout parcial; a migração 9 → 10 adiciona `sync_diagnostics` sem alterar os dados de mercado.
+- O backup atual é formato 7, serializa os metadados de colaboração e preserva tombstones. Backups 1–6 continuam aceitos e recebem defaults legadas durante o restore; o validador aceita schemas 1 a 10.
 - Itens criados por membro entram como `pending_review`; o owner pode confirmar ou remover explicitamente pela central **Conta e sincronização → Revisão do owner**. O owner cria itens já aprovados.
 - A decisão do owner é gravada por `moderatePlannedItem` em `syncV2/{householdId}/reviews/{itemSyncId}` após validar `households/{householdId}.ownerUid` e a autoria publicada. O cliente aplica essas revisões antes do merge; o backend impede publicação que reverta uma decisão ou um tombstone.
 - A hierarquia de moderação é uma regra pura e testada (`findModerationViolation` em `functions-pilot/src/sync_v2_moderation.ts`): somente o owner confirmado da casa decide, a decisão é sempre sobre um item publicado e de outro membro, e um item do próprio owner não passa por revisão. Um membro que não é o owner recebe `permission-denied`.

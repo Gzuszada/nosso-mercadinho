@@ -202,6 +202,10 @@ class CloudSyncSettings extends Table {
   /// remain conservative (pending review) while temporarily offline.
   TextColumn get householdOwnerUid => text().nullable()();
 
+  /// Diagnóstico local da última tentativa de sincronização. É JSON porque
+  /// reúne data, origem, resultado por área e erro acionável.
+  TextColumn get syncDiagnostics => text().nullable()();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
@@ -225,7 +229,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? openAppDatabase());
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -319,8 +323,24 @@ class AppDatabase extends _$AppDatabase {
       if (from < 9) {
         await _ensureCloudSyncOwnerColumn();
       }
+      if (from < 10) {
+        await _ensureSyncDiagnosticsColumn();
+      }
     },
   );
+
+  Future<void> _ensureSyncDiagnosticsColumn() async {
+    final rows = await customSelect(
+      'PRAGMA table_info(cloud_sync_settings)',
+      readsFrom: {},
+    ).get();
+    final existing = rows.map((row) => row.read<String>('name')).toSet();
+    if (!existing.contains('sync_diagnostics')) {
+      await customStatement(
+        'ALTER TABLE cloud_sync_settings ADD COLUMN sync_diagnostics TEXT',
+      );
+    }
+  }
 
   Future<void> _ensureCloudSyncOwnerColumn() async {
     final rows = await customSelect(

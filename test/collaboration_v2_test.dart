@@ -82,7 +82,7 @@ void main() {
     final plan = await database.select(database.shoppingPlans).getSingle();
     final item = await database.select(database.plannedItems).getSingle();
 
-    expect(database.schemaVersion, 9);
+    expect(database.schemaVersion, 10);
     expect(product.syncId, 'legacy:product:7');
     expect(product.logicalKey, 'product:leite:unit');
     expect(plan.syncId, 'legacy:plan:3');
@@ -125,7 +125,7 @@ void main() {
     final backup = await BackupService(database).createBackup();
     final payload = jsonDecode(backup) as Map<String, dynamic>;
     expect(payload['formatVersion'], 7);
-    expect(payload['schemaVersion'], 9);
+    expect(payload['schemaVersion'], 10);
     final row = (payload['products'] as List).single as Map<String, dynamic>;
     expect(row['syncId'], startsWith('product:'));
     expect(row['logicalKey'], 'product:café:unit');

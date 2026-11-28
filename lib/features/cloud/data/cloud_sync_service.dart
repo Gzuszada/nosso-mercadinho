@@ -11,6 +11,7 @@ import 'cloud_snapshot_service.dart';
 import 'sync_v2_candidate.dart';
 import 'sync_v2_client.dart';
 import 'sync_v2_review.dart';
+import 'sync_diagnostics.dart';
 
 class CloudSyncService {
   CloudSyncService({
@@ -82,6 +83,64 @@ class CloudSyncService {
   }
 
   Future<CloudSyncResult> synchronize({
+    required String householdId,
+    Map<CloudSyncConflictArea, CloudSyncResolution>? resolutions,
+  }) async {
+    final previous = await _readDiagnostics(householdId);
+    await _saveDiagnostics(
+      householdId,
+      CloudSyncDiagnostics(
+        lastAttemptAt: DateTime.now().toUtc(),
+        lastSuccessfulAt: previous?.lastSuccessfulAt,
+        lastOrigin: previous?.lastOrigin,
+        lastOriginAt: previous?.lastOriginAt,
+        lastOriginAuthor: previous?.lastOriginAuthor,
+        areaResults: previous?.areaResults ?? const {},
+      ),
+    );
+    try {
+      final result = await _synchronizeUntracked(
+        householdId: householdId,
+        resolutions: resolutions,
+      );
+      final areas = {for (final area in _areas.keys) area.name: 'inSync'};
+      await _saveDiagnostics(
+        householdId,
+        CloudSyncDiagnostics(
+          lastAttemptAt: DateTime.now().toUtc(),
+          lastSuccessfulAt: DateTime.now().toUtc(),
+          lastOrigin: const CloudSyncDiagnostics().publicationDeviceId,
+          lastOriginAt: DateTime.now().toUtc(),
+          outcome: CloudSyncAttemptOutcome.success,
+          areaResults: areas,
+        ),
+      );
+      return result;
+    } on Object catch (error) {
+      final kind = classifyCloudSyncFailure(error);
+      final failedArea = error is CloudSyncConflictException
+          ? error.conflict.area.name
+          : 'all';
+      await _saveDiagnostics(
+        householdId,
+        CloudSyncDiagnostics(
+          lastAttemptAt: DateTime.now().toUtc(),
+          lastSuccessfulAt: previous?.lastSuccessfulAt,
+          lastOrigin: previous?.lastOrigin,
+          lastOriginAt: previous?.lastOriginAt,
+          lastOriginAuthor: previous?.lastOriginAuthor,
+          outcome: CloudSyncAttemptOutcome.failure,
+          failureKind: kind,
+          failedArea: failedArea,
+          message: _safeErrorMessage(error),
+          areaResults: previous?.areaResults ?? const {},
+        ),
+      );
+      rethrow;
+    }
+  }
+
+  Future<CloudSyncResult> _synchronizeUntracked({
     required String householdId,
     Map<CloudSyncConflictArea, CloudSyncResolution>? resolutions,
   }) async {
@@ -281,6 +340,19 @@ class CloudSyncService {
   Future<CloudSyncResult> publishAllLocalAreas({
     required String householdId,
   }) async {
+    try {
+      final result = await _publishAllLocalAreasUntracked(householdId);
+      await _recordSuccessfulAttempt(householdId);
+      return result;
+    } on Object catch (error) {
+      await _recordFailedAttempt(householdId, error);
+      rethrow;
+    }
+  }
+
+  Future<CloudSyncResult> _publishAllLocalAreasUntracked(
+    String householdId,
+  ) async {
     if (syncV2Client != null) {
       return _publishPilotAreas(householdId, null);
     }
@@ -316,6 +388,20 @@ class CloudSyncService {
     required String householdId,
     required CloudSyncConflictArea area,
   }) async {
+    try {
+      final result = await _publishLocalAreaUntracked(householdId, area);
+      await _recordSuccessfulAttempt(householdId, synchronizedArea: area);
+      return result;
+    } on Object catch (error) {
+      await _recordFailedAttempt(householdId, error);
+      rethrow;
+    }
+  }
+
+  Future<CloudSyncResult> _publishLocalAreaUntracked(
+    String householdId,
+    CloudSyncConflictArea area,
+  ) async {
     if (syncV2Client != null) {
       return _publishPilotAreas(householdId, area);
     }
@@ -398,10 +484,15 @@ class CloudSyncService {
         remoteHash: remoteHash,
       );
     }
+    final diagnostics = CloudSyncDiagnostics.decode(settings?.syncDiagnostics);
     return CloudSyncStatus(
       householdId: householdId,
       remoteRevision: remote?.generation ?? 0,
       areas: areas,
+      diagnostics: diagnostics,
+      remoteOrigin: remote?.manifest.deviceId,
+      remoteOriginAt: remote?.manifest.createdAt,
+      remoteOriginAuthor: remote?.manifest.authorName,
     );
   }
 
@@ -526,7 +617,7 @@ class CloudSyncService {
         areas: remoteAreas,
         authorUid: author.uid,
         authorName: author.name,
-        deviceId: 'android-pilot',
+        deviceId: const CloudSyncDiagnostics().publicationDeviceId,
         baseGeneration: generation,
         expectedManifestHash: remote?.manifestHash,
         requiresOwnerModeration: requiresOwnerModeration,
@@ -612,7 +703,7 @@ class CloudSyncService {
       areas: areas,
       authorUid: author.uid,
       authorName: author.name,
-      deviceId: 'android-pilot',
+      deviceId: const CloudSyncDiagnostics().publicationDeviceId,
       baseGeneration: remote?.generation ?? 0,
       expectedManifestHash: remote?.manifestHash,
       // Publishing is allowed to every household member. Owner moderation is
@@ -762,6 +853,83 @@ class CloudSyncService {
       );
     }
     await applySyncV2ReviewToLocalItem(database, review);
+  }
+
+  Future<CloudSyncDiagnostics?> _readDiagnostics(String householdId) async {
+    final settings = await settingsRepository.getCloudSyncSettings();
+    if (settings?.householdId != householdId) return null;
+    return CloudSyncDiagnostics.decode(settings?.syncDiagnostics);
+  }
+
+  Future<void> _saveDiagnostics(
+    String householdId,
+    CloudSyncDiagnostics diagnostics,
+  ) async {
+    await settingsRepository.saveSyncDiagnostics(
+      householdId,
+      diagnostics.encode(),
+    );
+  }
+
+  Future<void> _recordSuccessfulAttempt(
+    String householdId, {
+    CloudSyncConflictArea? synchronizedArea,
+  }) async {
+    final previous = await _readDiagnostics(householdId);
+    final areaResults = synchronizedArea == null
+        ? {for (final area in _areas.keys) area.name: 'inSync'}
+        : {
+            ...previous?.areaResults ?? const <String, String>{},
+            synchronizedArea.name: 'inSync',
+          };
+    await _saveDiagnostics(
+      householdId,
+      CloudSyncDiagnostics(
+        lastAttemptAt: DateTime.now().toUtc(),
+        lastSuccessfulAt: DateTime.now().toUtc(),
+        lastOrigin: const CloudSyncDiagnostics().publicationDeviceId,
+        lastOriginAt: DateTime.now().toUtc(),
+        outcome: CloudSyncAttemptOutcome.success,
+        areaResults: areaResults,
+      ),
+    );
+  }
+
+  Future<void> _recordFailedAttempt(String householdId, Object error) async {
+    final previous = await _readDiagnostics(householdId);
+    final failedArea = error is CloudSyncConflictException
+        ? error.conflict.area.name
+        : 'all';
+    await _saveDiagnostics(
+      householdId,
+      CloudSyncDiagnostics(
+        lastAttemptAt: DateTime.now().toUtc(),
+        lastSuccessfulAt: previous?.lastSuccessfulAt,
+        lastOrigin: previous?.lastOrigin,
+        lastOriginAt: previous?.lastOriginAt,
+        lastOriginAuthor: previous?.lastOriginAuthor,
+        outcome: CloudSyncAttemptOutcome.failure,
+        failureKind: classifyCloudSyncFailure(error),
+        failedArea: failedArea,
+        message: _safeErrorMessage(error),
+        areaResults: previous?.areaResults ?? const {},
+      ),
+    );
+  }
+
+  String _safeErrorMessage(Object error) {
+    final kind = classifyCloudSyncFailure(error);
+    return switch (kind) {
+      CloudSyncFailureKind.network => 'Não foi possível acessar a internet.',
+      CloudSyncFailureKind.permission =>
+        'Este dispositivo não tem acesso à casa.',
+      CloudSyncFailureKind.invalidData =>
+        'Os dados recebidos da casa estão inválidos.',
+      CloudSyncFailureKind.conflict =>
+        'Há uma divergência que ainda precisa ser resolvida.',
+      CloudSyncFailureKind.account => 'Entre na sua conta e tente novamente.',
+      CloudSyncFailureKind.unknown => 'A sincronização não pôde ser concluída.',
+    };
   }
 
   Future<void> _persistState({

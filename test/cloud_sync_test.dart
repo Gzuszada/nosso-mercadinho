@@ -218,6 +218,46 @@ void main() {
       expect(selected?.lastSyncedHash, isNull);
     });
 
+    test('diagnóstico persiste e sobrevive à atualização de revisão', () async {
+      await settings.saveCloudSyncSettings(
+        householdId: 'casa-atual',
+        remoteRevision: 3,
+        lastSyncedHash: 'hash-inicial',
+      );
+      await settings.saveSyncDiagnostics(
+        'casa-atual',
+        '{"version":1,"outcome":"success"}',
+      );
+
+      await settings.saveCloudSyncSettings(
+        householdId: 'casa-atual',
+        remoteRevision: 4,
+        lastSyncedHash: 'hash-atualizado',
+      );
+
+      final selected = await settings.getCloudSyncSettings();
+      expect(selected?.remoteRevision, 4);
+      expect(selected?.syncDiagnostics, contains('"outcome":"success"'));
+    });
+
+    test('trocar de casa limpa o diagnóstico anterior', () async {
+      await settings.saveCloudSyncSettings(
+        householdId: 'casa-antiga',
+        remoteRevision: 3,
+        lastSyncedHash: 'hash-antigo',
+      );
+      await settings.saveSyncDiagnostics(
+        'casa-antiga',
+        '{"version":1,"outcome":"failure"}',
+      );
+
+      await settings.selectCloudHousehold('casa-nova');
+
+      final selected = await settings.getCloudSyncSettings();
+      expect(selected?.householdId, 'casa-nova');
+      expect(selected?.syncDiagnostics, isNull);
+    });
+
     test('manter a mesma casa preserva o estado base', () async {
       await settings.saveCloudSyncSettings(
         householdId: 'casa-atual',

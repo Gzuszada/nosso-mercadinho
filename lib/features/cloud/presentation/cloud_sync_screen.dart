@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app_environment.dart';
 import '../../../app_providers.dart';
+import '../../backup/presentation/backup_actions.dart';
 import '../data/cloud_models.dart';
 import '../data/cloud_sync_service.dart';
 import '../data/sync_v2_review.dart';
@@ -205,6 +206,8 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
           onUseAll: _useAllRemoteData,
           onSynchronize: _synchronize,
           onDeleteHousehold: _deleteHousehold,
+          onExportBackup: _exportBackup,
+          onCheckInternet: _checkInternet,
         ),
       ],
     ];
@@ -233,6 +236,40 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
     final merged = bySyncId.values.toList()
       ..sort((left, right) => left.createdAt.compareTo(right.createdAt));
     return merged;
+  }
+
+  Future<void> _exportBackup() async {
+    final saved = await exportBackup(context, ref.read(databaseProvider));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          saved
+              ? 'Backup exportado.'
+              : 'O backup não foi exportado. Tente novamente.',
+        ),
+      ),
+    );
+  }
+
+  Future<void> _checkInternet() async {
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Verificar internet'),
+        content: const Text(
+          'Confirme que o dispositivo está conectado ao Wi-Fi ou aos dados móveis. '
+          'Depois toque em “Tentar novamente”. Os dados locais continuam seguros '
+          'enquanto a conexão não estiver disponível.',
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Entendi'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _checkSyncStatus() => _run(() async {

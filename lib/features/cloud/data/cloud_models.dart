@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 
+import 'sync_diagnostics.dart';
+
 enum CloudSyncConflictArea { catalog, imports, shopping }
 
 enum CloudSyncAreaState { inSync, localOnly, remoteOnly, divergent, invalid }
@@ -79,11 +81,19 @@ class CloudSyncStatus {
     required this.householdId,
     required this.remoteRevision,
     required this.areas,
+    this.diagnostics = const CloudSyncDiagnostics(),
+    this.remoteOrigin,
+    this.remoteOriginAt,
+    this.remoteOriginAuthor,
   });
 
   final String householdId;
   final int remoteRevision;
   final Map<CloudSyncConflictArea, CloudSyncAreaStatus> areas;
+  final CloudSyncDiagnostics diagnostics;
+  final String? remoteOrigin;
+  final DateTime? remoteOriginAt;
+  final String? remoteOriginAuthor;
 
   bool get needsSynchronization =>
       areas.values.any((area) => area.needsSynchronization);

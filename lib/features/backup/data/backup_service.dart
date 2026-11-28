@@ -619,7 +619,7 @@ class BackupService {
     final formatVersion = _integer(root, 'formatVersion');
     final schemaVersion = _integer(root, 'schemaVersion');
     if (!const {1, 2, 3, 4, 5, 6, 7}.contains(formatVersion) ||
-        !const {1, 2, 3, 4, 5, 6, 7, 8, 9}.contains(schemaVersion)) {
+        !const {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.contains(schemaVersion)) {
       throw const FormatException(
         'Versão de backup não compatível com esta versão do aplicativo.',
       );

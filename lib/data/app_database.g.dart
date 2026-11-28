@@ -6979,6 +6979,17 @@ class $CloudSyncSettingsTable extends CloudSyncSettings
         type: DriftSqlType.string,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _syncDiagnosticsMeta = const VerificationMeta(
+    'syncDiagnostics',
+  );
+  @override
+  late final GeneratedColumn<String> syncDiagnostics = GeneratedColumn<String>(
+    'sync_diagnostics',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -6986,6 +6997,7 @@ class $CloudSyncSettingsTable extends CloudSyncSettings
     remoteRevision,
     lastSyncedHash,
     householdOwnerUid,
+    syncDiagnostics,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -7038,6 +7050,15 @@ class $CloudSyncSettingsTable extends CloudSyncSettings
         ),
       );
     }
+    if (data.containsKey('sync_diagnostics')) {
+      context.handle(
+        _syncDiagnosticsMeta,
+        syncDiagnostics.isAcceptableOrUnknown(
+          data['sync_diagnostics']!,
+          _syncDiagnosticsMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -7067,6 +7088,10 @@ class $CloudSyncSettingsTable extends CloudSyncSettings
         DriftSqlType.string,
         data['${effectivePrefix}household_owner_uid'],
       ),
+      syncDiagnostics: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_diagnostics'],
+      ),
     );
   }
 
@@ -7086,12 +7111,17 @@ class CloudSyncSetting extends DataClass
   /// Last owner UID confirmed by the backend. It lets a signed-in member
   /// remain conservative (pending review) while temporarily offline.
   final String? householdOwnerUid;
+
+  /// Diagnóstico local da última tentativa de sincronização. É JSON porque
+  /// reúne data, origem, resultado por área e erro acionável.
+  final String? syncDiagnostics;
   const CloudSyncSetting({
     required this.id,
     this.householdId,
     required this.remoteRevision,
     this.lastSyncedHash,
     this.householdOwnerUid,
+    this.syncDiagnostics,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -7106,6 +7136,9 @@ class CloudSyncSetting extends DataClass
     }
     if (!nullToAbsent || householdOwnerUid != null) {
       map['household_owner_uid'] = Variable<String>(householdOwnerUid);
+    }
+    if (!nullToAbsent || syncDiagnostics != null) {
+      map['sync_diagnostics'] = Variable<String>(syncDiagnostics);
     }
     return map;
   }
@@ -7123,6 +7156,9 @@ class CloudSyncSetting extends DataClass
       householdOwnerUid: householdOwnerUid == null && nullToAbsent
           ? const Value.absent()
           : Value(householdOwnerUid),
+      syncDiagnostics: syncDiagnostics == null && nullToAbsent
+          ? const Value.absent()
+          : Value(syncDiagnostics),
     );
   }
 
@@ -7139,6 +7175,7 @@ class CloudSyncSetting extends DataClass
       householdOwnerUid: serializer.fromJson<String?>(
         json['householdOwnerUid'],
       ),
+      syncDiagnostics: serializer.fromJson<String?>(json['syncDiagnostics']),
     );
   }
   @override
@@ -7150,6 +7187,7 @@ class CloudSyncSetting extends DataClass
       'remoteRevision': serializer.toJson<int>(remoteRevision),
       'lastSyncedHash': serializer.toJson<String?>(lastSyncedHash),
       'householdOwnerUid': serializer.toJson<String?>(householdOwnerUid),
+      'syncDiagnostics': serializer.toJson<String?>(syncDiagnostics),
     };
   }
 
@@ -7159,6 +7197,7 @@ class CloudSyncSetting extends DataClass
     int? remoteRevision,
     Value<String?> lastSyncedHash = const Value.absent(),
     Value<String?> householdOwnerUid = const Value.absent(),
+    Value<String?> syncDiagnostics = const Value.absent(),
   }) => CloudSyncSetting(
     id: id ?? this.id,
     householdId: householdId.present ? householdId.value : this.householdId,
@@ -7169,6 +7208,9 @@ class CloudSyncSetting extends DataClass
     householdOwnerUid: householdOwnerUid.present
         ? householdOwnerUid.value
         : this.householdOwnerUid,
+    syncDiagnostics: syncDiagnostics.present
+        ? syncDiagnostics.value
+        : this.syncDiagnostics,
   );
   CloudSyncSetting copyWithCompanion(CloudSyncSettingsCompanion data) {
     return CloudSyncSetting(
@@ -7185,6 +7227,9 @@ class CloudSyncSetting extends DataClass
       householdOwnerUid: data.householdOwnerUid.present
           ? data.householdOwnerUid.value
           : this.householdOwnerUid,
+      syncDiagnostics: data.syncDiagnostics.present
+          ? data.syncDiagnostics.value
+          : this.syncDiagnostics,
     );
   }
 
@@ -7195,7 +7240,8 @@ class CloudSyncSetting extends DataClass
           ..write('householdId: $householdId, ')
           ..write('remoteRevision: $remoteRevision, ')
           ..write('lastSyncedHash: $lastSyncedHash, ')
-          ..write('householdOwnerUid: $householdOwnerUid')
+          ..write('householdOwnerUid: $householdOwnerUid, ')
+          ..write('syncDiagnostics: $syncDiagnostics')
           ..write(')'))
         .toString();
   }
@@ -7207,6 +7253,7 @@ class CloudSyncSetting extends DataClass
     remoteRevision,
     lastSyncedHash,
     householdOwnerUid,
+    syncDiagnostics,
   );
   @override
   bool operator ==(Object other) =>
@@ -7216,7 +7263,8 @@ class CloudSyncSetting extends DataClass
           other.householdId == this.householdId &&
           other.remoteRevision == this.remoteRevision &&
           other.lastSyncedHash == this.lastSyncedHash &&
-          other.householdOwnerUid == this.householdOwnerUid);
+          other.householdOwnerUid == this.householdOwnerUid &&
+          other.syncDiagnostics == this.syncDiagnostics);
 }
 
 class CloudSyncSettingsCompanion extends UpdateCompanion<CloudSyncSetting> {
@@ -7225,12 +7273,14 @@ class CloudSyncSettingsCompanion extends UpdateCompanion<CloudSyncSetting> {
   final Value<int> remoteRevision;
   final Value<String?> lastSyncedHash;
   final Value<String?> householdOwnerUid;
+  final Value<String?> syncDiagnostics;
   const CloudSyncSettingsCompanion({
     this.id = const Value.absent(),
     this.householdId = const Value.absent(),
     this.remoteRevision = const Value.absent(),
     this.lastSyncedHash = const Value.absent(),
     this.householdOwnerUid = const Value.absent(),
+    this.syncDiagnostics = const Value.absent(),
   });
   CloudSyncSettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -7238,6 +7288,7 @@ class CloudSyncSettingsCompanion extends UpdateCompanion<CloudSyncSetting> {
     this.remoteRevision = const Value.absent(),
     this.lastSyncedHash = const Value.absent(),
     this.householdOwnerUid = const Value.absent(),
+    this.syncDiagnostics = const Value.absent(),
   });
   static Insertable<CloudSyncSetting> custom({
     Expression<int>? id,
@@ -7245,6 +7296,7 @@ class CloudSyncSettingsCompanion extends UpdateCompanion<CloudSyncSetting> {
     Expression<int>? remoteRevision,
     Expression<String>? lastSyncedHash,
     Expression<String>? householdOwnerUid,
+    Expression<String>? syncDiagnostics,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -7252,6 +7304,7 @@ class CloudSyncSettingsCompanion extends UpdateCompanion<CloudSyncSetting> {
       if (remoteRevision != null) 'remote_revision': remoteRevision,
       if (lastSyncedHash != null) 'last_synced_hash': lastSyncedHash,
       if (householdOwnerUid != null) 'household_owner_uid': householdOwnerUid,
+      if (syncDiagnostics != null) 'sync_diagnostics': syncDiagnostics,
     });
   }
 
@@ -7261,6 +7314,7 @@ class CloudSyncSettingsCompanion extends UpdateCompanion<CloudSyncSetting> {
     Value<int>? remoteRevision,
     Value<String?>? lastSyncedHash,
     Value<String?>? householdOwnerUid,
+    Value<String?>? syncDiagnostics,
   }) {
     return CloudSyncSettingsCompanion(
       id: id ?? this.id,
@@ -7268,6 +7322,7 @@ class CloudSyncSettingsCompanion extends UpdateCompanion<CloudSyncSetting> {
       remoteRevision: remoteRevision ?? this.remoteRevision,
       lastSyncedHash: lastSyncedHash ?? this.lastSyncedHash,
       householdOwnerUid: householdOwnerUid ?? this.householdOwnerUid,
+      syncDiagnostics: syncDiagnostics ?? this.syncDiagnostics,
     );
   }
 
@@ -7289,6 +7344,9 @@ class CloudSyncSettingsCompanion extends UpdateCompanion<CloudSyncSetting> {
     if (householdOwnerUid.present) {
       map['household_owner_uid'] = Variable<String>(householdOwnerUid.value);
     }
+    if (syncDiagnostics.present) {
+      map['sync_diagnostics'] = Variable<String>(syncDiagnostics.value);
+    }
     return map;
   }
 
@@ -7299,7 +7357,8 @@ class CloudSyncSettingsCompanion extends UpdateCompanion<CloudSyncSetting> {
           ..write('householdId: $householdId, ')
           ..write('remoteRevision: $remoteRevision, ')
           ..write('lastSyncedHash: $lastSyncedHash, ')
-          ..write('householdOwnerUid: $householdOwnerUid')
+          ..write('householdOwnerUid: $householdOwnerUid, ')
+          ..write('syncDiagnostics: $syncDiagnostics')
           ..write(')'))
         .toString();
   }
@@ -7339,22 +7398,24 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   ];
 }
 
-typedef $$CategoriesTableCreateCompanionBuilder = CategoriesCompanion Function({
-  Value<int> id,
-  required String name,
-  Value<int> sortOrder,
-  Value<bool> isArchived,
-  Value<DateTime> createdAt,
-  Value<DateTime> updatedAt,
-});
-typedef $$CategoriesTableUpdateCompanionBuilder = CategoriesCompanion Function({
-  Value<int> id,
-  Value<String> name,
-  Value<int> sortOrder,
-  Value<bool> isArchived,
-  Value<DateTime> createdAt,
-  Value<DateTime> updatedAt,
-});
+typedef $$CategoriesTableCreateCompanionBuilder =
+    CategoriesCompanion Function({
+      Value<int> id,
+      required String name,
+      Value<int> sortOrder,
+      Value<bool> isArchived,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
+typedef $$CategoriesTableUpdateCompanionBuilder =
+    CategoriesCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<int> sortOrder,
+      Value<bool> isArchived,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
 
 class $$CategoriesTableFilterComposer
     extends Composer<_$AppDatabase, $CategoriesTable> {
@@ -7782,50 +7843,52 @@ typedef $$SubcategoriesTableProcessedTableManager =
       Subcategory,
       PrefetchHooks Function()
     >;
-typedef $$ProductsTableCreateCompanionBuilder = ProductsCompanion Function({
-  Value<int> id,
-  required String name,
-  Value<int?> categoryId,
-  Value<int?> subcategoryId,
-  Value<String> measurementMode,
-  Value<bool> needsCategoryReview,
-  Value<String?> description,
-  Value<bool> isArchived,
-  Value<String?> syncId,
-  Value<String?> logicalKey,
-  Value<String?> authorUid,
-  Value<String?> authorName,
-  Value<String> reviewState,
-  Value<String?> reviewedByUid,
-  Value<String?> reviewedByName,
-  Value<DateTime?> reviewedAt,
-  Value<DateTime?> deletedAt,
-  Value<int> syncRevision,
-  Value<DateTime> createdAt,
-  Value<DateTime> updatedAt,
-});
-typedef $$ProductsTableUpdateCompanionBuilder = ProductsCompanion Function({
-  Value<int> id,
-  Value<String> name,
-  Value<int?> categoryId,
-  Value<int?> subcategoryId,
-  Value<String> measurementMode,
-  Value<bool> needsCategoryReview,
-  Value<String?> description,
-  Value<bool> isArchived,
-  Value<String?> syncId,
-  Value<String?> logicalKey,
-  Value<String?> authorUid,
-  Value<String?> authorName,
-  Value<String> reviewState,
-  Value<String?> reviewedByUid,
-  Value<String?> reviewedByName,
-  Value<DateTime?> reviewedAt,
-  Value<DateTime?> deletedAt,
-  Value<int> syncRevision,
-  Value<DateTime> createdAt,
-  Value<DateTime> updatedAt,
-});
+typedef $$ProductsTableCreateCompanionBuilder =
+    ProductsCompanion Function({
+      Value<int> id,
+      required String name,
+      Value<int?> categoryId,
+      Value<int?> subcategoryId,
+      Value<String> measurementMode,
+      Value<bool> needsCategoryReview,
+      Value<String?> description,
+      Value<bool> isArchived,
+      Value<String?> syncId,
+      Value<String?> logicalKey,
+      Value<String?> authorUid,
+      Value<String?> authorName,
+      Value<String> reviewState,
+      Value<String?> reviewedByUid,
+      Value<String?> reviewedByName,
+      Value<DateTime?> reviewedAt,
+      Value<DateTime?> deletedAt,
+      Value<int> syncRevision,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
+typedef $$ProductsTableUpdateCompanionBuilder =
+    ProductsCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<int?> categoryId,
+      Value<int?> subcategoryId,
+      Value<String> measurementMode,
+      Value<bool> needsCategoryReview,
+      Value<String?> description,
+      Value<bool> isArchived,
+      Value<String?> syncId,
+      Value<String?> logicalKey,
+      Value<String?> authorUid,
+      Value<String?> authorName,
+      Value<String> reviewState,
+      Value<String?> reviewedByUid,
+      Value<String?> reviewedByName,
+      Value<DateTime?> reviewedAt,
+      Value<DateTime?> deletedAt,
+      Value<int> syncRevision,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
 
 class $$ProductsTableFilterComposer
     extends Composer<_$AppDatabase, $ProductsTable> {
@@ -10529,14 +10592,19 @@ class $$AppPreferencesTableTableManager
               $$AppPreferencesTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$AppPreferencesTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<bool> isDarkMode = const Value.absent(),
-          }) => AppPreferencesCompanion(id: id, isDarkMode: isDarkMode),
-          createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<bool> isDarkMode = const Value.absent(),
-          }) => AppPreferencesCompanion.insert(id: id, isDarkMode: isDarkMode),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<bool> isDarkMode = const Value.absent(),
+              }) => AppPreferencesCompanion(id: id, isDarkMode: isDarkMode),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<bool> isDarkMode = const Value.absent(),
+              }) => AppPreferencesCompanion.insert(
+                id: id,
+                isDarkMode: isDarkMode,
+              ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
@@ -10569,6 +10637,7 @@ typedef $$CloudSyncSettingsTableCreateCompanionBuilder =
       Value<int> remoteRevision,
       Value<String?> lastSyncedHash,
       Value<String?> householdOwnerUid,
+      Value<String?> syncDiagnostics,
     });
 typedef $$CloudSyncSettingsTableUpdateCompanionBuilder =
     CloudSyncSettingsCompanion Function({
@@ -10577,6 +10646,7 @@ typedef $$CloudSyncSettingsTableUpdateCompanionBuilder =
       Value<int> remoteRevision,
       Value<String?> lastSyncedHash,
       Value<String?> householdOwnerUid,
+      Value<String?> syncDiagnostics,
     });
 
 class $$CloudSyncSettingsTableFilterComposer
@@ -10610,6 +10680,11 @@ class $$CloudSyncSettingsTableFilterComposer
 
   ColumnFilters<String> get householdOwnerUid => $composableBuilder(
     column: $table.householdOwnerUid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncDiagnostics => $composableBuilder(
+    column: $table.syncDiagnostics,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -10647,6 +10722,11 @@ class $$CloudSyncSettingsTableOrderingComposer
     column: $table.householdOwnerUid,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get syncDiagnostics => $composableBuilder(
+    column: $table.syncDiagnostics,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CloudSyncSettingsTableAnnotationComposer
@@ -10678,6 +10758,11 @@ class $$CloudSyncSettingsTableAnnotationComposer
 
   GeneratedColumn<String> get householdOwnerUid => $composableBuilder(
     column: $table.householdOwnerUid,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get syncDiagnostics => $composableBuilder(
+    column: $table.syncDiagnostics,
     builder: (column) => column,
   );
 }
@@ -10727,12 +10812,14 @@ class $$CloudSyncSettingsTableTableManager
                 Value<int> remoteRevision = const Value.absent(),
                 Value<String?> lastSyncedHash = const Value.absent(),
                 Value<String?> householdOwnerUid = const Value.absent(),
+                Value<String?> syncDiagnostics = const Value.absent(),
               }) => CloudSyncSettingsCompanion(
                 id: id,
                 householdId: householdId,
                 remoteRevision: remoteRevision,
                 lastSyncedHash: lastSyncedHash,
                 householdOwnerUid: householdOwnerUid,
+                syncDiagnostics: syncDiagnostics,
               ),
           createCompanionCallback:
               ({
@@ -10741,12 +10828,14 @@ class $$CloudSyncSettingsTableTableManager
                 Value<int> remoteRevision = const Value.absent(),
                 Value<String?> lastSyncedHash = const Value.absent(),
                 Value<String?> householdOwnerUid = const Value.absent(),
+                Value<String?> syncDiagnostics = const Value.absent(),
               }) => CloudSyncSettingsCompanion.insert(
                 id: id,
                 householdId: householdId,
                 remoteRevision: remoteRevision,
                 lastSyncedHash: lastSyncedHash,
                 householdOwnerUid: householdOwnerUid,
+                syncDiagnostics: syncDiagnostics,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

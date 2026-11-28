@@ -185,6 +185,37 @@ Para comandos Android, use a junction ASCII `C:\Users\Usuario\MercadoApp`, pois 
 - Verificação pós-publicação: estado `ACTIVE`, runtime nodejs22, timeout 60 s, revisão `moderateplanneditem-00002-guz`, `firebase-functions-hash` `90efaddf6af6c6d0a4c1f9739db8cddc586fdf92`; as chamadas sem token chegam à função e respondem `INVALID_ARGUMENT`, o que confirma o `roles/run.invoker` público; o artefato baixado do bucket `gcf-v2-sources` contém `lib/sync_v2_moderation.js` com a regra `isHouseholdOwner`.
 - `npm test` em `functions-pilot` antes da publicação: 21 testes passando, incluindo a hierarquia de moderação do owner.
 
+## Piloto: diagnóstico acionável de sincronização (27/11/2026)
+
+- O painel de sincronização do APK e da Web piloto agora prioriza data da última
+  tentativa, data da última sincronização bem-sucedida, dispositivo atual,
+  plataforma/autoria da última publicação oficial, resultado por área e uma
+  falha acionável. A revisão numérica foi movida para **Detalhes técnicos**.
+- Falhas são classificadas como rede, permissão, dados inválidos, divergência,
+  conta ou desconhecida. O painel oferece **Tentar novamente**, **Verificar
+  internet**, **Verificar acesso à casa** e **Exportar backup** conforme o
+  contexto, reutilizando o exportador de backup existente.
+- O diagnóstico é persistido como JSON versionado no schema Drift 10. A migração
+  9 → 10 é aditiva; trocar de casa limpa o diagnóstico anterior e salvar nova
+  revisão/hash não apaga o resultado da casa atual. O backup formato 7 aceita
+  schemas 1 a 10.
+- A origem oficial não exige mudança de backend: o cliente usa `deviceId`,
+  `authorName` e `createdAt` já presentes no manifesto v2. Nenhuma Function,
+  regra do Firestore ou manifesto remoto foi alterado.
+- APK piloto `1.0.15-pilot+26` gerado, assinado com APK Signature Scheme v2
+  válido, 68.068.056 bytes e SHA-256
+  `BDF03A8260DC102F2001825B86BF1CEE5A3595E1DFDBED245C80E6E9F85C8D6B`.
+  Instalação por cima da release anterior e abertura sem crash em
+  `emulator-5554` e `emulator-5556`.
+- Web piloto publicada somente em `nosso-mercado-casa-pilot`, HTTP 200 e
+  `Cache-Control: no-cache`; o bundle contém somente o App ID piloto e seu
+  SHA-256 local/remoto é
+  `12598598D6B7F5C46B6C74AFCEDC68D2A64820A000F28C6885308939BFA3C271`.
+- Validações: `flutter analyze` sem problemas; 139 testes Flutter; 26 testes
+  Node das Functions piloto e 7 das Functions de produção. O Emulator não
+  pôde ser iniciado porque o `firebase-tools` exige JDK 21 e a máquina possui
+  JDK 17; nenhuma regra mudou nesta entrega.
+
 ## Próximo passo
 
 Realizar o checklist manual de instalação, backup/restauração, migração, acessibilidade e funcionamento offline no aparelho. Manter a instalação antiga até confirmar os dados; não alterar dados reais nem criar commit pelo assistente.

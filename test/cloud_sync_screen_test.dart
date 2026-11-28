@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mercado/features/cloud/data/cloud_models.dart';
+import 'package:mercado/features/cloud/data/sync_diagnostics.dart';
 import 'package:mercado/features/cloud/presentation/cloud_sync_status_panel.dart';
 
 void main() {
@@ -33,6 +34,8 @@ void main() {
               onUseAll: () {},
               onSynchronize: () {},
               onDeleteHousehold: () {},
+              onExportBackup: () {},
+              onCheckInternet: () {},
             ),
           ),
         ),
@@ -101,6 +104,72 @@ void main() {
     }
   });
 
+  testWidgets('mostra diagnóstico e ações para falha de rede', (tester) async {
+    final status = CloudSyncStatus(
+      householdId: 'casa',
+      remoteRevision: 4,
+      areas: {
+        for (final area in CloudSyncConflictArea.values)
+          area: CloudSyncAreaStatus(
+            area: area,
+            state: CloudSyncAreaState.inSync,
+            localCounts: _localCounts(area),
+            remoteCounts: _localCounts(area),
+            localHash: 'local',
+            remoteHash: 'local',
+          ),
+      },
+      diagnostics: CloudSyncDiagnostics(
+        lastAttemptAt: DateTime.utc(2026, 11, 27, 10),
+        lastSuccessfulAt: DateTime.utc(2026, 11, 27, 9),
+        lastOrigin: 'android-pilot',
+        outcome: CloudSyncAttemptOutcome.failure,
+        failureKind: CloudSyncFailureKind.network,
+        failedArea: 'all',
+        message: 'Não foi possível acessar a internet.',
+        areaResults: const {'catalog': 'inSync'},
+      ),
+      remoteOrigin: 'web-pilot',
+      remoteOriginAt: DateTime.utc(2026, 11, 27, 8),
+      remoteOriginAuthor: 'Piloto Web',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: CloudSyncStatusPanel(
+              status: status,
+              busy: false,
+              onCheck: () {},
+              onSendAll: () {},
+              onUseAll: () {},
+              onSynchronize: () {},
+              onDeleteHousehold: () {},
+              onExportBackup: () {},
+              onCheckInternet: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.text('A última sincronização não foi concluída'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Última sincronização:'), findsOneWidget);
+    expect(find.textContaining('Este dispositivo:'), findsOneWidget);
+    expect(find.textContaining('Última origem: Web'), findsOneWidget);
+    expect(find.textContaining('Publicada em:'), findsOneWidget);
+    expect(find.textContaining('Publicado por: Piloto Web'), findsOneWidget);
+    expect(find.text('Falha de rede'), findsOneWidget);
+    expect(find.textContaining('Área: todas as áreas'), findsOneWidget);
+    expect(find.text('Tentar novamente'), findsOneWidget);
+    expect(find.text('Verificar internet'), findsOneWidget);
+    expect(find.text('Exportar backup'), findsOneWidget);
+  });
+
   testWidgets('mostra o que difere quando a área está divergente', (
     tester,
   ) async {
@@ -134,6 +203,8 @@ void main() {
               onUseAll: () {},
               onSynchronize: () {},
               onDeleteHousehold: () {},
+              onExportBackup: () {},
+              onCheckInternet: () {},
             ),
           ),
         ),
