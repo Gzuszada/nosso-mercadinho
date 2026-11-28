@@ -29,62 +29,120 @@ service cloud.firestore {
       allow read: if signedIn() && resource.data.uid == request.auth.uid;
     }
 
+    // Convites são administrativos: somente o owner cria convites. O dono e a
+    // pessoa destinada podem consultar ou cancelar o convite; ele é imutável.
     match /householdInvites/{code} {
       allow read: if signedIn() &&
         (resource.data.email == request.auth.token.email ||
-          resource.data.createdBy == request.auth.uid);
+          isOwner(resource.data.householdId));
       allow create: if signedIn() &&
+        isOwner(request.resource.data.householdId) &&
         request.resource.data.createdBy == request.auth.uid &&
-        isMember(request.resource.data.householdId);
+        request.resource.data.code == code &&
+        request.resource.data.email is string &&
+        request.resource.data.keys().hasOnly([
+          'code', 'householdId', 'email', 'createdBy', 'createdAt', 'expiresAt'
+        ]);
+      allow update: if false;
       allow delete: if signedIn() &&
-        (resource.data.createdBy == request.auth.uid ||
-          resource.data.email == request.auth.token.email);
+        (resource.data.email == request.auth.token.email ||
+          isOwner(resource.data.householdId));
     }
 
     match /households/{householdId} {
       allow read: if isMember(householdId);
-      allow create: if signedIn() && request.resource.data.ownerUid == request.auth.uid;
-      allow update, delete: if isMember(householdId) &&
-        resource.data.ownerUid == request.auth.uid;
+
+      // A criação da casa e do primeiro(owner) membro é atômica. O role do
+      // documento da casa é a fonte de autoridade para as demais operações.
+      allow create: if signedIn() &&
+        request.resource.data.ownerUid == request.auth.uid &&
+        request.resource.data.name is string &&
+        request.resource.data.keys().hasOnly(['name', 'ownerUid', 'createdAt']);
+
+      // O owner pode renomear a casa. A transferência de propriedade é
+      // executada somente pelo backend, que valida e atualiza ownerUid e
+      // papéis em uma transação atômica.
+      allow update: if isOwner(householdId) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name']) &&
+        request.resource.data.ownerUid == resource.data.ownerUid;
+
+      // Somente o owner pode excluir a casa.
+      allow delete: if isOwner(householdId);
 
       match /members/{userId} {
         allow read: if signedIn() &&
           (request.auth.uid == userId ||
             resource.data.uid == request.auth.uid ||
             isMember(householdId));
+        // O owner cria a própria associação. Um convidado cria a própria
+        // associação member somente depois de uma claim válida.
         allow create: if signedIn() &&
           request.auth.uid == userId &&
-          ((existsAfter(/databases/$(database)/documents/households/$(householdId)) &&
-            getAfter(/databases/$(database)/documents/households/$(householdId)).data.ownerUid == request.auth.uid) ||
-            existsAfter(/databases/$(database)/documents/households/$(householdId)/inviteClaims/$(request.auth.uid)));
-        // Cada pessoa pode atualizar apenas o próprio nome de usuário.
+          request.resource.data.uid == request.auth.uid &&
+          request.resource.data.role in ['owner', 'member'] &&
+          request.resource.data.keys().hasAll([
+            'uid', 'email', 'displayName', 'role', 'joinedAt'
+          ]) &&
+          request.resource.data.keys().hasOnly([
+            'uid', 'email', 'displayName', 'role', 'joinedAt'
+          ]) &&
+          (
+            (
+              request.resource.data.role == 'owner' &&
+              getAfter(/databases/$(database)/documents/households/$(householdId)).data.ownerUid == request.auth.uid
+            ) ||
+            (
+              request.resource.data.role == 'member' &&
+              existsAfter(/databases/$(database)/documents/households/$(householdId)/inviteClaims/$(request.auth.uid))
+            )
+          );
+
+        // Cada pessoa altera somente o próprio nome de usuário.
         allow update: if isMember(householdId) &&
           request.auth.uid == userId &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName']);
-        // O dono pode manter os demais membros e remover contas da casa.
-        allow update: if isMember(householdId) &&
-          request.auth.uid != userId &&
-          isOwner(householdId);
-        allow delete: if isMember(householdId) &&
-          isOwner(householdId);
+
+        // Papéis são atualizados exclusivamente pelo backend durante uma
+        // transferência validada; clientes não podem alterar role/uid.
+        allow update: if false;
+
+        // O owner remove membros comuns. O owner só pode remover o próprio
+        // registro como parte da exclusão atômica da casa.
+        allow delete: if isOwner(householdId) &&
+          (
+            resource.data.role != 'owner' ||
+            !existsAfter(/databases/$(database)/documents/households/$(householdId))
+          );
       }
 
       match /inviteClaims/{userId} {
         allow create: if signedIn() &&
           request.auth.uid == userId &&
+          request.resource.data.uid == request.auth.uid &&
           exists(/databases/$(database)/documents/householdInvites/$(request.resource.data.inviteCode)) &&
           get(/databases/$(database)/documents/householdInvites/$(request.resource.data.inviteCode)).data.email == request.auth.token.email &&
-          get(/databases/$(database)/documents/householdInvites/$(request.resource.data.inviteCode)).data.householdId == householdId;
+          get(/databases/$(database)/documents/householdInvites/$(request.resource.data.inviteCode)).data.householdId == householdId &&
+          request.resource.data.keys().hasOnly(['uid', 'email', 'inviteCode', 'claimedAt']);
         allow read: if isMember(householdId);
-        allow delete: if isMember(householdId);
+        allow update: if false;
+        allow delete: if isOwner(householdId);
       }
 
+      // Snapshot legado: membros podem consultar, mas nenhum cliente cria ou
+      // atualiza manifesto, conteúdo, revision ou hashes. O commit oficial do
+      // piloto é executado pela Cloud Function com Admin SDK.
       match /tables/{tableName} {
-        allow read, write: if isMember(householdId);
+        allow read: if isMember(householdId);
+        allow create, update: if false;
+        allow delete: if isOwner(householdId);
       }
 
+      // Metadata legada é igualmente somente leitura. A remoção é permitida
+      // ao owner apenas para a limpeza explícita da casa.
       match /metadata/{documentId} {
-        allow read, write: if isMember(householdId);
+        allow read: if isMember(householdId);
+        allow create, update: if false;
+        allow delete: if isOwner(householdId);
       }
 
 
@@ -103,14 +161,20 @@ service cloud.firestore {
 
       match /candidates/{publicationId} {
         allow read: if isMember(householdId);
-        allow create: if isMember(householdId) &&
-          request.resource.data.authorUid == request.auth.uid;
-        allow update, delete: if false;
+        allow create, update, delete: if false;
 
+        // O cliente publica somente chunks candidatos novos e imutáveis.
+        // O manifesto, a geração e o estado oficial são gravados pelo backend.
         match /areas/{area}/parts/{partIndex} {
           allow read: if isMember(householdId);
           allow create: if isMember(householdId) &&
-            request.resource.data.hash is string;
+            request.resource.data.hash is string &&
+            request.resource.data.hash.matches('^[a-f0-9]{64}$') &&
+            request.resource.data.count is int &&
+            request.resource.data.count >= 0 &&
+            request.resource.data.keys().hasOnly([
+              'payload', 'hash', 'count', 'createdAt'
+            ]);
           allow update, delete: if false;
         }
       }

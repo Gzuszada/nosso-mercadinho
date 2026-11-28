@@ -84,16 +84,25 @@ async function main() {
 
   const createHousehold = await commit(owner, [
     set(household, { name: { stringValue: 'Casa de teste' }, ownerUid: { stringValue: owner.uid } }),
-    set(`${household}/members/${owner.uid}`, { uid: { stringValue: owner.uid }, role: { stringValue: 'owner' } }),
+    set(`${household}/members/${owner.uid}`, {
+      uid: { stringValue: owner.uid },
+      email: { stringValue: owner.email },
+      displayName: { stringValue: 'Dono Teste' },
+      role: { stringValue: 'owner' },
+      joinedAt: { timestampValue: '2026-01-01T00:00:00Z' },
+    }),
   ]);
   if (createHousehold.status !== 200) throw new Error(`Dono não criou a casa: ${JSON.stringify(createHousehold)}`);
 
   const invite = 'householdInvites/ABCDEFGH';
   const createInvite = await commit(owner, [
     set(invite, {
+      code: { stringValue: 'ABCDEFGH' },
       householdId: { stringValue: household.split('/')[1] },
       email: { stringValue: member.email },
       createdBy: { stringValue: owner.uid },
+      createdAt: { timestampValue: '2026-01-01T00:00:00Z' },
+      expiresAt: { timestampValue: '2027-01-01T00:00:00Z' },
     }),
   ]);
   if (createInvite.status !== 200) throw new Error(`Membro não criou convite: ${JSON.stringify(createInvite)}`);
@@ -103,15 +112,33 @@ async function main() {
       uid: { stringValue: member.uid },
       email: { stringValue: member.email },
       inviteCode: { stringValue: 'ABCDEFGH' },
+      claimedAt: { timestampValue: '2026-01-01T00:00:00Z' },
     }),
-    set(`${household}/members/${member.uid}`, { uid: { stringValue: member.uid }, role: { stringValue: 'member' } }),
+    set(`${household}/members/${member.uid}`, {
+      uid: { stringValue: member.uid },
+      email: { stringValue: member.email },
+      displayName: { stringValue: 'Membro Teste' },
+      role: { stringValue: 'member' },
+      joinedAt: { timestampValue: '2026-01-01T00:00:00Z' },
+    }),
   ]);
   if (claim.status !== 200) throw new Error(`Convite não vinculou o segundo usuário: ${JSON.stringify(claim)}`);
 
-  const createMetadata = await commit(owner, [
-    set(`${household}/metadata/sync`, { revision: { integerValue: '1' } }),
+  await adminDb.doc(`${household}/metadata/sync`).set({ revision: 1 });
+
+  const directMetadataWrite = await commit(member, [
+    set(`${household}/metadata/sync`, { revision: { integerValue: '99' } }),
   ]);
-  if (createMetadata.status !== 200) throw new Error(`Dono não criou metadata: ${JSON.stringify(createMetadata)}`);
+  if (directMetadataWrite.status !== 403) {
+    throw new Error(`Membro não deveria escrever metadata: ${JSON.stringify(directMetadataWrite)}`);
+  }
+
+  const directTableWrite = await commit(member, [
+    set(`${household}/tables/catalog`, { payload: { stringValue: 'produtos' } }),
+  ]);
+  if (directTableWrite.status !== 403) {
+    throw new Error(`Membro não deveria escrever tables: ${JSON.stringify(directTableWrite)}`);
+  }
 
   const read = await request(`${firestoreBase}/${household}/metadata/sync`, { headers: auth(member) });
   if (read.status !== 200) throw new Error(`Membro não leu metadata: ${JSON.stringify(read)}`);
@@ -119,7 +146,13 @@ async function main() {
   const secondHousehold = `households/house-second-${Date.now()}`;
   const createSecondHousehold = await commit(owner, [
     set(secondHousehold, { name: { stringValue: 'Segunda casa' }, ownerUid: { stringValue: owner.uid } }),
-    set(`${secondHousehold}/members/${owner.uid}`, { uid: { stringValue: owner.uid }, role: { stringValue: 'owner' } }),
+    set(`${secondHousehold}/members/${owner.uid}`, {
+      uid: { stringValue: owner.uid },
+      email: { stringValue: owner.email },
+      displayName: { stringValue: 'Dono Teste' },
+      role: { stringValue: 'owner' },
+      joinedAt: { timestampValue: '2026-01-01T00:00:00Z' },
+    }),
   ]);
   if (createSecondHousehold.status !== 200) {
     throw new Error(`Dono não criou a segunda casa: ${JSON.stringify(createSecondHousehold)}`);
@@ -215,7 +248,7 @@ async function main() {
   const createChunk = await commit(member, [
     set(chunkPath, {
       payload: { stringValue: 'products' },
-      hash: { stringValue: 'chunk-hash' },
+      hash: { stringValue: 'a'.repeat(64) },
       count: { integerValue: '1' },
     }),
   ]);
@@ -226,7 +259,7 @@ async function main() {
   const updateChunk = await commit(member, [
     set(chunkPath, {
       payload: { stringValue: 'alterado' },
-      hash: { stringValue: 'outro-hash' },
+      hash: { stringValue: 'b'.repeat(64) },
       count: { integerValue: '1' },
     }),
   ]);
@@ -291,6 +324,116 @@ async function main() {
     throw new Error(`Owner não excluiu chunk v2: ${ownerDelete.status}`);
   }
 
+  const successor = await signUp('successor@example.com');
+  const transferHousehold = `households/house-transfer-${Date.now()}`;
+  const createTransferHousehold = await commit(owner, [
+    set(transferHousehold, {
+      name: { stringValue: 'Casa para transferência' },
+      ownerUid: { stringValue: owner.uid },
+    }),
+    set(`${transferHousehold}/members/${owner.uid}`, {
+      uid: { stringValue: owner.uid },
+      email: { stringValue: owner.email },
+      displayName: { stringValue: 'Dono Teste' },
+      role: { stringValue: 'owner' },
+      joinedAt: { timestampValue: '2026-01-01T00:00:00Z' },
+    }),
+  ]);
+  if (createTransferHousehold.status !== 200) {
+    throw new Error(`Dono não criou a casa de transferência: ${JSON.stringify(createTransferHousehold)}`);
+  }
+
+  await adminDb.doc('householdInvites/SUCCESSOR').set({
+    code: 'SUCCESSOR',
+    householdId: transferHousehold.split('/')[1],
+    email: successor.email,
+    createdBy: owner.uid,
+    createdAt: new Date('2026-01-01T00:00:00Z'),
+    expiresAt: new Date('2027-01-01T00:00:00Z'),
+  });
+  const claimSuccessor = await commit(successor, [
+    set(`${transferHousehold}/inviteClaims/${successor.uid}`, {
+      uid: { stringValue: successor.uid },
+      email: { stringValue: successor.email },
+      inviteCode: { stringValue: 'SUCCESSOR' },
+      claimedAt: { timestampValue: '2026-01-01T00:00:00Z' },
+    }),
+    set(`${transferHousehold}/members/${successor.uid}`, {
+      uid: { stringValue: successor.uid },
+      email: { stringValue: successor.email },
+      displayName: { stringValue: 'Sucessor Teste' },
+      role: { stringValue: 'member' },
+      joinedAt: { timestampValue: '2026-01-01T00:00:00Z' },
+    }),
+  ]);
+  if (claimSuccessor.status !== 200) {
+    throw new Error(`Sucessor não entrou na casa: ${JSON.stringify(claimSuccessor)}`);
+  }
+
+  const ownerRemovesMember = await commit(owner, [
+    deleteDocument(`${transferHousehold}/members/${successor.uid}`),
+  ]);
+  if (ownerRemovesMember.status !== 200) {
+    throw new Error(`Owner não removeu membro comum: ${JSON.stringify(ownerRemovesMember)}`);
+  }
+
+  await adminDb.doc(`${transferHousehold}/members/${successor.uid}`).set({
+    uid: successor.uid,
+    email: successor.email,
+    displayName: 'Sucessor Teste',
+    role: 'member',
+    joinedAt: new Date('2026-01-01T00:00:00Z'),
+  });
+  const directOwnershipTransfer = await commit(owner, [
+    set(transferHousehold, { ownerUid: { stringValue: successor.uid } }),
+  ]);
+  if (directOwnershipTransfer.status !== 403) {
+    throw new Error(`Cliente não deveria transferir ownerUid: ${directOwnershipTransfer.status}`);
+  }
+
+  // Simula o commit privilegiado do callable, que valida a transferência e
+  // atualiza ownerUid e os papéis em uma transação atômica.
+  await adminDb.runTransaction(async (transaction) => {
+    transaction.update(adminDb.doc(transferHousehold), {ownerUid: successor.uid});
+    transaction.update(adminDb.doc(`${transferHousehold}/members/${owner.uid}`), {role: 'member'});
+    transaction.update(adminDb.doc(`${transferHousehold}/members/${successor.uid}`), {role: 'owner'});
+  });
+
+  const oldOwnerDeletesHousehold = await commit(owner, [
+    deleteDocument(transferHousehold),
+  ]);
+  if (oldOwnerDeletesHousehold.status !== 403) {
+    throw new Error(`Ex-owner não deveria excluir a casa: ${oldOwnerDeletesHousehold.status}`);
+  }
+
+  const newOwnerDeletesHousehold = await commit(successor, [
+    deleteDocument(transferHousehold),
+  ]);
+  if (newOwnerDeletesHousehold.status !== 200) {
+    throw new Error(`Novo owner não excluiu a casa: ${JSON.stringify(newOwnerDeletesHousehold)}`);
+  }
+
+  const memberInvite = await commit(member, [
+    set('householdInvites/MEMBERCODE', {
+      code: { stringValue: 'MEMBERCODE' },
+      householdId: { stringValue: household.split('/')[1] },
+      email: { stringValue: outsider.email },
+      createdBy: { stringValue: member.uid },
+      createdAt: { timestampValue: '2026-01-01T00:00:00Z' },
+      expiresAt: { timestampValue: '2027-01-01T00:00:00Z' },
+    }),
+  ]);
+  if (memberInvite.status !== 403) {
+    throw new Error(`Membro não deveria criar convite: ${memberInvite.status}`);
+  }
+
+  const memberDeletesOwner = await commit(member, [
+    deleteDocument(`${household}/members/${owner.uid}`),
+  ]);
+  if (memberDeletesOwner.status !== 403) {
+    throw new Error(`Membro não deveria remover o owner: ${memberDeletesOwner.status}`);
+  }
+
   // Regressão da exclusão da casa: o owner precisa remover todos os dados
   // compartilhados, a árvore sync v2 e o documento principal.
   const deletionPaths = [
@@ -313,20 +456,13 @@ async function main() {
   await adminDb.doc(`${v2Root}/state/current-delete`).set({
     generation: 1,
   });
-  const createDeletionData = await commit(owner, [
-    set(deletionPaths[0], { payload: { stringValue: 'catalog' } }),
-    set(deletionPaths[1], { revision: { integerValue: '1' } }),
-    set(deletionPaths[3], {
-      payload: { stringValue: 'products' },
-      hash: { stringValue: 'chunk-hash' },
-      count: { integerValue: '1' },
-    }),
-  ]);
-  if (createDeletionData.status !== 200) {
-    throw new Error(
-      `Owner não criou os dados de exclusão: ${JSON.stringify(createDeletionData)}`,
-    );
-  }
+  await adminDb.doc(deletionPaths[0]).set({ payload: 'catalog' });
+  await adminDb.doc(deletionPaths[1]).set({ revision: 1 });
+  await adminDb.doc(deletionPaths[3]).set({
+    payload: { products: [] },
+    hash: 'c'.repeat(64),
+    count: 0,
+  });
   for (const path of deletionPaths) {
     const deletion = await commit(owner, [deleteDocument(path)]);
     if (deletion.status !== 200) {

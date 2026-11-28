@@ -67,24 +67,32 @@ class DefaultFirebaseOptions {
   );
 }
 
-/// Firebase configuration for the isolated Android pilot.
+/// Firebase configuration for the isolated pilot.
 ///
-/// This configuration is intentionally not registered for Web. The pilot
-/// protocol must never be used by the production PWA.
+/// The Android flavor selects its project through `google-services.json`. The
+/// pilot Web build selects [web] through an explicit compile-time flag, so a
+/// normal Web build can never connect to the pilot by accident.
 class PilotFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'O Firebase piloto está disponível somente no aplicativo Android.',
-      );
+      return web;
     }
     if (defaultTargetPlatform != TargetPlatform.android) {
       throw UnsupportedError(
-        'O Firebase piloto está disponível somente no Android.',
+        'O Firebase piloto está disponível somente no Android e na Web piloto.',
       );
     }
     return android;
   }
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyBhXfEu0r5gY5hJTAkX2i6gr15ZAvGQffw',
+    appId: '1:1055183366543:web:94b3a4699576ce33cac3fa',
+    messagingSenderId: '1055183366543',
+    projectId: 'nosso-mercado-casa-pilot',
+    authDomain: 'nosso-mercado-casa-pilot.firebaseapp.com',
+    storageBucket: 'nosso-mercado-casa-pilot.firebasestorage.app',
+  );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDMLnuQuRFJw678J0QNffG35LBDgP4NOuU',

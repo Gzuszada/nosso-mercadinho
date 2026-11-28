@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'app_environment.dart';
 import 'app_providers.dart';
 import 'firebase_options.dart';
 import 'features/cloud/presentation/auth_screen.dart';
@@ -13,12 +14,18 @@ import 'features/shopping/presentation/shopping_history_screen.dart';
 import 'features/shopping/presentation/shopping_plans_screen.dart';
 import 'features/shopping/presentation/shopping_trips_screen.dart';
 
+const bool _pilotWebBuild = bool.fromEnvironment('MERCADO_PILOT_WEB');
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   String? firebaseInitializationError;
   try {
     await Firebase.initializeApp(
-      options: kIsWeb ? DefaultFirebaseOptions.web : null,
+      options: kIsWeb
+          ? (_pilotWebBuild
+                ? PilotFirebaseOptions.web
+                : DefaultFirebaseOptions.web)
+          : null,
     );
   } on Object {
     firebaseInitializationError =
@@ -52,7 +59,7 @@ class MercadoApp extends ConsumerWidget {
     );
 
     return MaterialApp(
-      title: 'Nosso Mercadinho',
+      title: isPilotBuild ? 'Nosso Mercadinho — Piloto' : 'Nosso Mercadinho',
       debugShowCheckedModeBanner: false,
       locale: const Locale('pt', 'BR'),
       supportedLocales: const [Locale('pt', 'BR')],

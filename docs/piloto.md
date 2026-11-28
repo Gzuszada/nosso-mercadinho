@@ -79,6 +79,71 @@ SHA-256 `A8DE1D30C23D8CB3BFE33C03B2F689263D581DF8703685C715E222B2EEDC4B19`.
 Ele foi gerado em 26/11/2026 e ainda não foi instalado em aparelho: a
 validação manual no fluxo real membro → owner → membro continua pendente.
 
+## Entrega 1.0.14+25 — regras de segurança, Web piloto e APK
+
+A entrega de 27/11/2026 aplica o reforço das regras do Firestore ao piloto e
+atualiza os dois artefatos do piloto. Ela não modifica nem republica produção.
+
+### APK piloto
+
+- Package: `br.com.nocorre.mercado.pilot`
+- versionName: `1.0.14-pilot`
+- versionCode: `25`
+- Tamanho: `67.985.956` bytes
+- SHA-256: `28DFA189E100F8F01BAE664D623A267151CE07F98F52C69B4A625BA22B8EE58D`
+- APK Distribution: `C:\Dev\Mercado\release-assets\nosso-mercadinho-1.0.14-pilot.apk`
+- Checksum: `C:\Dev\Mercado\release-assets\nosso-mercadinho-1.0.14-pilot.apk.sha256`
+- Source: `C:\Dev\Mercado\release-assets\nosso-mercadinho-v1.0.14-source.zip`
+
+A assinatura APK Signature Scheme v2 foi validada com o certificado
+`4576ea958c127b5a3fa0a671d47b65307d64b925032a04d99225087f39942035`
+(RSA 2048). O APK foi instalado por cima da versão piloto anterior com
+`adb install -r` e aberto sem crash nos emuladores `emulator-5554` e
+`emulator-5556`; ambos reportaram `versionName=1.0.14-pilot` e `versionCode=25`.
+
+O source zip contém o código Dart, Android, Web, regras e Functions, mas exclui
+`.git`, builds, dependências, bibliotecas geradas, chaves e `key.properties`.
+
+### Site Web piloto
+
+O bundle foi gerado com:
+
+```powershell
+flutter build web --release --no-wasm-dry-run --base-href=/ --dart-define=MERCADO_PILOT_WEB=true
+node tools/prepare_pilot_web.js
+```
+
+`--no-wasm-dry-run` desliga somente o dry-run de Wasm do compilador Flutter; o
+bundle continua sendo JavaScript e mantém `sqlite3.wasm` e `drift_worker.js` para
+o banco local. A inspeção do `main.dart.js` encontrou o App ID piloto
+`1:1055183366543:web:94b3a4699576ce33cac3fa` uma vez e nenhum App ID de
+produção. O SHA-256 do bundle local e remoto é:
+
+```text
+127667C0BCC56A24609BA28BBCD5C20EE6314D6839A457809C3FE3D88D9C7946
+```
+
+O Hosting piloto foi publicado somente em `nosso-mercado-casa-pilot`, no release
+`1795824304934000`, versão `97e6983cd6df6b51`, status `FINALIZED`. A URL
+`https://nosso-mercado-casa-pilot.web.app` respondeu HTTP 200 e o bundle remoto
+teve o mesmo hash do bundle local.
+
+### Backend e validação
+
+As regras piloto e as Functions já foram publicadas em
+`nosso-mercado-casa-pilot`. O callable `transferHouseholdOwnership` valida o
+owner atual e o destino member, e usa Admin SDK para trocar `ownerUid` e papéis
+em uma transação atômica; clientes não podem alterar esses campos diretamente.
+
+Validação desta entrega:
+
+- Emulator Firestore/Auth piloto: `REGRAS_OK`;
+- Functions piloto: 26/26 testes Node;
+- Flutter: 133/133 testes;
+- `flutter analyze`: sem problemas;
+- APK: assinatura v2 válida, instalação e abertura em dois emuladores;
+- Web: HTTP 200, somente App ID piloto e hash local/remoto idêntico.
+
 ## Deploy exclusivo do piloto
 
 ```powershell
@@ -88,24 +153,61 @@ firebase deploy --config firebase.pilot.json --only functions --project nosso-me
 
 As regras de produção continuam em `firestore.rules` e são publicadas com `firebase.json`. O backend v2 fica em `functions-pilot/`; o source `functions/` continua exclusivo de produção.
 
+### Site Web piloto
+
+O Hosting do piloto usa o projeto `nosso-mercado-casa-pilot`, o Web App
+`1:1055183366543:web:94b3a4699576ce33cac3fa` e o protocolo sync-v2. A build
+precisa da flag explícita para nunca selecionar o projeto piloto por engano:
+
+```powershell
+flutter build web --release --base-href=/ --dart-define=MERCADO_PILOT_WEB=true
+node tools/prepare_pilot_web.js
+firebase deploy --config firebase.pilot.json --only hosting --project nosso-mercado-casa-pilot
+```
+
+O site publicado está em `https://nosso-mercado-casa-pilot.web.app`. A build Web
+normal, sem `MERCADO_PILOT_WEB=true`, continua apontando para o App Web e as
+regras de produção.
+
 ### Publicação das Functions em 27/11/2026
 
-As três Functions do projeto `nosso-mercado-casa-pilot` foram atualizadas em
-27/11/2026 com `firebase deploy --config firebase.pilot.json --only functions
---project nosso-mercado-casa-pilot`. `beforeCreateUser`, `moderatePlannedItem`
-e `publishSyncV2` ficaram `ACTIVE`, runtime nodejs22, timeout 60 s, revisão
-`moderateplanneditem-00002-guz` e `firebase-functions-hash`
-`90efaddf6af6c6d0a4c1f9739db8cddc586fdf92`. O `roles/run.invoker` foi
-preservado (as chamadas sem token chegam à função e respondem
-`INVALID_ARGUMENT`, e não com `PERMISSION_DENIED` do IAM) e o artefato baixado
-do bucket `gcf-v2-sources` contém `lib/sync_v2_moderation.js` com a regra
-`isHouseholdOwner`: a hierarquia de moderação está no ar.
+As Functions do projeto `nosso-mercado-casa-pilot` foram atualizadas em
+27/11/2026. `beforeCreateUser`, `moderatePlannedItem`, `publishSyncV2` e
+`transferHouseholdOwnership` ficaram `ACTIVE`, runtime nodejs22 e timeout 60 s.
+O `roles/run.invoker` foi preservado: chamadas sem token chegam à função e
+recebem `UNAUTHENTICATED`, e não `PERMISSION_DENIED` do IAM.
 
-Antes da publicação foi guardado o backup em
+Antes da primeira publicação foi guardado o backup em
 `C:\Dev\Mercado\release-assets\functions-pilot-backup-2026-11-27-0845.zip`, com
 o código exato que estava rodando (commit `6e78b18`, o último a alterar
 `functions-pilot` antes do deploy de 25/11), os metadados da API, as políticas
 IAM, a configuração do projeto e o procedimento de rollback.
+
+## Segurança do Firestore piloto
+
+As regras endurecidas foram publicadas exclusivamente em
+`nosso-mercado-casa-pilot` com `firestore.pilot.rules`. A política vigente é:
+
+- **sincronizar**: membros leem o estado oficial e criam chunks candidatos
+  imutáveis; manifesto, geração, hashes oficiais, revisões e conflitos são
+  gravados exclusivamente pelas Functions com Admin SDK;
+- **metadados e snapshot legado**: `tables` e `metadata` são somente leitura
+  para membros; clientes não criam nem atualizam revision, hashes ou conteúdo;
+- **convidar**: somente o owner cria e cancela convites; a pessoa destinada
+  pode consultar/cancelar o próprio convite;
+- **remover membros**: somente o owner remove membros comuns; o owner só é
+  removido como parte da exclusão atômica da casa;
+- **transferir propriedade**: somente o owner atual, por meio do callable
+  `transferHouseholdOwnership`; o backend confirma que o destino é um membro
+  comum e troca `ownerUid` e os papéis em uma transação atômica;
+- **excluir a casa**: somente o owner; a limpeza dos documentos legados e da
+  árvore sync-v2 permanece autorizada para essa operação.
+
+A suíte do Emulator cobre owner, member, outsider, criação/claim de convite,
+escrita direta indevida em manifesto e metadata, chunks imutáveis, remoção de
+membros, transferência, exclusão e acesso ao estado v2. A validação local ficou
+verde com 26 testes Node, 133 testes Flutter, `flutter analyze` sem problemas e
+`REGRAS_OK` no Emulator.
 
 ## Protocolo v2 implementado
 
@@ -139,7 +241,7 @@ IAM, a configuração do projeto e o procedimento de rollback.
 
 - Plano Blaze ativo; o projeto aceita deploy de Cloud Functions.
 - Identity Platform/GCIP inicializado no projeto piloto, com E-mail/Senha habilitado e `passwordRequired=true`.
-- `beforeCreateUser`, `publishSyncV2` e `moderatePlannedItem` publicadas e ativas em `us-central1`, Node.js 22 (2nd Gen). As duas callables de sincronização compartilham o source validado com as proteções de autoria e decisão do owner.
+- `beforeCreateUser`, `publishSyncV2`, `moderatePlannedItem` e `transferHouseholdOwnership` publicadas e ativas em `us-central1`, Node.js 22 (2nd Gen). As Functions de sincronização e propriedade compartilham o source validado com as proteções de autoria, decisão do owner e transferência atômica.
 - `beforeCreateUser` vinculada ao trigger `beforeCreate`; e-mails fora da allowlist são recusados com `PERMISSION_DENIED`.
 - Allowlist privada do piloto em `privateConfig/registrationAllowlist`, com hashes SHA-256 e sem e-mails em texto aberto.
 - Regras `firestore.pilot.rules` compiladas e publicadas em 25/11/2026; membros leem `reviews`, enquanto somente o Admin SDK usado pela Function pode escrevê-las.
