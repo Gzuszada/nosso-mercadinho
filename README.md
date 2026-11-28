@@ -152,7 +152,15 @@ O projeto Firebase `nosso-mercado-casa` (nome de exibição **Nosso Mercado**) u
 
 A criação de contas é validada no servidor pela Identity Platform blocking function `beforeCreateUser`. A lista privada fica em `privateConfig/registrationAllowlist`, contém apenas hashes SHA-256 dos e-mails autorizados e é negada explicitamente pelas regras públicas do Firestore. Se a configuração estiver ausente ou a Function estiver indisponível, o cadastro falha fechado: nenhuma conta nova é criada.
 
-Para gerenciar os e-mails autorizados:
+Para gerenciar os e-mails autorizados no piloto, use a CLI administrativa
+descrita em [docs/piloto.md](docs/piloto.md). Ela autentica uma conta
+administrativa separada, lista e-mails mascarados, adiciona, remove, promove
+administradores e mantém histórico de auditoria. A configuração privada
+continua contendo hashes SHA-256; e-mails completos, senhas e hashes não são
+gravados no aplicativo nem em commits.
+
+O fluxo legado abaixo é preservado somente para a allowlist de produção e não
+deve ser usado no projeto piloto:
 
 ```powershell
 Set-Location functions

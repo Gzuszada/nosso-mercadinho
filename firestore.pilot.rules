@@ -22,6 +22,9 @@ service cloud.firestore {
     match /privateConfig/{documentId} {
       allow read, write: if false;
     }
+    match /privateConfig/{documentId}/{subcollection}/{subdocumentId} {
+      allow read, write: if false;
+    }
 
     // Permite localizar as casas do próprio usuário sem permitir que ele
     // consulte registros de membro de outras contas.

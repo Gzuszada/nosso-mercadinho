@@ -339,6 +339,64 @@ verde com 26 testes Node, 133 testes Flutter, `flutter analyze` sem problemas e
 
 ## Estado operacional
 
+### Administração da allowlist do piloto — 28/11/2026
+
+A allowlist do piloto deixou de depender do script que substituía a lista
+completa. A nova ferramenta administrativa é a CLI
+`functions-pilot/src/scripts/manage-registration-allowlist.ts`, publicada
+somente no backend de `nosso-mercado-casa-pilot`:
+
+- `npm run allowlist -- list`: lista e-mails mascarados, papel, data da última
+  alteração e conta que executou a mudança;
+- `npm run allowlist -- add EMAIL`: valida, normaliza e adiciona o e-mail;
+- `npm run allowlist -- remove EMAIL`: revoga a autorização;
+- `npm run allowlist -- promote EMAIL`: promove uma conta Auth existente a
+  administrador;
+- `npm run allowlist -- history`: mostra as últimas 50 operações de auditoria.
+
+A CLI autentica a conta administrativa no Identity Platform e chama a
+`manageRegistrationAllowlist`. O servidor confere o token e exige uma entrada
+com papel `admin`; clientes não leem nem alteram a configuração privada. A
+documentação privada e sua subcoleção de auditoria são negadas pelas regras
+pilot, e somente o Admin SDK usado pela Function grava os dados. E-mails
+completos não são gravados nem exibidos: a configuração continua baseada em
+hash SHA-256, com uma máscara adicional para listagem e auditoria. A remoção do
+último administrador é recusada na transação.
+
+A conta administrativa inicial é separada da conta usada pela família. O
+bootstrap é feito uma única vez, com sessão local do Firebase CLI e variáveis
+de ambiente:
+
+```powershell
+Set-Location functions-pilot
+$env:MERCADO_ADMIN_EMAIL = 'ALIAS_ADMINISTRATIVO'
+$env:MERCADO_ADMIN_PASSWORD = 'SENHA_FORTE_COM_NO_MINIMO_16_CARACTERES'
+npm run allowlist:bootstrap
+Remove-Item Env:MERCADO_ADMIN_EMAIL
+Remove-Item Env:MERCADO_ADMIN_PASSWORD
+```
+
+O bootstrap cria a conta no Identity Platform, registra o hash na allowlist
+com papel `admin` e salva as credenciais fora do repositório em
+`%USERPROFILE%\.config\mercado-pilot-admin.json`. A CLI usa esse arquivo
+automaticamente; alternativamente, `MERCADO_ADMIN_EMAIL` e
+`MERCADO_ADMIN_PASSWORD` podem ser fornecidos pelo ambiente. E-mails, senhas e
+hashes não são versionados.
+
+Validação remota desta entrega, exclusivamente no projeto piloto:
+
+- regras do Firestore compiladas e publicadas; a configuração privada e a
+  auditoria permanecem inacessíveis aos clientes;
+- `manageRegistrationAllowlist` publicada e ativa em `us-central1`, Node.js 22;
+- `list` confirmou 1 administrador e 2 membros, sempre mascarados;
+- inclusão e remoção de uma entrada temporária concluíram com sucesso;
+- o histórico registrou ação, alvo mascarado, autor mascarado e instante;
+- a remoção do único administrador foi recusada;
+- Functions piloto: 31/31 testes Node aprovados.
+
+A melhoria não altera o aplicativo Flutter, o APK `1.0.18+29`, o Web App ou
+qualquer recurso de produção.
+
 - Plano Blaze ativo; o projeto aceita deploy de Cloud Functions.
 - Identity Platform/GCIP inicializado no projeto piloto, com E-mail/Senha habilitado e `passwordRequired=true`.
 - `beforeCreateUser`, `publishSyncV2`, `moderatePlannedItem` e `transferHouseholdOwnership` publicadas e ativas em `us-central1`, Node.js 22 (2nd Gen). As Functions de sincronização e propriedade compartilham o source validado com as proteções de autoria, decisão do owner e transferência atômica.

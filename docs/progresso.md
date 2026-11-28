@@ -281,6 +281,29 @@ Para comandos Android, use a junction ASCII `C:\Users\Usuario\MercadoApp`, pois 
 - Web piloto publicada; `main.dart.js` local/remoto com SHA-256 `686D66AB7DA69DF88430607D730AC343C6941CF813FE2F47B160E51D27EFB0BE`.
 - Validações: `flutter analyze` sem problemas; 165 testes Flutter; build TypeScript e 26 testes Node das Functions piloto. As regras do Firestore piloto compilaram e foram publicadas com sucesso.
 
+## Piloto: administração da allowlist sem script manual (28/11/2026)
+
+- Substituído o script que substituía a lista completa pela CLI administrativa
+  `functions-pilot/src/scripts/manage-registration-allowlist.ts`. Ela lista
+  e-mails mascarados, adiciona, remove, promove administradores e mostra o
+  histórico de alterações.
+- A CLI autentica uma conta administrativa separada no Identity Platform e usa
+  a callable `manageRegistrationAllowlist`. O servidor valida o token e exige
+  papel `admin`; a configuração privada e a auditoria continuam inacessíveis
+  aos clientes pelas regras do Firestore piloto.
+- A configuração privada mantém hashes SHA-256 e acrescenta somente máscara,
+  papel, instante e autoria. Cada mudança registra ação, alvo mascarado, autor
+  mascarado e horário. A remoção do último administrador é bloqueada.
+- Criada uma conta Auth administrativa separada, com credenciais salvas fora
+  do repositório em `%USERPROFILE%\.config\mercado-pilot-admin.json`. Nenhum
+  e-mail, senha ou hash foi versionado.
+- Regras do Firestore e Functions publicadas somente em
+  `nosso-mercado-casa-pilot`. Validação remota: listagem mascarada, inclusão e
+  remoção de entrada temporária, auditoria e recusa da remoção do último
+  administrador. Functions piloto: 31/31 testes Node.
+- O app Flutter, o APK `1.0.18+29`, o Web App e produção não foram alterados;
+  não havia necessidade de regenerar APK ou publicar Hosting.
+
 ## Próximo passo
 
 Realizar o checklist manual de instalação, backup/restauração, migração, acessibilidade e funcionamento offline no aparelho. Manter a instalação antiga até confirmar os dados; não alterar dados reais nem criar commit pelo assistente.

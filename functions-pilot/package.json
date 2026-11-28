@@ -8,8 +8,9 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "npm run build && node --test lib/allowlist.test.js lib/household_ownership.test.js lib/sync_v2_authorship.test.js lib/sync_v2_cas.test.js lib/sync_v2_moderation.test.js",
-    "allowlist": "npm run build && node lib/scripts/set-registration-allowlist.js"
+    "test": "npm run build && node --test lib/allowlist.test.js lib/allowlist_admin.test.js lib/household_ownership.test.js lib/sync_v2_authorship.test.js lib/sync_v2_cas.test.js lib/sync_v2_moderation.test.js",
+    "allowlist": "npm run build && node lib/scripts/manage-registration-allowlist.js",
+    "allowlist:bootstrap": "npm run build && node lib/scripts/bootstrap-registration-admin.js"
   },
   "dependencies": {
     "firebase-admin": "^14.5.1",
