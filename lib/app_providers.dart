@@ -7,6 +7,7 @@ import 'features/cloud/data/auto_sync_coordinator.dart';
 import 'features/cloud/data/cloud_auth_service.dart';
 import 'features/cloud/data/cloud_models.dart';
 import 'features/cloud/data/cloud_sync_service.dart';
+import 'features/cloud/data/pilot_household_administration_service.dart';
 import 'features/cloud/data/sync_v2_client.dart';
 import 'features/cloud/domain/collaboration.dart';
 import 'features/cloud/domain/collaboration_service.dart';
@@ -121,6 +122,11 @@ final settingsRepositoryProvider = Provider<SettingsRepository>(
 final cloudAuthServiceProvider = Provider<CloudAuthService>(
   (ref) => CloudAuthService(),
 );
+
+final pilotHouseholdAdministrationServiceProvider =
+    Provider<PilotHouseholdAdministrationService>(
+      (ref) => PilotHouseholdAdministrationService(),
+    );
 
 final authStateProvider = StreamProvider<AuthAccount?>(
   (ref) => ref.watch(cloudAuthServiceProvider).authStateChanges,

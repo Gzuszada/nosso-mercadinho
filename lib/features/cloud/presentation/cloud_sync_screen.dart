@@ -11,6 +11,7 @@ import '../domain/collaboration.dart';
 import '../domain/collaboration_service.dart';
 import 'cloud_sync_status_panel.dart';
 import 'owner_review_panel.dart';
+import 'pilot_household_people_panel.dart';
 
 class _SignedOutMessage extends StatelessWidget {
   const _SignedOutMessage();
@@ -88,6 +89,7 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
       localPendingReviews,
       publishedPendingReviews,
     );
+    final householdId = _householdId;
     return [
       Card(
         child: ListTile(
@@ -152,28 +154,30 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
         label: const Text('Criar uma casa'),
       ),
       const SizedBox(height: 20),
-      TextField(
-        controller: _inviteEmailController,
-        keyboardType: TextInputType.emailAddress,
-        decoration: const InputDecoration(
-          labelText: 'E-mail da pessoa convidada',
-        ),
-      ),
-      const SizedBox(height: 12),
-      OutlinedButton.icon(
-        onPressed: _busy ? null : _createInvite,
-        icon: const Icon(Icons.person_add_alt),
-        label: const Text('Gerar convite'),
-      ),
-      if (_inviteCode != null)
-        Card(
-          child: ListTile(
-            title: Text('Código: $_inviteCode'),
-            subtitle: const Text(
-              'Compartilhe este código com o e-mail informado.',
-            ),
+      if (!isPilotBuild || actor?.isOwner == true) ...[
+        TextField(
+          controller: _inviteEmailController,
+          keyboardType: TextInputType.emailAddress,
+          decoration: const InputDecoration(
+            labelText: 'E-mail da pessoa convidada',
           ),
         ),
+        const SizedBox(height: 12),
+        OutlinedButton.icon(
+          onPressed: _busy ? null : _createInvite,
+          icon: const Icon(Icons.person_add_alt),
+          label: const Text('Gerar convite'),
+        ),
+        if (_inviteCode != null)
+          Card(
+            child: ListTile(
+              title: Text('Código: $_inviteCode'),
+              subtitle: const Text(
+                'Compartilhe este código com o e-mail informado.',
+              ),
+            ),
+          ),
+      ],
       const SizedBox(height: 20),
       TextField(
         controller: _inviteCodeController,
@@ -186,8 +190,17 @@ class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
         icon: const Icon(Icons.login),
         label: const Text('Entrar na casa'),
       ),
-      if (_householdId != null) ...[
+      if (householdId != null) ...[
         const Divider(height: 32),
+        if (isPilotBuild) ...[
+          PilotHouseholdPeoplePanel(
+            householdId: householdId,
+            onOwnershipChanged: () {
+              ref.invalidate(collaborationActorProvider);
+            },
+          ),
+          const SizedBox(height: 12),
+        ],
         OwnerReviewPanel(
           reviews: pendingReviews,
           isOwner: actor?.isOwner == true,

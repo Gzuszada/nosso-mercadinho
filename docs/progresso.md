@@ -1,5 +1,29 @@
 ## Piloto Android de sincronização v2 — primeira entrega
 
+# Administração de pessoas da casa no piloto — 27/11/2026
+
+- Implementada, somente no piloto, a seção **Pessoas da casa** em **Conta e
+  sincronização**. Ela lista nome, papel e data de entrada, mostra a quantidade
+  de pessoas e identifica claramente o owner.
+- O owner pode remover membros comuns, revogar convites pendentes e transferir
+  a propriedade. O owner não pode remover a si mesmo sem transferir a casa.
+  Membros comuns não veem e-mails, convites ou ações administrativas.
+- A transferência reutiliza a Function `transferHouseholdOwnership`; a remoção
+  reutiliza as regras existentes para `members` e `inviteClaims`. Nenhuma
+  regra, Function, dependência ou formato de sincronização foi alterado. A
+  callable precisa estar publicada no projeto piloto antes do teste manual da
+  transferência; esta entrega não publica Functions no Firebase.
+- Versão do cliente atualizada para `1.0.17+28`. Nenhum APK release, instalação
+  em aparelho, publicação de Functions ou publicação no Firebase Hosting foi
+  realizada.
+- Validação: `flutter analyze` sem problemas; suíte Flutter completa com 161
+  testes aprovados; 26/26 testes Node do `functions-pilot`; builds Web release
+  piloto e produção e APKs debug `pilot` e `production` compilados. O Emulator
+  permanece indisponível sem JDK 21 compatível e não foi necessário porque as
+  regras não mudaram. Falta validar as ações administrativas em dois
+  dispositivos reais e em aparelho Android.
+
+
 # Sincronização automática entre dispositivos — 27/11/2026
 
 - Implementada sincronização automática conservadora para Android e Web, sem

@@ -446,3 +446,39 @@ compilada com `MERCADO_PILOT_WEB=true`. O Emulator continua indisponível nesta
 máquina por ausência de JDK 21 para a versão instalada do `firebase-tools`, e
 nenhuma regra foi alterada. A validação em dois dispositivos e em aparelho
 Android real permanece manual.
+
+## Administração de pessoas da casa — 1.0.17+28
+
+A versão `1.0.17+28` acrescenta ao APK e à Web do piloto a seção **Pessoas da
+casa**, em **Conta e sincronização**. A interface lista o nome, o papel e a data
+de entrada de cada pessoa, informa quantas pessoas pertencem à casa e mostra
+**Você é o dono desta casa** ao owner.
+
+O owner pode:
+
+- remover uma pessoa comum, revogando sua associação e claim de entrada sem
+  apagar os dados já compartilhados;
+- revogar um convite pendente, depois de confirmar a ação;
+- transferir a propriedade para outro membro por meio da Function
+  `transferHouseholdOwnership`.
+
+O owner não pode remover a própria associação. A propriedade precisa ser
+transferida primeiro. Membros comuns veem a lista e os papéis, mas não veem os
+e-mails dos demais, os convites pendentes nem as ações administrativas. No
+build de produção, a seção não é exibida.
+
+A implementação reutiliza `households/{id}/members`,
+`householdInvites` e a Function de transferência já existentes. Nenhuma regra,
+Function, dependência ou formato de sincronização foi alterado. A callable
+`transferHouseholdOwnership` precisa estar publicada no projeto piloto antes
+da validação manual da transferência; esta entrega de código não publica
+Functions no Firebase.
+
+Validação local desta entrega: `flutter analyze` sem problemas; 161/161 testes
+Flutter aprovados, incluindo 9 testes novos de serviços e interface; 26/26
+testes Node do `functions-pilot`; builds Web release piloto e produção e APKs
+debug `pilot` e `production` compilados. O Emulator continua indisponível por
+ausência de JDK 21 compatível com a versão instalada do `firebase-tools`; como
+nenhuma regra mudou, não foi exigido para esta entrega. A validação das ações
+administrativas em dois dispositivos reais e em aparelho Android permanece
+manual.
